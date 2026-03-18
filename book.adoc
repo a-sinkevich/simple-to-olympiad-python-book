@@ -1,0 +1,36 @@
+= Algorithms and Programming in Python
+:toc: left
+:toclevels: 3
+:source-highlighter: highlight.js
+:stem: latexmath
+:icons: font
+:sectnums:
+:imagesdir: images
+
+include::chapters/00-front-matter.adoc[]
+
+include::chapters/01-introduction.adoc[]
+
+include::chapters/02-ch1-1-basics.adoc[]
+
+include::chapters/03-ch1-2-language.adoc[]
+
+include::chapters/04-ch1-3-methodology.adoc[]
+
+include::chapters/05-ch2-1-queue-stack.adoc[]
+
+include::chapters/06-ch2-2-recursion.adoc[]
+
+include::chapters/07-ch2-3-recurrence.adoc[]
+
+include::chapters/08-ch2-4-graphs.adoc[]
+
+include::chapters/09-ch2-5-combinatorics.adoc[]
+
+include::chapters/10-ch3-1-geometry.adoc[]
+
+include::chapters/11-ch3-2-number-theory.adoc[]
+
+include::chapters/12-bibliography.adoc[]
+
+include::chapters/13-index.adoc[]

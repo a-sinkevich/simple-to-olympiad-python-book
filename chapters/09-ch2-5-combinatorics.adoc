@@ -1,0 +1,608 @@
+== 2.5. Generating Combinatorial Objects
+
+There is a set of problems whose solution consists of generating all elements of such combinatorial objects as _the power set (set of all subsets), permutations, combinations, arrangements, permutations with repetitions, combinations with repetitions_. For each generated element, certain properties are checked for the specific problem.
+
+[NOTE]
+====
+The following order of presentation is proposed for each combinatorial object: example, algorithm, program, comments on the program. For greater clarity, all programs operate with a list of characters from A to Z. Obviously, the proposed algorithms and programs change very little when working with lists of elements of any type required by the problem conditions (for example, lists of numbers, words, geometric figures, etc.).
+
+====
+
+
+=== The Power Set (Set of All Subsets)
+
+Suppose we have a set of four components, denoted by Latin letters _A, B, C, D_. And suppose, according to the problem conditions, we need to select a subset consisting of several components that possesses a certain property. The following approach to solving the problem is proposed: we generate _all_ possible subsets of the given set and for each generated subset check whether it satisfies the given property.
+
+An alternative version of the problem is to count all subsets of the given set that possess the given property.
+
+// Page 201
+
+
+
+For example: for a set of four characters _A, B, C, D_, the _power set_ includes the following sets:
+
+
+* the empty set;
+* one-element sets: {_A_}, {_B_}, {_C_}, {_D_};
+* two-element sets: {_A, B_}, {_A, C_}, {_A, D_}, {_B, C_}, {_B, D_}, {_C, D_};
+* three-element sets: {_A, B, C_}, {_A, B, D_}, {_A, C, D_}, {_B, C, D_};
+* four-element set: {_A, B, C, D_}.
+
+When the order of subset generation does not matter (when we need to count all subsets possessing a given property, this is indeed the case), one of the simplest algorithms to code for generating the power set is as follows: we create a list _b_ consisting of four numbers, each of which can take the value 0 or 1. We consider that the value 1 indicates the inclusion of the corresponding component of the original set in the desired subset. The value 0 indicates that the element is not included.
+
+Now consider the sequence of binary numbers from 0 to 15 and the corresponding subsets:
+
+
+. {0000} — the empty set;
+. {0001} — _A_, {0010} — _B_, {0100} — _C_, {1000} — _D_;
+. {0011} — _AB_, {0101} — _AC_, {0110} — _BC_, {1001} — _AD_, {1010} — _BD_, {1100} — _CD_;
+. {0111} — _ABC_, {1011} — _ABD_, {1101} — _ACD_, {1110} — _BCD_;
+. {1111} — _ABCD_.
+
+Thus, there are 16 different subsets of a set of 4 elements in total. In the general case, the power set of a set of _N_ elements contains 2_N_ elements.
+
+The algorithm that generates the power set of N elements can be informally described as follows: we form a list consisting of N zeros and consider it as the current set. Thus, the initial value of the current subset is the empty set.
+
+To obtain the next subset from the current one, we process the current list of 0s and 1s as follows: from right to left (from the first element of the list to the last), we look for the first number equal to 0. If no such number is found, then the current subset is the last one, that is, the set consisting of all elements. At this point, the algorithm finishes its work. If an element equal to 0 is found, it is replaced by 1, and all numbers to its right (if any) are replaced by zeros.
+
+In a more formalized way, this algorithm can be written as follows:
+
+----
+Input (N)
+Zero out list b of N+1 elements
+Output (Empty set)
+While b[N]==0
+  i=0
+----
+
+// Page 202
+[source,python]
+----
+    while b[i] == 1:
+        b[i] = 0
+        i += 1
+    b[i] = 1
+    # Output the set defined by list b
+----
+
+Now it is easy to write the program text that reads the number of elements in the set (stem:[N]) and outputs to the screen the power set, denoting elements by the corresponding Latin letters in order (Listing 2.38).
+
+.Listing 2.38.
+
+=== Program for generating the power set
+
+[source,python]
+----
+ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+
+
+def main() -> None:
+    n = int(input())
+    b: list[int] = [0] * (n + 1)
+    print('Empty set')
+    while b[n] == 0:
+        i = 0
+        while b[i] == 1:
+            b[i] = 0
+            i += 1
+        b[i] = 1
+        result = ''
+        for i in range(n):
+            if b[i] == 1:
+                result += ALPHABET[i]
+        print(result)
+
+
+main()
+----
+
+
+==== NOTE
+
+[NOTE]
+====
+If it is necessary to process (analyze) the constructed subsets, one can add calls to processing functions that receive list b as a parameter, whose elements equal to one indicate the indices of the elements of the set included in the current subset.
+
+====
+
+
+== Permutations
+
+Suppose we have 4 components denoted by the letters stem:[A, B, C, D]. Then the _set of all permutations_ of these components will include the following elements:
+
+_ABCD, BACD, CABD, DABC, ABDC, BADC, CADB, DACB, ACBD, BCAD, CBAD, DBAC, ACDB, BCDA, CBDA, DBCA, ADBC, BDAC, CDAB, DCAB, ADCB, BDCA, CDBA, DCBA._
+
+Here is the algorithm for constructing the _next_ permutation of 9 components denoted by digits from 1 to 9. The first such permutation is:
+
+1 2 3 4 5 6 7 8 9.
+
+Let the current permutation of 9 components be:
+
+1 9 5 8 4 7 6 3 2.
+
+// Page 203
+What will be the _next_ permutation if we are building permutations in _lexicographic_ order (that is, in ascending order of the number formed by these digits)? The correct answer is:
+
+1 9 5 8 6 2 3 4 7.
+
+How is it obtained? First, we scan the original list from end to beginning to find the first number that is _less than_ the previous one; in our case, it is 4 (7 < 6 < 3 < 2, but 4 < 7). Next, among the scanned numbers to the right of the found 4, we look for the last number that is greater than 4. This number is 6 (7 > 4, 6 > 4, 3 < 4, 2 < 4). Then we swap these 2 found numbers (4 and 6) and get:
+
+1 9 5 8 6 7 4 3 2.
+
+And now the numbers (to the right of 6), which form a decreasing sequence (7 4 3 2), are pairwise swapped so that they form an increasing sequence (2 3 4 7):
+
+1 9 5 8 6 2 3 4 7.
+
+This is the next permutation.
+
+And which permutation will be the last for this example? I hope the thoughtful reader has figured it out on their own:
+
+9 8 7 6 5 4 3 2 1.
+
+Informally, the algorithm for constructing the next permutation from the current one can be written as follows:
+
+
+* From end to beginning of the permutation, find the first element `b[i]` such that `b[i] < b[i + 1]`.
+* Remember its index — `i`.
+* From element `i + 1` to the end, find the last element greater than `b[i]` and remember its index — `k`.
+* Swap these elements with indices `i` and `k`.
+* The entire group of elements from the `(i + 1)`-th to the last are pairwise swapped: the `(i + 1)`-th element with the last, the `(i + 2)`-th element with the second-to-last, and so on.
+
+The formalized algorithm for generating all permutations of `N` elements can look as follows:
+
+----
+Input N
+Fill list b sequentially with numbers from 1 to N
+This is the first — initial — permutation, output it
+While (true)
+  i=N-1
+  While (i>=0) and (b[i]>=b[i+1]), i=i-1
+    If i<0 then end of work
+  For j from i+1 to N-1
+    if b[j]>b[i] then k=j
+  Swap values of b[i] and b[k]
+----
+
+// Page 204
+[source,pseudocode]
+----
+Reverse b[i+1 .. N-1]
+Output the current permutation b
+----
+
+It is clear that the loop for reversing the "tail" of list b cannot run from the stem:[(i + 1)]-th to the last element, otherwise the elements would be swapped twice and nothing would change. The loop must be executed for half of this "tail". In Python, reversing a slice is most naturally done with slice assignment: `b[i+1:] = b[i+1:][::-1]`.
+
+.Listing 2.39. Program generating permutations of N components
+[source,python]
+----
+ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+
+
+def swap_b(b: list[int], i: int, k: int) -> None:
+    b[i], b[k] = b[k], b[i]
+
+
+def write_b(b: list[int], n: int) -> None:
+    print(''.join(ALPHABET[b[i]] for i in range(n)))
+
+
+def main() -> None:
+    n = int(input())
+    b: list[int] = list(range(n))
+    write_b(b, n)
+    while True:
+        i = n - 2
+        while i >= 0 and b[i] >= b[i + 1]:
+            i -= 1
+        if i < 0:
+            break
+        k = i + 1
+        for j in range(i + 1, n):
+            if b[j] > b[i]:
+                k = j
+        swap_b(b, i, k)
+        # Reverse the tail from i+1 to end
+        left = i + 1
+        right = n - 1
+        while left < right:
+            swap_b(b, left, right)
+            left += 1
+            right -= 1
+        write_b(b, n)
+
+
+main()
+----
+
+In the program that generates all permutations of N components denoted by uppercase Latin letters (Listing 2.39), two functions are introduced: `write_b` and `swap_b`.
+
+The `write_b` function is called every time a new permutation is constructed. In this program, the `write_b` function simply outputs the corresponding sequence of Latin letters. The `swap_b(b, i, k)` function is introduced to simplify understanding of the main program. `swap_b` simply exchanges the values of two elements of list b whose indices correspond to the values of the function's parameters `i` and `k`.
+
+// Page 205
+The swap_b function is used in the program text twice:
+
+
+. when exchanging the values of the two found elements with indices i and k;
+. when performing pairwise exchange of "tail" elements, in which the current element with index j is swapped with its "partner" located at position n + i + 1 - j (using 1-based indexing). In 0-based Python indexing, we reverse the sublist from i+1 to the end. Thus, the (i + 1)-th element will be swapped with the last element, the (i + 2)-th element with the second-to-last, and so on.
+
+The total number of permutations of _N_ elements is _N!_ (read — _N factorial_). Recall that N! = 1 * 2 * 3 * ... * _N_.
+
+
+== Combinations
+
+Suppose we have 5 components denoted by Latin letters _A, B, C, D, E_. Then all _combinations_ of these 5 components taken 3 at a time, listed in lexicographic order, are as follows:
+
+
+* for letters — _ABC, ABD, ABE, ACD, ACE, ADE, BCD, BCE, BDE, CDE_;
+* for digits — 123, 124, 125, 134, 135, 145, 234, 235, 245, 345.
+
+Informally, the algorithm for generating a sequence of numbers in lexicographic order can be written as follows: we choose the smallest M numbers out of the available N and write them in ascending order (in our example — 1 2 3) — this will be the initial combination. Obviously, the largest M numbers out of the available ones (3 4 5), written in ascending order, will constitute the last combination. To obtain the next combination from the current one, we can proceed as follows: we find the position in the current combination where the last possible value does not stand, and then increase it by 1. All subsequent elements of the combination are obtained by adding 1 to the previous element of the combination.
+
+For example, let the current combination be:
+
+1 3 5.
+
+The analysis starts from the last position of the combination. 5 is the last possible value, so we move to the previous position. 3 is not the last possible value for this position (which is 4 in this case). Therefore, we increase it by 1 and get 4. The number in the next position is obtained by adding 1 to this 4, giving 5. Thus, the next combination will be:
+
+1 4 5.
+
+More rigorously, this algorithm can be written as follows:
+
+----
+Input N, M (from how many, taken how many at a time)
+Fill list b with numbers from 1 to M
+This is the first combination, output it
+While (true)
+  i=M-1
+  While (i>=0) and (b[i]==N-M+i+1), i=i-1
+----
+
+// Page 206
+[source,pseudocode]
+----
+If i<0 then work is done
+b[i]=b[i]+1
+For j from i+1 to M-1: b[j]=b[j-1]+1
+Output b — the next combination
+----
+
+.Listing 2.40. Program that outputs in lexicographic order +
+all combinations of stem:[N
+[source,python]
+----
+ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+
+
+def write_b(b: list[int], m: int) -> None:
+    print(''.join(ALPHABET[b[i]] for i in range(m)))
+
+
+def main() -> None:
+    n, m = map(int, input().split())
+    b: list[int] = list(range(1, m + 1))
+    write_b(b, m)
+    while True:
+        i = m - 1
+        while i >= 0 and b[i] == n - m + i + 1:
+            i -= 1
+        if i < 0:
+            break
+        b[i] += 1
+        for j in range(i + 1, m):
+            b[j] = b[j - 1] + 1
+        write_b(b, m)
+
+
+main()
+----
+
+Recall that the total number of combinations of stem:[N] elements taken stem:[M] at a time can be calculated using the formula:
+
+stem:[C(N,M) = N! / (M!(N - M)!)]
+
+
+== Arrangements
+
+To generate all _arrangements_ of stem:[N] elements taken stem:[M] at a time, one can use a composition of the algorithms described above. That is, generate all combinations of stem:[N] taken stem:[M] at a time, and then for each obtained combination generate all permutations of stem:[M] elements.
+
+For example, when generating all arrangements of 5 elements taken 3 at a time, where the elements themselves are denoted by Latin letters _A, B, C, D, E,_ the following sequence needs to be obtained, presented for compactness as 10 rows, each of which represents all possible permutations of the 3 letters of the first element of the row (the first elements of the rows represent all possible combinations of 5 letters taken 3 at a time):
+
+_ABC ACB BAC BCA CAB CBA_
+
+// Page 207
+_ABD ..._
+
+_ABE ..._
+
+_ACD ..._
+
+_ACE ..._
+
+_ADE ..._
+
+_BCD ..._
+
+_BCE ..._
+
+_BDE ..._
+
+_CDE CED DCE DEC ECD EDC_
+
+The total number of arrangements of stem:[N] elements taken stem:[M] at a time can be found using the formula:
+
+stem:[N!] +
+
+stem:[(N − M)!]
+
+.Listing 2.41. Program generating all possible arrangements of N
+stem:[ letters taken stem:[M] at a time]
+
+[source,python]
+----
+ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+
+z = 0
+
+
+def write_b(b: list[int], m: int) -> None:
+    global z
+    z += 1
+    print(f'{z:3d} - ', end='')
+    print(''.join(ALPHABET[b[i]] for i in range(m)))
+
+
+def swap_b(b: list[int], i: int, k: int) -> None:
+    b[i], b[k] = b[k], b[i]
+
+
+def permute_all(b: list[int], n: int, m: int) -> None:
+    b = b[:]  # work on a copy
+    write_b(b, m)
+    while True:
+        i = n - 2
+        while i >= 0 and b[i] >= b[i + 1]:
+            i -= 1
+        if i < 0:
+            break
+        k = i + 1
+        for j in range(i + 1, n):
+----
+
+// Page 208
+.Listing 2.41
+
+=== (continued)
+
+[source,python]
+----
+            if b[j] > b[i]:
+                k = j
+        swap_b(b, i, k)
+        # Reverse tail from i+1 to end
+        left = i + 1
+        right = n - 1
+        while left < right:
+            swap_b(b, left, right)
+            left += 1
+            right -= 1
+        write_b(b, m)
+
+
+def main() -> None:
+    n, m = map(int, input().split())
+    b: list[int] = list(range(1, m + 1))
+    permute_all(b, m, m)
+    while True:
+        i = m - 1
+        while i >= 0 and b[i] == n - m + i + 1:
+            i -= 1
+        if i < 0:
+            break
+        b[i] += 1
+        for j in range(i + 1, m):
+            b[j] = b[j - 1] + 1
+        permute_all(b, m, m)
+
+
+main()
+----
+
+Here are some explanations for the program that reads the numbers N, M from the keyboard and generates all possible arrangements of N letters taken M at a time (Listing 2.41).
+
+
+. The main program reads the numbers N, M and generates all combinations of N taken M at a time using the algorithm described above. For each obtained combination in list b, the `permute_all` function is called, receiving the current combination b and the number of elements M as parameters. The `permute_all` function generates all possible permutations for the received combination.
+. List b is copied inside the `permute_all` function (using `b = b[:]`), and therefore changes to list b in `permute_all` do not affect the contents of list b in the main program. This is analogous to pass-by-value in Python.
+. The `swap_b` function swaps values in b in place. Since Python lists are mutable, passing a list to a function allows the function to modify it directly — similar to pass-by-reference.
+. In Python, no special type declaration is needed for passing lists as parameters, unlike some other languages where a special type must be created.
+. The variable z in the `write_b` function is used for counting all generated arrangements.
+
+
+== Permutations with Repetitions
+
+Permutations with repetitions allow repeated use of elements. Suppose we have a set consisting of two symbols _A_ and two symbols _B_. Then all _permutations with repetitions_ of these symbols are: _AABB, ABBA, BABA, ABAB, BAAB, BBAA_.
+
+In the general case, if there are stem:[N1] items of the 1st kind, stem:[N2] items of the 2nd kind, and so on, stem:[Nk] items of the stem:[k]-th kind, then the total number of permutations can be calculated using the formula:
+
+// Page 209
+[source,pseudocode]
+----
+            N!
+       N1!N2!...Nk!
+----
+
+The algorithm is similar to generating permutations without repetitions, except for the formation of the initial permutation:
+
+[source,pseudocode]
+----
+i = 0
+for j in range(k):
+    for m in range(nn[j]):
+        b[i] = j + 1
+        i += 1
+----
+
+In the program for generating permutations with repetitions (Listing 2.42), the number K of different types of items, denoted by Latin letters, is entered from the keyboard. The quantities `nn[j]` of items of each type are also entered from the keyboard. The sum of the entered `nn[j]` determines the total number of elements in each of the generated permutations.
+
+.Listing 2.42. Program for generating permutations with repetitions
+[source,python]
+----
+ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+
+
+def swap_b(b: list[int], i: int, k: int) -> None:
+    b[i], b[k] = b[k], b[i]
+
+
+def write_b(b: list[int], n: int) -> None:
+    print(''.join(ALPHABET[b[i] - 1] for i in range(n)))
+
+
+def main() -> None:
+    k = int(input())
+    nn: list[int] = list(map(int, input().split()))
+    n = sum(nn)
+    # Build initial permutation
+    b: list[int] = []
+    for j in range(k):
+        for m in range(nn[j]):
+            b.append(j + 1)
+    write_b(b, n)
+    while True:
+        i = n - 2
+        while i >= 0 and b[i] >= b[i + 1]:
+            i -= 1
+        if i < 0:
+            break
+        kk = i + 1
+        for j in range(i + 1, n):
+            if b[j] > b[i]:
+                kk = j
+        swap_b(b, i, kk)
+        # Reverse tail from i+1 to end
+        left = i + 1
+        right = n - 1
+        while left < right:
+            swap_b(b, left, right)
+            left += 1
+            right -= 1
+        write_b(b, n)
+
+
+main()
+----
+
+// Page 210
+
+== Combinations with Repetitions
+
+For a set of symbols from _A_ to _C_ and size stem:[M = 3], the _combinations with repetitions_ will be as follows: _CCC, BCC, BBC, BBB, ACC, ABC, ABB, AAC, AAB, AAA_.
+
+The total number of combinations:
+
+stem:[(N + M − 1)! / M!(N − 1)!],
+
+where stem:[N] is the number of symbols, stem:[M] is the number of symbols in a combination.
+
+The main idea behind generating such combinations with repetitions is as follows: we write combinations as stem:[(N - 1)] zeros and stem:[M] ones, where ones replace symbols and zeros act as separators.
+
+For example:
+
+_ABB_ — 1 0 1 1, _AAC_ — 1 1 0 0 1, _CCC_ — 0 0 1 1 1.
+
+Let us explain these examples.
+
+
+** The first digit 1 means that symbol _A_ is present in the string of symbols.
+** The next digit 0 means that the _A_ symbols have ended.
+** The next digit 1 means that symbol _B_ follows.
+** The next digit 1 means that another symbol _B_ follows.
+** The digits have ended.
+Thus, the string of symbols _ABB_ was represented by the binary string 1011.
+
+
+** The first digit 1 means that symbol _A_ is present in the string of symbols.
+** The next digit 1 means that symbol _A_ appears again.
+** The next digit 0 means that the _A_ symbols have ended.
+** The next digit 0 means that the _B_ symbols have ended (were absent).
+** The next digit 1 means that symbol _C_ follows.
+** The digits have ended.
+Thus, the string of symbols _AAC_ was represented by the binary string 11001.
+
+
+** The first digit 0 means that symbol _A_ is absent from the string of symbols.
+** The next digit 0 means that symbol _B_ is absent from the string of symbols.
+** The next digit 1 means that symbol _C_ follows (first symbol).
+** The next digit 1 means that symbol _C_ appears again.
+** The next digit 1 means that symbol _C_ appears again.
+** The digits have ended.
+Thus, the string of symbols _CCC_ was represented by the binary string 00111.
+
+
+// Page 211
+With this approach, to solve the problem it is sufficient to generate all permutations of N ones and (N − 1) zeros.
+
+.Listing 2.43. Program that generates combinations with repetitions
+[source,python]
+----
+import string
+
+ALPHABET = string.ascii_uppercase  # 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+
+
+def swap_b(b: list[int], i: int, k: int) -> None:
+    b[i], b[k] = b[k], b[i]
+
+
+def write_b(b: list[int], n: int) -> None:
+    j = 0
+    result = []
+    for i in range(n):
+        if b[i] == 0:
+            j += 1
+        else:
+            result.append(ALPHABET[j])
+    print("".join(result))
+
+
+def main() -> None:
+    n1, m = map(int, input().split())
+    n = n1 - 1 + m
+    b = [0] * n
+    for i in range(n1 - 1):
+        b[i] = 0
+    for i in range(n1 - 1, n1 - 1 + m):
+        b[i] = 1
+    write_b(b, n)
+    while True:
+        i = n - 1
+        while i > 0 and b[i - 1] >= b[i]:
+            i -= 1
+        if i == 0:
+            break
+        i -= 1  # convert to 0-based position
+        k = i
+        for j in range(i + 1, n):
+            if b[j] > b[i]:
+                k = j
+        swap_b(b, i, k)
+        # reverse the suffix after position i
+        left = i + 1
+        right = n - 1
+        while left < right:
+            swap_b(b, left, right)
+            left += 1
+            right -= 1
+        write_b(b, n)
+
+
+main()
+----
+
+_Explanations for the program._
+
+
+. The initial permutation is formed sequentially from N1-1 zeros and M ones.
+. In the permutation output function `write_b`, modifications were made according to the design (zeros are separators, ones are symbols). If the current element of list B equals 0, then the next symbol "becomes active." If the current element of list B equals 1, then the current active symbol is printed to the screen.
+
+// Page 212
+

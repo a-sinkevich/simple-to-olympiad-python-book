@@ -1,0 +1,412 @@
+== Alphabetical Index
+
+
+== A
+
+
+** Dijkstra, 157
+** Euclid's, 93
+** on graphs, 155
+** depth-first search, 171
+** breadth-first search, 195
+
+*** minimum convex hull, 219
+*** circumscribed circle of a triangle, 216
+** Floyd's, 157
+
+
+== B
+
+
+* byte, 45
+* bit, 44
+* boolean data type (`bool` in Python), 51
+
+
+== C
+
+
+* convex polygon, 219
+* context-sensitive help invocation, 54
+
+** of segment midpoint, 215
+
+*** on the plane, 214
+*** of intersection of two lines, 216
+
+
+== D
+
+
+* two-dimensional list (2D array in Python), 23
+
+** on the plane, 214
+
+
+* dynamic memory, 86
+* dominant set, 185
+* graph arc, 156
+
+
+== E
+
+
+* equation of a line, +
+
+passing through two points, 215
+* equation of a line +
+
+on the plane, 215
+
+
+== F
+
+
+* factorial, 207
+
+** for prime factor occurrence in N!, 230
+
+
+** Heron's, 217
+* functions in Python, 54
+* type conversion functions, 54
+
+** slicing (replaces Copy), 54
+** `len()` (replaces Length), 54
+** `str.find()` (replaces Pos), 54
+
+
+== G
+
+
+** set of all subsets, 202
+** permutations, 204
+** arrangements, 208
+** combinations, 207
+* global variables, 84
+* greatest common divisor (`math.gcd()`), 230
+* graph edge, 156
+
+
+== I
+
+
+** of diagonals of a two-dimensional list, 25
+** of column of a two-dimensional list, 24
+** of row of a two-dimensional list, 24
+* initialization of a constant list, 82
+* input of a two-dimensional list, 26
+* integer data type (`int` in Python), 48
+
+
+== L
+
+
+* logical variables and lists (`bool`), 51
+* local variables, 83
+
+
+== M
+
+
+* minor automation of testing, 85
+* adjacency matrix, 156
+* set of all subsets, 203
+* maximum number of identical consecutive +
+
+  elements, 31
+
+
+== N
+
+
+* number of combinations, 208
+
+
+== O
+
+
+* one-dimensional list (array in Python), 10, 11
+* output of a two-dimensional list, 26
+
+
+== P
+
+
+* Pascal's triangle, 95
+* perpendicular to a line passing +
+
+  through a point, 216
+* plan for developing algorithms +
+
+  and programs, 29
+* point belonging to +
+
+  a segment, 218 +
+
+  a rectangle, 218 +
+
+  a triangle, 217 +
+
+  a polygon, 218
+* positional number systems, 47 (hexadecimal)
+
+** `del` / list slicing (replaces Delete), 54
+** list `insert()` (replaces Insert), 54
+* functions in Python, 54
+
+** fast polynomial evaluation, 227
+** replacing list elements +
+
+     with their opposites, 27
+** greatest common divisor, 231
+** polynomial remainder, 228
+** summing elements of a one-dimensional +
+
+     list, 25
+
+
+== Q
+
+
+* queue (`collections.deque`), 70
+
+
+== R
+
+
+* float data type (`float` in Python), 49
+* dataclass / dictionary (replaces record), 65
+
+** restoring the optimal path, 154
+** on strings, 154
+
+** with two parameters, 126
+** with one parameter, 118
+** with three or more parameters, 139
+* reduction of memory usage, 154
+* redirection of standard +
+
+  input-output +
+
+  in a program, 56 +
+
+  at launch, 55
+* type hints in Python, 51
+
+
+== S
+
+
+* searching for elements with a given +
+
+  property, 17, 20
+* searching for the maximum element, 17, 19
+* searching for the minimum element, 17, 19
+* shortest distances on graphs, 157
+* simplest algorithms on a one-dimensional +
+
+  list, 17
+* simplest techniques for working in the +
+
+  Python environment, 41
+* sorting elements of a one-dimensional +
+
+  list, 21
+* source (in a network), 110
+* sink (in a network), 110
+* stack, 70
+* string data type (`str` in Python), 53
+* strongly connected components, 185
+* character data type (`str` of length 1), 52
+* character-to-number conversion (`ord()`), 82
+
+
+== T
+
+
+* test, 29
+* text files, 55
+* transferring algorithms to two-dimensional +
+
+  lists, 25
+* translating an algorithm +
+
+  into a Python program, 40
+* technology of program development, 57
+
+
+== W
+
+
+* weighted graph, 157
+
+// Page 233
+
+== Index (continued)
+
+area +
+
+  of a circle, 217 +
+
+  of an arbitrary plane +
+
+    polygon, 217 +
+
+  of a triangle, 217 +
+
+combinations with repetitions, 212 +
+
+counting elements with a given +
+
+  property, 17 +
+
+debugging recursive functions, 112 +
+
+distance +
+
+  from a point to a line, 215 +
+
+forming all possible +
+
+  sums, 153 +
+
+manual trace, 33
+
+data type +
+
+  boolean (`bool`), 51 +
+
+  large integer (Python `int` is arbitrary precision), 50 +
+
+  dataclass / dictionary (replaces record), 65 +
+
+  string (`str`), 53
+
+permutations +
+
+  with repetitions, 210
+
+problem +
+
+  outputting all possible ways, 105 +
+
+  outputting one of the possible ways, 106 +
+
+  number of valid bracket expressions, 103 +
+
+  number of representations of a number as a sum of components, 102 +
+
+  number of ways to form sum M from N numbers, 98 +
+
+  about cutting pieces, 76 +
+
+  about a set of triangles, 61 +
+
+  about finding a line, 58 +
+
+  about brackets, 78 +
+
+  about the knight's tour, 73 +
+
+  about Fibonacci numbers, 116 +
+
+  number of combinations of stem:[N] choose stem:[M], 96
+
+// Page 234
+
+* text files, 55
+* test, 29
+* technology of program development, 57
+
+** boolean (`bool`), 51
+** large integer (Python `int` is arbitrary precision), 50
+** dataclass / dictionary (replaces record), 65
+** string (`str`), 53
+* Pascal's triangle, 95
+
+
+== U
+
+
+* equation of a line, +
+
+passing through two points, 215
+* equation of a line +
+
+on the plane, 215
+
+
+== V
+
+
+* factorial, 207
+
+** for prime factor occurrence in N!, 230
+
+
+** Heron's, 217
+* functions in Python, 54
+* type conversion functions, 54
+
+** slicing (replaces Copy), 54
+** `len()` (replaces Length), 54
+** `str.find()` (replaces Pos), 54
+
+
+== W
+
+
+* integer data type (`int` in Python), 48
+
+
+== X
+
+
+* number of combinations, 208
+
+
+== Y
+
+
+* hexadecimal number +
+
+system, 47
+
+// Page 235
+Dolinsky Mikhail Semenovich
+
+*Algorithmization and Programming in Python: From Simple to Olympiad Problems*
+
+Textbook
+
+Editor-in-Chief _E. Stroganova_ +
+
+Head of Editorial Department _A. Krivtsov_ +
+
+Project Manager _A. Adamenko_ +
+
+Literary Editor _M. Vdovina_ +
+
+Artist _E. Dyachenko_ +
+
+Proofreaders _A. Kelle-Pelle, D. Stuzhalin_ +
+
+Layout _A. Kelle-Pelle_
+
+License ID No. 05784 dated 07.09.01. +
+
+Signed for printing 26.08.04. Format 70×100/16. Conventional printed sheets 19.35. +
+
+Print run 4000. Order 877 +
+
+OOO "Piter Print," 194044, St. Petersburg, Bolshoy Sampsonievsky pr., 29a. +
+
+Tax benefit — All-Russian Product Classifier +
+
+OK 005-93, vol. 2; 95 3005 — educational literature.
+
+Printed from camera-ready copy at OAO "Tekhnicheskaya kniga" +
+
+190005, St. Petersburg, Izmaylovsky pr., 29
+

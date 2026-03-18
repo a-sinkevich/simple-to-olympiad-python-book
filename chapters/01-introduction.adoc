@@ -1,0 +1,38 @@
+== Introduction
+
+Programming currently attracts considerable interest among students and schoolchildren. Many of them are _capable_ of independently studying the necessary theoretical material and developing practical skills using both educational (school and university) and personal computers. However, a significant limiting factor is the lack of appropriate literature. Most available programming literature is essentially a retelling of manuals for one programming language or another, for example [2]. Libraries occasionally carry books that also describe algorithmic methods. But such books are often not tied to any programming language, for example [15], or are tied to outdated programming languages [3]. The best, in the author's opinion, of the relatively accessible textbooks on algorithm design today [8-11] unfortunately contain no information on the methodology of program development and debugging. A serious drawback of the monograph [11] for practical use by first-year university students and schoolchildren is also the high theoretical level of the material's presentation. A common shortcoming of books as such is the static nature of the material, that is, the student's inability to self-assess the quality of their mastery of the knowledge being studied and to reinforce the corresponding skills. The development of new information technologies and electronic means of distributing information, as well as the author's many years of using the above-mentioned and other similar materials (primarily [8-10]), led to the need to create a new study guide. The author hopes that it will better allow each student to realize their individual creative potential through the following factors.
+
+
+** The first chapter contains all the material necessary for the initial stage of work. The student (schoolchild) is not assumed to have any prior knowledge from computer science courses -- everything needed is presented in full, but in a compact form. From the very first pages, the reader is oriented toward independent work in the Python environment (IDLE, VS Code, or command line) and ongoing practical reinforcement of the studied material.
+** Information is presented in order of increasing difficulty.
+
+// Page 6
+
+. Block structure and nesting of difficulty levels in the theoretical presentation. This provides the opportunity for those who have understood the material to skip more detailed discussion, and for those who have not to delve deeper.
+. Autonomous feedback with learners.
+All theoretical information, as well as all practical assignments, are hosted in the course "Computers and Programming" on the "Distance Learning" project website, which has been operating on the servers of Francisk Skorina Gomel State University since October 1999. A learner can, using Internet-online (http://dl.gsu.unibel.by) or email (dl-service@gsu.unibel.by), submit their own solution to any of the problems presented in the book and many others at any convenient time! The automatic solution checking system operates daily and around the clock, without holidays or days off, and typically checks solutions within a few minutes. For those who have access neither to the Internet nor to email, there is the option to obtain the necessary information (theory, problem statements, tests, solution programs, batch files for self-testing) as a supplement to the book on floppy disks or CD.
+
+The integration of these factors ensures high effectiveness of the learning process based on the theoretical material and practical assignments presented in this book.
+
+The proposed material has been actively used by the author in practical work teaching programming to students of the mathematics department at Francisk Skorina Gomel State University and to schoolchildren in the city of Gomel. The effectiveness of the implemented methodology is confirmed, in particular, by the following facts.
+
+
+* From 1997 to 2001, exactly half (10 out of 20) of the members of the Belarusian team at the International Olympiads in Informatics (IOI 1997-2001) were Gomel schoolchildren, who won a total of 5 silver and 2 bronze medals. Over the same period, the remaining representatives of the Republic of Belarus won 2 silver and 4 bronze medals.
+* Furthermore, over the same period, Gomel students won the Belarusian National Olympiad in Informatics in the individual standings 3 times (1997 -- Artem Kuznetsov, 1999 -- Konstantin Sudilovsky, 2000 -- Evgeny Gonchar) and twice (1998, 2000) in the team standings.
+
+The author hopes that the reader will be able to see for themselves the merits of this book and the proposed approach to learning and self-learning algorithms and programming.
+
+Nevertheless, the author will be grateful for all feedback and comments (including and above all critical ones), sent to: dolinsky@gsu.unibel.by.
+
+// Page 7
+
+== From the Publisher
+
+Please send your comments, suggestions, and questions to the email address comp@piter.com (Piter Publishing, computer editorial office).
+
+We will be glad to hear your opinion!
+
+You can find detailed information about our books on the publisher's website http://www.piter.com.
+
+// Page 8
+

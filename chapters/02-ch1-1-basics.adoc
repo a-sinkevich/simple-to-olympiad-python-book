@@ -1,0 +1,2193 @@
+== CHAPTER 1 Programming in Python
+
+The goal of this study guide is to help you learn to write programs in the _Python_ programming language. The guide requires active independent work on your part, without which this is _impossible_ to achieve.
+
+
+== 1.1. Basic language constructs and simplest algorithms
+
+This book is the result of the author's many years of work teaching programming to schoolchildren of various ages and developing his own methodology for the initial stage of learning, which the author has called "rapid immersion" into program development in Python. In short, the essence of this methodology can be stated as follows: the learner needs to be given a minimally necessary amount of information, but in such a way that they can independently solve practically any problem involving numeric data. The author considers the following to be such information: integer and real variables, arithmetic and logical expressions, assignment (`=`), conditional statements (`if ... elif ... else`), and loops (`for` and `while`).
+
+
+=== Introduction to programming
+
+First of all, let us agree on some concepts. Let us try to do this in the form of answers to questions.
+
+_Why do we need a program?_
+
+To make the computer perform some useful work instead of a person. At the initial stage of your programming education -- to perform some labor-intensive computations, for example, processing one-dimensional or two-dimensional arrays of numbers.
+
+_What is a one-dimensional array of numbers?_
+
+Suppose a clown in a circus has 10 barrels of different heights, from which he plans to build a "pyramid" by stacking one barrel on top of another. The question is: how tall will this pyramid be?
+
+// Page 9
+To answer this question correctly, we need to know the heights of these barrels, measured, for example, in centimeters:
+
+25 10 30 40 54 12 60 90 40 20.
+
+These numbers, separated by spaces, are those very heights: 25 cm is the height of the first barrel, 10 cm is the height of the second, and so on, 20 cm is the height of the tenth barrel. Then the height of the pyramid will be:
+
+25 + 10 + 30 + 40 + 54 + 12 + 60 + 90 + 40 + 20 = 381 cm.
+
+These 10 numbers, written in a single row (though they could also be written in a single column), are called a _one-dimensional array_ of 10 numbers. In Python, we represent such arrays using _lists_.
+
+Since all numbers in this array are integers, such a list is called an _integer list_.
+
+If the clown measured the heights of his barrels not in centimeters but in decimeters, then the list of barrel heights would look like this:
+
+2.5 1.0 3.0 4.0 5.4 1.2 6.0 9.0 4.0 2.0.
+
+Now our list consists of real (floating-point) numbers and is therefore called a _float list_.
+
+[NOTE]
+====
+Note that historically, in programming, the fractional part is separated from the integer part by the symbol `.` (period), rather than the symbol `,` (comma), as is customary in mathematics.
+
+====
+
+But what if the clown's barrels keep breaking or getting lost, and the height of the "pyramid" needs to be recalculated each time, or if we decided to help all clowns in the world who perform this trick at the same time?
+
+Obviously, one can think of more serious examples where it is necessary to perform calculations on numbers in a list in one way or another. And the more numbers there are in these lists, the greater the chance that a person will make an error in the calculations. Therefore, a person's salvation in such cases is the ability to write a program that can input the numbers needed for calculations (here the person will provide some help to the computer -- entering the source data from the keyboard), then perform the necessary calculations, and output the finished result. It is clear that now we need to write a program that will do all of this. You might object: writing a program is also work! Especially since sometimes performing calculations with a pen, paper, and a calculator is much simpler and faster than writing a program. This is true, especially for the programs with which you will begin your learning, _but_:
+
+1) a program is written once, and then it can be used an infinite number of times, and this is the main advantage of even the simplest programs;
+
+// Page 10
+2) a program can be written and tested for lists with a small number of elements, say 10, and then used for the same calculations but on 10 million elements.
+
+There are, of course, other arguments in favor of programming over manual work. In this chapter, we will try to help you learn to write simple programs in the Python programming language that can input one-dimensional lists of integers or real numbers from the keyboard, perform some calculations, and then output the results to the screen.
+
+
+== Standard processing of one-dimensional arrays
+
+The text of a program written in Python that solves the problem of calculating the height of the "pyramid" of barrels for our clown is shown in Listing 1.1.
+
+.Listing 1.1. Example of the simplest Python program
+[source,python]
+----
+# Sum_1arr: Summing elements of a one-dimensional list
+
+print('Enter 10 numbers')
+a = [0] * 10  # list a with 10 elements
+for i in range(10):  # Input
+    a[i] = int(input())  # of one-dimensional list
+s = 0  # Summing
+for i in range(10):  # of one-dimensional
+    s = s + a[i]  # list
+print('source array')  # Output
+for i in range(10):  # of one-dimensional
+    print(a[i], end=' ')  # list
+print()
+print('answer')
+print(s)  # Output of result
+----
+
+This same program also solves a large number of other problems where, in the end, 10 numbers need to be added together.
+
+[EXAMPLE]
+====
+Ten friends decided to give a gift to their favorite singer Michael Jackson. Each one broke open their piggy bank and contributed their share to the common cause. How much money did the friends collect? Can you think of a problem whose solution requires adding 10 numbers?
+
+====
+
+It is clear that the simplest version of such a program should accumulate the sum, that is, first add the first 2 elements, then add the third to them, and so on for all elements of the list. The last element to be added to the sum in our problem is the tenth element of the list.
+
+But let us look carefully at the text of the program. The first task is to figure out and try to remember the purpose of all keywords and punctuation used
+
+// Page 11
+in the program. After all, the program is intended for a computer, and for it every character matters. It will simply misunderstand the program if you make a mistake.
+
+Python is case-sensitive: `print` and `Print` are different names! All Python keywords are written in lowercase. Variable names can use lowercase or uppercase letters, but by convention we use lowercase for variable names and UPPERCASE for constants.
+
+So, a Python program does not need a special "program" declaration line -- you simply start writing your code. In our example, we begin with a comment `# Sum_1arr` to give the program a name. Comments in Python start with the `#` symbol -- everything after `#` on a line is ignored by the computer, but comments can be useful to the person who writes and reads the program, explaining what a particular line is for.
+
+Unlike many other languages, Python does not use semicolons to end statements. Instead, each statement goes on its own line. Python uses _indentation_ (spaces at the beginning of a line) to show which lines belong inside a loop or a conditional block. This is one of the most important rules in Python -- incorrect indentation will cause an error.
+
+The comments in our program state that the program sums the elements of a one-dimensional list. The list `a` is created with 10 elements initialized to zero. The variable `i` will be used to store and change the index of the element being processed. The variable `s` will be used to store the sum of the list elements that we have already added. Further: the one-dimensional list is input, its elements are summed, and then the list itself and the obtained result of summation are output.
+
+A question arises: why output the source list? We entered it ourselves; we know what numbers are there. We only needed to output the result!
+
+// Page 12
+In this program, the source list was output for the following reasons.
+
+
+. To show how to output a one-dimensional list, should the need arise.
+. At the initial stage of learning programming, you may make some mistakes. Finding them will be easier if the numbers you entered and the numbers your program produced as an answer to the problem you posed are both right before your eyes. You might also make mistakes in the input statements themselves.
+
+Let us try to analyze our program line by line:
+
+[source,python]
+----
+# Sum_1arr: Summing elements of a one-dimensional list
+----
+
+This line is a comment that describes the purpose of the program -- summing elements. In Python, the `#` character marks the start of a comment.
+
+[source,python]
+----
+a = [0] * 10
+----
+
+This line creates a list named `a` containing 10 zeros. In Python, lists are dynamic -- they can grow or shrink -- but here we pre-create a list of a known size so we can fill it with values by index. Note that Python lists are _0-indexed_: the elements are numbered from 0 to 9, not from 1 to 10.
+
+[source,python]
+----
+for i in range(10):
+    a[i] = int(input())
+----
+
+This block provides input of 10 numbers from the keyboard into the list `a`.
+
+Literally, this reads as follows:
+
+[source,pseudocode]
+----
+For i from 0 to 9 do read a[i].
+----
+
+The `range(10)` function generates numbers 0, 1, 2, ..., 9. Thus, the computer waits until we type a number on the keyboard and press Enter. It will store this number in list element `a[0]`, that is, the first element of list a. Then the computer waits until we type the second number to store it in `a[1]`, and so on, up to the 10th element, which it will store in `a[9]`.
+
+[source,python]
+----
+s = 0
+----
+
+Recall that we introduced the variable `s` to accumulate the sum of the entered numbers. It is clear that the initial value of this variable, that is, the value of variable `s` before we start adding, should be zero. This is what this statement ensures. Literally, it reads as follows:
+
+[source,pseudocode]
+----
+Store the number 0 in variable s.
+----
+
+Or like this:
+
+[source,pseudocode]
+----
+Assign the value 0 to variable s.
+----
+
+Next:
+
+[source,python]
+----
+for i in range(10):
+    s = s + a[i]
+----
+
+Literally, this reads as follows:
+
+[source,pseudocode]
+----
+For i from 0 to 9 do
+  compute  the  new  value  of variable s  as  the  result of adding
+  the old value of variable s and the list element a[i].
+----
+
+Alternatively, it can be read as follows:
+
+[source,pseudocode]
+----
+For i from 0 to 9 do
+  take the old value of variable s,
+  add the value of element a[i] to it and
+  store the resulting sum back in variable s.
+----
+
+This is the only part of the program that directly solves the problem at hand -- it sequentially sums the 10 entered numbers in variable `s`, adding to it:
+
+
+* first the value of `a[0]`, that is, the first element of list a (the first number we entered from the keyboard);
+* then the value of `a[1]`, that is, the second element of list a (the second number we entered from the keyboard), and so on;
+* finally, the value of `a[9]`, that is, the tenth element of list a (the tenth number we entered from the keyboard).
+
+After this loop finishes executing, the variable `s` contains the desired result -- the required sum!
+
+[source,python]
+----
+print('source array')
+----
+
+This line outputs the text `source array` to the screen, and it is needed so that the person who will run our program knows what
+
+// Page 14
+numbers are about to be displayed (the numbers of the source list in this case).
+
+[source,python]
+----
+for i in range(10):
+    print(a[i], end=' ')
+----
+
+Literally, this reads as follows:
+
+[source,pseudocode]
+----
+For i from 0 to 9 do
+  output a[i] to the screen, followed by a space character.
+----
+
+Note that `print(a[i], end=' ')` uses the `end=' '` parameter to prevent moving to the next line after each number. By default, `print()` adds a newline character at the end. By specifying `end=' '`, the cursor is _not moved_ to the beginning of the next line but a space is printed instead. Thus, the numbers of list `a` are displayed one after another on the same line, separated by spaces.
+
+If we had used plain `print(a[i])` without `end=' '`, the numbers would have been displayed in a column, which in our case is less clear.
+
+[source,python]
+----
+print()
+----
+
+To move the cursor to the beginning of the next line after finishing the output of the entire list, a bare `print()` call is used. As a result, the word "answer" from the next statement is displayed at the beginning of the next line.
+
+[source,python]
+----
+print('answer')
+----
+
+This statement is used to indicate that the results of our program's work will follow.
+
+[source,python]
+----
+print(s)
+----
+
+This statement outputs the value of variable `s`, which contains the result of the program's work.
+
+We have analyzed the first, simplest Python program. It can be used as a basis for writing other programs that process one-dimensional lists. When doing so, only the calculation part of the program needs to be changed. Creating lists, inputting source data, and outputting source data and results, using exactly the corresponding parts of the program we analyzed, must always be done.
+
+For example, what needs to be changed in our program if we want to multiply, rather than add, the entered numbers?
+
+Only 2 characters need to be changed: `+` to `*` and `0` to `1`, resulting in the following calculation part:
+
+[source,python]
+----
+s = 1  # Multiplying elements
+for i in range(10):  # of a one-dimensional list
+    s = s * a[i]
+----
+
+// Page 15
+The text of this program is shown in Listing 1.2.
+
+.Listing 1.2. Program that multiplies the entered numbers
+[source,python]
+----
+# Mul_1arr: Multiplying elements of a one-dimensional list
+
+print('Enter 10 numbers')
+a = [0] * 10  # list a with 10 elements
+for i in range(10):  # Input
+    a[i] = int(input())  # of one-dimensional list
+s = 1  # Multiplying elements
+for i in range(10):  # of one-dimensional list
+    s = s * a[i]
+print('source array')  # Output
+for i in range(10):  # of one-dimensional list
+    print(a[i], end=' ')
+print()
+print('answer')  # Output
+print(s)  # of result
+----
+
+Thus, when developing programs, the main thing is to come up with the calculation part or, in other words, to design the algorithm of the program. For a large number of problems, such algorithms have long been devised, and instead of "reinventing the wheel," it is sufficient to study and memorize them, which is what you are invited to do.
+
+
+== Simplest algorithms on a one-dimensional list
+
+Let us consider the most commonly used algorithms on a one-dimensional list:
+
+
+* counting elements that possess a given property;
+* finding the maximum and minimum elements;
+* searching for elements that possess a given property.
+
+
+=== Counting elements that possess a given property
+
+Suppose we have a list with computer science grades of 10 students. We need to count how many of them have a grade of 5. The algorithm for this problem is as follows:
+
+[source,python]
+----
+s = 0  # Counting elements
+for i in range(10):  # equal to a given value (5)
+    if a[i] == 5:
+        s = s + 1
+----
+
+Following our established tradition, let us examine the algorithm line by line.
+
+[source,python]
+----
+s = 0
+----
+
+The initial count of students with top marks in computer science is set to 0.
+
+[source,python]
+----
+for i in range(10):
+----
+
+This tells Python to repeat the indented block below for each value of `i` from 0 to 9. The colon `:` at the end of the `for` line is mandatory -- it tells Python that an indented block follows.
+
+// Page 16
+Everything that is indented under the `for` line belongs to the loop body. This is how Python knows what to repeat -- by looking at the indentation level.
+
+[source,python]
+----
+    if a[i] == 5:
+        s = s + 1
+----
+
+If `a[i]` equals 5, then increase the value of `s` by 1. In more detail, this can be read as follows: if the i-th element of list `a` equals 5, then the new value of variable `s` should be formed by adding the old value of `s` and 1. Note that Python uses `==` for comparison (is equal to?) and `=` for assignment (store a value).
+
+Returning to the problem about top students: if the current student has a grade of 5, then they should be counted. But incrementing by 1 is precisely counting.
+
+Question: how to count the number of students with C grades?
+
+[source,python]
+----
+s = 0
+for i in range(10):
+    if a[i] == 3:
+        s = s + 1
+----
+
+How to count the number of students with B and A grades?
+
+[source,python]
+----
+s = 0
+for i in range(10):
+    if a[i] >= 4:
+        s = s + 1
+----
+
+In general, in the `if` statement, the following comparison operators can be used:
+
+
+* □ `==` -- equal to
+* □ `>` -- greater than
+* □ `<` -- less than
+* □ `>=` -- greater than or equal to
+* □ `<=` -- less than or equal to
+* □ `!=` -- not equal to
+
+For example, how many students have a grade other than 5?
+
+[source,python]
+----
+s = 0
+for i in range(10):
+    if a[i] != 5:
+        s = s + 1
+----
+
+In the `if` statement, more complex conditions can also be written using the keywords `and` and `or` and parentheses.
+
+For example, suppose `a[i]` is a list of computer science grades and `b[i]` is a list of mathematics grades. How do we count the number of students who have a grade of 5 in both computer science and mathematics?
+
+[source,python]
+----
+s = 0
+for i in range(10):
+    if a[i] == 5 and b[i] == 5:
+        s = s + 1
+----
+
+How do we count the number of students who have a grade of 5 in at least one of these subjects?
+
+[source,python]
+----
+s = 0
+for i in range(10):
+    if a[i] == 5 or b[i] == 5:
+        s = s + 1
+----
+
+// Page 17
+Now you can solve any problem that requires counting the number of elements in a list that possess some property. For example, problems 1 and 5 from the section "Exercises for independent practice."
+
+Think of problems that are solved by counting elements possessing a given property.
+
+
+=== Finding the maximum and minimum elements
+
+Suppose the list `a` contains numbers representing the heights of 10 students in centimeters. We need to find the height of the tallest student.
+
+[source,python]
+----
+...
+s = a[0]  # Finding
+for i in range(1, 10):  # the maximum element
+    if a[i] > s:
+        s = a[i]
+...
+----
+
+As usual, let us examine the problem line by line.
+
+[source,python]
+----
+s = a[0]
+----
+
+First, we store the height of the first student in variable `s`. Remember that in Python, the first element has index 0.
+
+[source,python]
+----
+for i in range(1, 10):
+----
+
+For all remaining students from the 2nd to the 10th (indices 1 through 9), the following actions must be performed:
+
+[source,python]
+----
+    if a[i] > s:
+        s = a[i]
+----
+
+If the height of the current (i-th) student is greater than the one we remember in variable `s`, then `s` should be updated with this larger value.
+
+Thus, when this procedure has been performed for all students, the variable `s` will contain the value corresponding to the maximum of all that were entered into list `a`.
+
+And if we need to find not the maximum but the minimum element (that is, the height of the shortest student), what needs to be changed in this algorithm?
+
+Correct -- replace the `>` (greater than) sign with the `<` (less than) sign in the `if` statement. Then we get:
+
+[source,python]
+----
+s = a[0]  # Finding
+for i in range(1, 10):  # the minimum element
+    if a[i] < s:
+        s = a[i]
+----
+
+If, for example, the problem requires finding the difference between the largest and smallest elements, what should be done?
+
+Introduce separate variables for the maximum and minimum elements:
+
+[source,python]
+----
+mx = a[0]  # Finding
+for i in range(1, 10):  # the maximum element
+    if a[i] > mx:
+        mx = a[i]
+mn = a[0]  # Finding
+for i in range(1, 10):  # the minimum element
+    if a[i] < mn:
+        mn = a[i]
+s = mx - mn
+----
+
+// Page 18
+In Python, you do not need to declare variables before using them -- Python creates them automatically when you first assign a value. So there is no need for a separate declaration section.
+
+Simultaneous search for the maximum and minimum elements in a list could be written somewhat more concisely:
+
+[source,python]
+----
+mx = a[0]
+mn = a[0]
+for i in range(1, 10):
+    if a[i] > mx:
+        mx = a[i]
+    if a[i] < mn:
+        mn = a[i]
+s = mx - mn
+----
+
+In this case, when we want to execute 2 (or more) `if` statements inside a `for` loop, we simply write them at the same indentation level under the `for`. In Python, there is no need for special "begin/end" brackets -- indentation alone defines the block structure.
+
+[NOTE]
+====
+Pay attention to the indentation in the statements, reflecting the nesting of their execution.
+
+====
+
+
+=== Searching for elements that possess a given property
+
+Suppose `a` contains the computer science grades of 10 students. We need to find out whether there is at least one student among them who has a grade of C.
+
+[source,python]
+----
+i = 0  # Searching for elements
+while i < 10 and a[i] != 3:  # equal to a given value (3)
+    i += 1
+if i >= 10:
+    print('no 3s found')
+else:
+    print('the first 3 has index', i)
+----
+
+Of course, one could have used the algorithm for counting elements that possess a given property:
+
+[source,python]
+----
+s = 0
+for i in range(10):
+    if a[i] == 3:
+        s += 1
+if s == 0:
+    print('no C students')
+else:
+    print('there is a C student')
+----
+
+However, in this variant we are unable to find out who exactly the C student is, that is, what is the index of the element equal to 3.
+
+The previous algorithm can be modified as follows:
+
+[source,python]
+----
+s = 0
+k = -1
+for i in range(10):
+    if a[i] == 3:
+        s += 1
+        k = i
+if s == 0:
+    print('no C students')
+else:
+    print('there is a C student, their index is', k)
+----
+
+// Page 19
+But the main drawback of this approach is that we are forced to examine all elements of the list, even though the answer to our question could have been known after examining the first element if it turned out to be a C student. In the case of a list of 10 elements, this may not be a tragedy, but what if the list has 10 million elements?
+
+For this case, Python provides the `while` loop:
+
+[source,python]
+----
+i = 0  # Searching for elements
+while i < 10 and a[i] != 3:  # equal to a given value (3)
+    i += 1
+if i >= 10:
+    print('no 3s found')
+else:
+    print('the first 3 has index', i)
+----
+
+As usual, let us examine the algorithm line by line.
+
+[source,python]
+----
+i = 0
+----
+
+`i` is assigned the value 0. `i` is a variable that stores the index of the current element of list `a`. Remember, Python lists start at index 0.
+
+[source,python]
+----
+while i < 10 and a[i] != 3:
+    i += 1
+----
+
+Literally, this reads as follows:
+
+[source,pseudocode]
+----
+While (i < 10) and (a[i] != 3) do i = i + 1
+----
+
+As applied to our problem:
+
+[source,pseudocode]
+----
+While (the list has not ended) and
+  (the current element in the list is not what we are looking for)
+  (that is, the element does not possess the property we need)
+do - take the next element
+----
+
+The program can exit this while loop in one of two ways:
+
+
+. in the process of adding 1 to `i` (taking subsequent elements), the desired element was never found;
+. the desired element was found at some `i`.
+
+[source,python]
+----
+if i >= 10:
+    print('no 3s found')
+else:
+    print('the first 3 has index', i)
+----
+
+Precisely because there are two possible outcomes, the `if` statement follows the `while`, analyzing exactly how it ended and giving us the corresponding message.
+
+Let us once again note that the main advantage of this method of list processing is that the search is stopped as soon as the desired element is found.
+
+
+=== Listing 1.3. Sorting elements of a one-dimensional list
+
+[source,python]
+----
+for j in range(9):
+    s = a[j]
+    k = j
+    for i in range(j + 1, 10):  # Finding
+        if a[i] < s:  # the minimum
+            s = a[i]  # element
+            k = i
+    a[k] = a[j]  # Moving the minimum
+    a[j] = s  # element "to the top"
+----
+
+// Page 20
+Suppose list `a` contains the heights of 10 students in centimeters. We need to rearrange the numbers in list `a` so that each subsequent number is greater than the previous one (or equal to it).
+
+[NOTE]
+====
+If you have difficulty understanding this section on first reading, it can be skipped.
+
+====
+
+The main idea of the algorithm is as follows: 9 times, the smallest element is found among the remaining elements. If such an element is found, it is swapped the first time with the first element, the second time with the second element (the first smallest element is already in the first position), and so on. On the 9th pass, the minimum element is selected from the 9th and 10th elements and swapped with the 9th.
+
+
+== Methodological guidelines for solving problems 1-5, 7, 9, 12, 13 from the section "Exercises for independent practice"
+
+*Problem 1.* Counting nonzero elements.
+
+[source,python]
+----
+s = 0
+for i in range(10):
+    if a[i] != 0:
+        s += 1
+print(s)
+----
+
+*Problem 2.* Counting elements whose absolute value is greater than 7.
+
+[source,python]
+----
+s = 0
+for i in range(10):
+    if abs(a[i]) > 7:
+        s += 1
+print(s)
+----
+
+*Problem 3.* Searching for 7.
+
+[source,python]
+----
+i = 0
+while i < 10 and a[i] != 7:
+    i += 1
+if i >= 10:
+    print('no')
+else:
+    print('yes')
+----
+
+*Problem 4.* Difference between the maximum and minimum elements.
+
+[source,python]
+----
+mx = a[0]
+mn = a[0]
+for i in range(1, 10):
+    if a[i] > mx:
+        mx = a[i]
+    if a[i] < mn:
+        mn = a[i]
+s = mx - mn
+print(s)
+----
+
+*Problem 5.* Pairwise comparison of two lists.
+
+[source,python]
+----
+s1 = 0
+s2 = 0
+s3 = 0
+for i in range(10):
+    if a[i] > b[i]:
+        s1 += 1
+    if a[i] == b[i]:
+        s2 += 1
+    if a[i] < b[i]:
+        s3 += 1
+print(s1, s2, s3)
+----
+
+// Page 21
+
+=== Problem 7. Summing and counting.
+
+[source,python]
+----
+s = 0
+for i in range(10):
+    s += a[i]
+r = s / 10
+n = 0
+for i in range(10):
+    if a[i] > r:
+        n += 1
+print(n)
+----
+
+
+=== Problem 9. Finding the maximum element and counting.
+
+[source,python]
+----
+mx = a[0]
+for i in range(10):
+    if a[i] > mx:
+        mx = a[i]
+s = 0
+for i in range(10):
+    if a[i] == mx:
+        s += 1
+print(s)
+----
+
+
+=== Problem 12. Searching for a zero element.
+
+[source,python]
+----
+i = 0
+while i < 10 and a[i] != 0:
+    i += 1
+if i >= 10:
+    print('no')
+else:
+    print('the first 0 is at position', i)
+----
+
+
+=== Problem 13. Searching for a negative number from the end of the list.
+
+[source,python]
+----
+i = 9
+while i >= 0 and a[i] >= 0:
+    i -= 1
+if i < 0:
+    print('no negative numbers')
+else:
+    print('the last number<0 is at position', i)
+----
+
+
+== Standard processing of two-dimensional arrays
+
+A significant number of practical problems require processing not one-dimensional but two-dimensional arrays (lists of lists in Python).
+
+
+=== Two-dimensional array and its parts
+
+For example, consider a two-dimensional array of 25 elements containing 5 rows and 5 columns:
+
+----
+
+5  -2  3  14  11
+17  13  1   7   1
+5  -2  3  14  20
+8   0  9  10  -4
+3  -6  3  14  16
+----
+
+Components of a two-dimensional array that may require special processing can be its rows, columns, and diagonals, for example:
+
+
+* the second row:
+
+----
+
+17 13 1 7 1
+----
+
+// Page 22
+
+* the first diagonal:
+ 5 13 3 10 16
+* the second diagonal:
+ 11 7 3 0 3
+* the third column:
+ 3 1 3 9 3
+* and so on.
+
+
+== Indices of elements of a two-dimensional array
+
+A two-dimensional array (list of lists) `a` of 25 elements (5 rows and 5 columns) has the following indices in Python (0-indexed):
+
+----
+
+5   -2   3   14   11   →   a[0][0] a[0][1] a[0][2] a[0][3] a[0][4]
+17  13   1    7    1   →   a[1][0] a[1][1] a[1][2] a[1][3] a[1][4]
+5   -2   3   14   20   →   a[2][0] a[2][1] a[2][2] a[2][3] a[2][4]
+8    0   9   10   -4   →   a[3][0] a[3][1] a[3][2] a[3][3] a[3][4]
+3   -6   3   14   16   →   a[4][0] a[4][1] a[4][2] a[4][3] a[4][4]
+----
+
+[NOTE]
+====
+The first index is the row number, and the second is the corresponding column number. Both start from 0 in Python.
+
+====
+
+When processing all elements of a two-dimensional array in a program, _nested_ `for` loops must be used:
+
+[source,python]
+----
+for i in range(5):
+    for j in range(5):
+        ... a[i][j] ...
+----
+
+
+== Row and column indices of a two-dimensional array
+
+Let us consider the indices of the second row (index 1 in Python) as an example:
+
+----
+
+a[1][0] a[1][1] a[1][2] a[1][3] a[1][4].
+----
+
+It is easy to see that the first index -- the row number -- is fixed and equals 1 (for the 2nd row in 0-indexed Python), while the second index sequentially takes values from 0 to 4. Therefore, when the 2nd row of a two-dimensional array needs to be processed, it is sufficient to write:
+
+[source,python]
+----
+for i in range(5):
+    ... a[1][i] ...
+----
+
+The variable `i` can be replaced by any other as needed, for example `m`:
+
+[source,python]
+----
+for m in range(5):
+    ... a[1][m] ...
+----
+
+Now let us consider the indices of the third column (index 2 in Python) as an example:
+
+----
+
+a[0][2]
+a[1][2]
+a[2][2]
+a[3][2]
+a[4][2]
+----
+
+// Page 23
+Obviously, now the second index -- the column number -- is fixed, and the first index -- the row number -- sequentially takes all values from 0 to 4. Therefore, the loop for processing elements of the third column should look like this:
+
+[source,python]
+----
+for i in range(5):
+    ... a[i][2] ...
+----
+
+
+== Indices of diagonals of a two-dimensional array
+
+The elements of the first diagonal of a two-dimensional array have the following indices:
+
+[source,python]
+----
+a[0][0]
+a[1][1]
+a[2][2]
+a[3][3]
+a[4][4]
+----
+
+It is easy to see that the row index equals the column index for all elements of the first diagonal, and therefore the loop for processing its elements should look as follows:
+
+[source,python]
+----
+for i in range(5):
+    ... a[i][i] ...
+----
+
+The elements of the second diagonal of a two-dimensional array have the following indices:
+
+[source,python]
+----
+a[0][4]
+a[1][3]
+a[2][2]
+a[3][1]
+a[4][0]
+----
+
+It is not easy, but one can notice that the sum of the row and column indices for all elements of the second diagonal is constant and equals 4 (for a 5x5 array with 0-based indexing; for an NxN array it would be N-1), and therefore the loop for processing the elements of the second diagonal should look as follows:
+
+[source,python]
+----
+for i in range(5):
+    ... a[i][4 - i] ...
+----
+
+
+== Transferring simplest algorithms to two-dimensional arrays
+
+Considering all of the above, one can agree with the methodology of transferring algorithms from one-dimensional lists to two-dimensional ones, illustrated here with the example of the summation algorithm:
+
+[source,python]
+----
+...
+s = 0  # Summing elements
+for i in range(10):  # of a one-dimensional list
+    s += a[i]
+...
+s = 0  # Summing elements
+for i in range(5):  # of the second row of a two-dimensional array
+    s += a[1][i]
+...
+s = 0  # Summing elements
+for i in range(5):  # of the third column of a two-dimensional array
+    s += a[i][2]
+...
+----
+
+// Page 24
+[source,python]
+----
+s = 0  # Summing elements
+for i in range(5):  # of the first diagonal of a two-dimensional
+    s += a[i][i]  # array
+...
+s = 0  # Summing elements
+for i in range(5):  # of the second diagonal of a two-dimensional
+    s += a[i][4 - i]  # array
+...
+s = 0  # Summing elements
+for i in range(5):  # of a two-dimensional
+    for j in range(5):  # array
+        s += a[i][j]
+...
+----
+
+What does this methodology consist of? In replacing the indices of a one-dimensional list with the indices of, respectively, a row, column, first or second diagonal, or the entire two-dimensional array. In the case of processing the entire two-dimensional array, _nested_ `for` loops must also be used.
+
+
+== Declaration, input, and output of a two-dimensional array
+
+In a program that processes a two-dimensional array, it is necessary to create, input, and output specifically a two-dimensional array (list of lists):
+
+[source,python]
+----
+# Create a 5x5 array filled with zeros
+a = [[0] * 5 for _ in range(5)]
+
+print('Enter 25 numbers')  # Input
+for i in range(5):  # of a two-dimensional
+    for j in range(5):  # array
+        a[i][j] = int(input())
+
+print('source array')  # Output
+for i in range(5):  # of a two-dimensional
+    for j in range(5):  # array
+        print(a[i][j], end=' ')
+    print()
+----
+
+The changes compared to the creation, input, and output of a one-dimensional list are quite intuitive, and therefore no comments are needed here.
+
+
+== Methodological guidelines for solving problems 10, 11, 14, 19-21
+
+*Problem 10.* In a two-dimensional array, change all signs to opposite. For example, suppose the input array is:
+
+----
+
+5  -2  3  14  11
+17  13  1   7   1
+5  -2  3  14  20
+8   0  9  10  -4
+3  -6  3  14  16
+----
+
+// Page 25
+Then the output should become:
+
+----
+
+  -5    2  -3  -14  -11
+ -17  -13  -1   -7   -1
+  -5    2  -3  -14  -20
+  -8    0  -9  -10    4
+  -3    6  -3  -14  -16
+----
+
+Obviously, the calculation part of the program should look as follows:
+
+[source,python]
+----
+for i in range(5):
+    for j in range(5):
+        a[i][j] = -a[i][j]
+----
+
+The text of the program itself is in Listing 1.4.
+
+.Listing 1.4. Program for changing the signs of array elements to their opposites
+[source,python]
+----
+# N10
+
+# Create a 5x5 array filled with zeros
+a = [[0] * 5 for _ in range(5)]
+
+print('Enter 25 numbers')  # Input
+for i in range(5):  # of a two-dimensional
+    for j in range(5):  # array
+        a[i][j] = int(input())
+
+print('source array')  # Output
+for i in range(5):  # of the source
+    for j in range(5):  # two-dimensional
+        print(a[i][j], end=' ')  # array
+    print()
+
+for i in range(5):
+    for j in range(5):
+        a[i][j] = -a[i][j]
+
+print('resulting array')  # Output
+for i in range(5):  # of the obtained
+    for j in range(5):  # two-dimensional
+        print(a[i][j], end=' ')  # array
+    print()
+----
+
+*Problem 11.* Find the maximum element in a two-dimensional array.
+
+The calculation part of the problem can look like this:
+
+[source,python]
+----
+mx = a[0][0]
+for i in range(5):
+    for j in range(5):
+        if a[i][j] > mx:
+            mx = a[i][j]
+----
+
+*Problem 14.* Determine whether a two-dimensional array (5x5) is a "magic square."
+
+The simplest solution is to:
+
+
+* first introduce the variables:
+s1, s2, ..., s5 -- sums of rows from the first to the fifth;
+
+// Page 26
+t1, t2, ..., t5 -- sums of columns from the first to the fifth;
+
+d1, d2 -- sums of elements of the first and second diagonals;
+
+
+* and then write an `if` statement of the following type:
+
+[source,python]
+----
+if (s1 == s2 == s3 == s4 == s5 ==
+    t1 == t2 == t3 == t4 == t5 == d1):
+    print('the square is magic')
+else:
+    print('the square is NOT magic')
+----
+
+Some of you may rightly note: if the array consists of 100 rows and 100 columns, this solution is very inconvenient. Agreed; in that case, one must devise an algorithm that solves this problem in the most convenient way. Inventing new algorithms is the most difficult task in programming. The next chapter is dedicated to it. I hope that once you manage to understand the material in the next section, you will come up with a better algorithm for solving problem 14 on your own.
+
+*Problem 19.* Find the number of zeros in a given column.
+
+The calculation part of the program can be as follows:
+
+[source,python]
+----
+j = int(input())  # read column index (0-based)
+k = 0
+for i in range(5):
+    if a[i][j] == 0:
+        k += 1
+print(k)
+----
+
+*Problems 20 and 21.* Despite their complex and at first glance different formulations, both require finding the minimum element among the row maximums. This can be done, for example, as follows:
+
+[source,python]
+----
+row_max = [0] * 5
+for i in range(5):
+    row_max[i] = a[i][0]
+    for j in range(1, 5):
+        if a[i][j] > row_max[i]:
+            row_max[i] = a[i][j]
+minmax = row_max[0]
+for i in range(1, 5):
+    if row_max[i] < minmax:
+        minmax = row_max[i]
+print(minmax)
+----
+
+
+== Non-standard algorithms and programs
+
+In general, the development of algorithms and programs is not only a science but also, to a significant extent, an art. And therefore many believe that teaching algorithm and program development is like teaching a person to paint pictures or compose poetry and melodies. Nevertheless, there are some general facts that should be communicated to anyone wishing to learn how to develop algorithms. Below, a plan is presented for your attention; following it when developing algorithms may help you master this science (or art) more quickly. It is not at all necessary to memorize it. It is sufficient to try to follow it when developing algorithms for every new program.
+
+// Page 27
+
+== Plan for developing algorithms and programs
+
+The plan is as follows.
+
+
+. Reformulate the problem statement.
+. Determine what is the input and what is the output.
+. Create test cases (not forgetting edge cases).
+. Solve the test cases by hand.
+. If the problem can be solved as a composition of known problems, go to step 9.
+. Develop the algorithm for the program.
+. Perform a manual trace.
+. If there are errors, go to step 6.
+. Write the program text.
+
+
+=== NOTE
+
+[NOTE]
+====
+Explanations for this plan will be provided alongside its application to solving specific problems.
+
+====
+
+
+== The long road to the algorithm
+
+Let us begin with problem 9: given an integer list `a` with 10 elements, count how many times the maximum value appears in it.
+
+To do this, we must sequentially go through all the steps of the plan.
+
+1. Reformulate the problem statement.
+
+2. Determine what is the input and what is the output.
+
+This means that you should try to reformulate the statement so that it contains a minimum number of words while the problem remains the same, and it is unambiguously defined what needs to be input (a number, a one-dimensional list of numbers, a two-dimensional list of numbers, a string of characters) and what needs to be output.
+
+For example, for problem 9 -- new formulation: in a list, count the number of maximums; the input is a list, the output is a number.
++
+3. Create test cases (not forgetting edge cases).
++
+4. Solve the test cases by hand.
+
+Before writing a program, you must clearly understand what exactly it should do. In addition, you must strictly define what criteria you will use to consider the program to be working correctly. It is precisely the creation of an adequate set of tests for the problem that allows you to solve this task.
+
+_What is a test?_ It is the data that you must input into your program and the answer that you consider correct, which your program should produce when this data is entered.
+
+_How many tests should there be?_ On the one hand, you must devise enough tests so that you can assert that your program works
+
+// Page 28
+correctly if it "passes" all your tests (that is, for all input data it produces the specified output). On the other hand, there should be as few tests as possible, because if you change even one character in your program, you will need to re-verify its correctness on _all_ your tests.
+
+Furthermore, when creating tests, one must take into account that many programs must handle various edge cases in a special way. For example, for problem 9 being solved, the following tests are sufficient.
+
+
+----
+5 -2 4 0 6 11 7 0 2 4,
+----
+
+* If the list is:
+
+
+then the maximum count is 1: 11.
+----
+5 11 4 0 6 11 7 0 2 11,
+----
+
+* If the list is:
+
+
+then there are 3 maximums. They are all the same and equal to 11.
+----
+5 5 5 5 5 5 5 5 5 5,
+----
+
+* If the list is:
+
+
+then all its elements are maximums.
+
+.. finding the maximum element in a list;
+.. counting the number of elements (in a list) equal to a given value (the found maximum).
+And then you can go directly to step 9 of the plan, that is, directly to writing the calculation part of the program (Listing 1.5).
+
+
+.Listing 1.5. Calculation part of the program for solving problem 9
+[source,python]
+----
+mx = a[0]  # Finding
+for i in range(1, 10):  # the maximum
+                                                # element
+    if a[i] > mx:
+        mx = a[i]
+n = 0  # Counting elements
+for i in range(10):  # equal to a given value (mx)
+    if a[i] == mx:
+        n += 1
+# And then the program itself:
+# MaxNumb
+
+a = [0] * 10  # list a with 10 elements
+print('Enter 10 numbers')  # Input
+----
+
+// Page 29
+[source,python]
+----
+for i in range(10):  # of one-dimensional list
+    a[i] = int(input())
+mx = a[0]  # Finding
+for i in range(1, 10):  # the maximum
+                                                   # element
+    if a[i] > mx:
+        mx = a[i]
+n = 0  # Counting elements
+for i in range(10):  # equal to a given value (mx)
+    if a[i] == mx:
+        n += 1
+print('source array')  # Output
+for i in range(10):  # of one-dimensional list
+    print(a[i], end=' ')
+print()
+print('Count of maximum elements', end=' ')  # Output
+print('of one-dimensional list =', n)  # of result
+----
+
+However, such an opportunity does not always present itself. As an example, let us consider problem 15: given an integer list `a` with 10 elements, count the greatest number of consecutive equal elements in it.
+
+For practice, let us carry out the initial stages of algorithm development for this problem as well.
+
+_New formulation:_ in a list, count the greatest number of consecutive equal elements; the input is a list, the output is a number.
+
+As for the complete set of tests, in this case it is more complex:
+
+
+. `a = [5, -2, 4, 0, 6, 11, 7, 0, 2, 4]` -- no consecutive equal elements;
+. `a = [5, 5, 5, 5, 5, 5, 5, 5, 5, 5]` -- all are consecutive equal elements;
+. `a = [5, 11, 4, 4, 4, 11, 7, 0, 2, 11]` -- one chain of consecutive equal elements;
+. `a = [5, 11, 4, 4, 4, 2, 2, 2, 2, 2]` -- first the `min`, then the `max`;
+. `a = [5, 4, 4, 4, 4, 4, 2, 2, 2]` -- first the `max`, then the `min`.
+
+I draw your attention to the necessity of including the fourth and fifth tests in the test set. For example, if test 4 is absent from the test set, then having written a program that counts the _first_ number of consecutive equal elements, one might, after getting correct answers on all remaining tests, erroneously believe that the program fully solves the problem.
+
+Similarly, if the test set does not contain test 5, then having written a program that counts the _last_ number of consecutive equal elements, one could again get correct answers on all remaining tests and, once again, erroneously believe that the program written fully solves the problem.
+
+Suppose you have created a complete set of tests. How do you now construct an algorithm that solves the problem at hand?
+
+First of all, note that since you have created the tests and manually calculated correct answers for all input data, you already know the correct algorithm for solving the problem. Your main challenge now is to write this algorithm in a way that the computer can correctly understand and execute it.
+
+// Page 30
+To help formalize an algorithm you already know, we suggest using the following mnemonic technique. Imagine that:
+
+
+* a million signs with numbers written on them are laid out side by side along a long highway;
+* you need to solve a problem for this million numbers;
+* you have to walk on foot (so you would like to walk as little as possible from number to number, ideally straight from the first to the last, without going back);
+* you can write some numbers on the palm of your hand, so you don't have to memorize them;
+* you can only compare two numbers (both on your palm, both on the road, one on your palm and the other on the road);
+* you need to come up with a plan of action (an algorithm) so that the answer appears on your palm when you reach the end of the highway.
+
+Another mnemonic technique for developing algorithms can be used when you are working together with a friend. In that case, you ask your friend to create a test with a large amount of input data, and then they tell you those input values one at a time. You are not allowed to write down the numbers they call out, but you can write down the results of computations on them. In this case you have two tasks:
+
+
+. get the correct answer (checking it later against your friend's answer);
+. come up with a plan of action (an algorithm) that always produces the correct answer (regardless of the input data).
+
+Let us now try to write the algorithm for the consecutive elements problem for human execution. In this case, you only need to write 2 numbers on your palm:
+
+
+* 1st -- how many identical consecutive elements there are right now;
+* 2nd -- the maximum number of identical consecutive elements encountered so far.
+
+Then the algorithm can be written as follows:
+
+[source,pseudocode]
+----
+Write the first number = 1 and the second number = 1 on your palm
+Starting from the second number on the highway and up to the last, do the following
+  if the current number on the highway equals the previous one
+    then increase the first number on your palm by 1
+    else if the first number on your palm is greater than the second number on your palm
+      then write the first number in place of the second number on your palm
+      (to preserve the maximum of consecutive elements)
+      write 1 in place of the first number on your palm
+      (to start counting from the beginning for the current consecutive elements)
+----
+
+The corresponding computerized algorithm may look like this:
+
+[source,python]
+----
+  # Input a[0..9]  (laid out numbers on the highway)
+mx = 1  # wrote 2 numbers on our palm
+cur = 1
+for i in range(1, 10):  # repeat for numbers from the second
+                                                 # to the tenth
+    if a[i] == a[i - 1]:  # if they are consecutive
+        cur += 1  # then increment current
+    else:
+        if cur > mx:  # else if needed update mx
+            mx = cur
+        cur = 1  # and start counting from the beginning
+if cur > mx:  # final check after loop ends
+    mx = cur
+print(mx)  # Output the result
+----
+
+// Page 31
+We have finally obtained an algorithm, and we believe it is correct. What do we do now? "Write a program based on it," you might answer. You could, but I still suggest first doing a _manual trace_, so that, even before sitting down at the computer, you can find and fix as many errors as possible in the written algorithm.
+
+What is a _manual trace?_ It is the process of a human executing a program as if they were a computer. The main difficulty of a manual trace for the author of the developed algorithm is to forget the essence of the problem being solved, the idea of the algorithm, and "mechanically and strictly" execute what is written in the algorithm (because that is exactly what the computer will do).
+
+Upon finding an error, you need to correct the algorithm and try performing the manual trace again, first on the same test, and then on others. And so on until the author is satisfied that the algorithm works correctly on all tests.
+
+We have finally obtained an algorithm, and we believe it is correct. What do we do now? "Write a program based on it," you might answer. You could, but I still suggest first doing a _manual trace_, so that, even before sitting down at the computer, you can find and fix as many errors as possible in the written algorithm.
+
+What is a _manual trace?_ It is the process of a human executing a program as if they were a computer. The main difficulty of a manual trace for the author of the developed algorithm is to forget the essence of the problem being solved, the idea of the algorithm, and "mechanically and strictly" execute what is written in the algorithm (because that is exactly what the computer will do).
+
+Upon finding an error, you need to correct the algorithm and try performing the manual trace again, first on the same test, and then on others. And so on until the author is satisfied that the algorithm works correctly on all tests.
+
+How do you perform a manual trace?
+
+First of all, you need to carefully write out the algorithm and the test example on which the manual trace will be performed. Then execute the algorithm line by line to the end.
+
+As a test example (let us call it example 1), we choose the list A with elements:
+
+5 11 4 4 4 2 2 2 2 2.
+
+Let us perform a manual trace for the algorithm that finds the largest number of identical consecutive numbers. For convenience, we will build a manual trace table (Table 1.1). Each step in it will correspond to one pass through the loop in our algorithm.
+
+*Table 1.1.* Result of the manual trace on test example 1
+
+
+[cols="1|1|1|1|1|1|1|1|1|1|1|1", options="header"]
+|===
+| Variable | Value |  |  |  |  |  |  |  |  |  | 
+
+|  | Step +
+0 | Step +
+1 | Step +
+2 | Step +
+3 | Step +
+4 | Step +
+5 | Step +
+6 | Step +
+7 | Step +
+8 | Step +
+9 | Step +
+10
+| A | 5 11 4 4 4 2 2 2 2 2 |  |  |  |  |  |  |  |  |  | 
+| max | 1 | 1 |  |  |  | 3 |  |  |  |  | 5
+| cur | 1 |  | 1 | 2 | 3 | 1 | 2 | 3 | 4 | 5 | 
+| i |  | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
+|===
+
+So, the manual trace:
+
+----
+Input A (10 elements, 0-indexed)
+max = 1, cur = 1
+for i in range(1, 10):
+    if a[i] == a[i - 1]:
+        cur = cur + 1
+    else:
+        if cur > max:
+            max = cur
+        cur = 1
+print(max)
+Answer: 3 (max) — ERROR!!!
+----
+
+// Page 32
+Let us comment on this example line by line as it executes:
+
+[source,python]
+----
+Input A (10 elements, 0-indexed)
+----
+
+After executing this line, the entered data will appear in the computer's memory: the list `a = [5, 11, 4, 4, 4, 2, 2, 2, 2, 2]`, that is, `a[0] = 5`, `a[1] = 11`, `a[2] = 4`, ..., `a[9] = 2`. We remember that the correct answer for this case is 5 (5 consecutive numbers 2; there were also 3 consecutive numbers 4, but 5 is greater than 3, so the correct answer is 5).
+
+[source,python]
+----
+max_val = 1, cur = 1
+----
+
+The variables `max_val` and `cur` received the value 1; in the manual trace, this is recorded as follows:
+
+
+[cols="1|1|1", options="header"]
+|===
+| A | max_val | cur
+
+| 5 11 4 4 4 2 2 2 2 2 | 1 | 1
+|===
+
+In principle, "documenting" the manual trace could also be done horizontally (Table 1.2).
+
+
+=== Table 1.2. Initial step of the manual trace
+
+
+[cols="1|1", options="header"]
+|===
+| Variable | Value
+
+| A | 5 11 4 4 4 2 2 2 2 2
+| max_val | 1
+| cur | 1
+|===
+
+Table 1.2 shows the initial step of the manual trace, during which values are assigned to variables. The values of `max_val` and `cur` are shifted in the table relative to each other. With this shift, we depict the passage of time, i.e., that the variable `cur` received its value after the variable `max_val`.
+
+[source,python]
+----
+for i in range(1, 10):
+----
+
+The variable `i` receives the value 1, this value is compared with the upper bound 10, and since `1 < 10`, control is passed inside the loop:
+
+[source,python]
+----
+if a[i] == a[i - 1]:
+----
+
+Since the value of `i is 1`, `a[1]` is compared with `a[0]`, that is, 11 is compared with 5. Equal? No! Therefore, what comes after `else` will be executed:
+
+[source,python]
+----
+else:
+    if cur > max_val:
+        max_val = cur
+----
+
+Cur is currently equal to 1, `max_val` is also equal to 1. `1 > 1`? No. So the statement inside the `if` is not executed, and for now everything stays as it was.
+
+[source,python]
+----
+cur = 1
+----
+
+In our table, `cur` is already equal to 1, but right now we are a PC and, like it, must replace the old value with the new one (even if it is the same).
+
+The result of executing the first step of the manual trace is in Table 1.3.
+
+[NOTE]
+====
+Step zero in the table denotes the step of the manual trace during which values were assigned to variables (see Table 1.1).
+
+====
+
+// Page 33
+
+== Table 1.3. Results of the first step of the manual trace
+
+
+[cols="1|1|1|1|1|1|1|1|1|1|1|1", options="header"]
+|===
+| Variable | Value |  |  |  |  |  |  |  |  |  | 
+
+|  | Step +
+0 | Step +
+1 | Step +
+2 | Step +
+3 | Step +
+4 | Step +
+5 | Step +
+6 | Step +
+7 | Step +
+8 | Step +
+9 | Step +
+10
+| A | 5 11 4 4 4 2 2 2 2 2 |  |  |  |  |  |  |  |  |  | 
+| max_val | 1 | 1 |  |  |  |  |  |  |  |  | 
+| cur | 1 | 1 |  |  |  |  |  |  |  |  | 
+| i |  | 1, |  |  |  |  |  |  |  |  | 
+|===
+
+And since there are no more statements in the loop body, control is once again passed to the line at the beginning of the loop:
+
+[source,python]
+----
+for i in range(1, 10):
+----
+
+i moves to the next value (was 1, becomes 2). stem:[2 < 10], and so control is once again passed inside the loop:
+
+[source,python]
+----
+if a[i] == a[i - 1]:
+----
+
+The value of i is now 2, therefore, `a[2]` is compared with `a[1]`, that is, 4 is compared with 11. Equal? No! Therefore, what comes after else will be executed:
+
+[source,python]
+----
+else:
+    if cur > max_val:
+        max_val = cur
+----
+
+Cur is currently equal to 1, max_val is also equal to 1, stem:[1 > 1?] No. So the statement inside the if is not executed, and for now everything stays as it was.
+
+[source,python]
+----
+cur = 1
+----
+
+In our table cur is already equal to 1, but right now we are a PC and, like it, must replace the old value with the new one (even if it is the same).
+
+
+== Table 1.4. Results of the second step of the manual trace
+
+
+[cols="1|1|1|1|1|1|1|1|1|1|1|1", options="header"]
+|===
+| Variable | Value |  |  |  |  |  |  |  |  |  | 
+
+|  | Step +
+0 | Step +
+1 | Step +
+2 | Step +
+3 | Step +
+4 | Step +
+5 | Step +
+6 | Step +
+7 | Step +
+8 | Step +
+9 | Step +
+10
+| A | 5 11 4 4 4 2 2 2 2 2 |  |  |  |  |  |  |  |  |  | 
+| max_val | 1 |  |  |  |  |  |  |  |  |  | 
+| cur | 1 | 1 | 1 |  |  |  |  |  |  |  | 
+| i |  | 1 | 2 |  |  |  |  |  |  |  | 
+|===
+
+And since there are no more statements in the loop body, control is once again passed to the line at the beginning of the loop:
+
+[source,python]
+----
+for i in range(1, 10):
+----
+
+i moves to the next value (was 2, becomes 3). stem:[3 < 10], and so control is once again passed inside the loop:
+
+[source,python]
+----
+if a[i] == a[i - 1]:
+----
+
+The value of i is 3, therefore, `a[3]` is compared with `a[2]`, that is, 4 is compared with 4. Equal? Yes! Therefore, what comes after the `if` condition will be executed:
+
+[source,python]
+----
+cur = cur + 1
+----
+
+Cur is currently equal to 1, and will become 2.
+
+// Page 34
+
+=== Table 1.5. Results of the third step of the manual trace
+
+
+[cols="1|1|1|1|1|1|1|1|1|1|1|1", options="header"]
+|===
+| Variable | Value |  |  |  |  |  |  |  |  |  | 
+
+|  | Step +
+0 | Step +
+1 | Step +
+2 | Step +
+3 | Step +
+4 | Step +
+5 | Step +
+6 | Step +
+7 | Step +
+8 | Step +
+9 | Step +
+10
+| A | 5 11 4 4 4 2 2 2 2 2 |  |  |  |  |  |  |  |  |  | 
+| max_val | 1 | 1 |  |  |  |  |  |  |  |  | 
+| cur | 1 | 1 | 1 | 2 |  |  |  |  |  |  | 
+| i |  | 1 | 2 | 3 |  |  |  |  |  |  | 
+|===
+
+At the same time, the statements in the `else` block are not executed (since the `if` condition was true). And since there are no more statements in the loop body, control is once again passed to the line at the beginning of the loop:
+
+[source,python]
+----
+for i in range(1, 10):
+----
+
+i moves to the next value (was 3, becomes 4). stem:[4 < 10], and so control is once again passed inside the loop:
+
+[source,python]
+----
+if a[i] == a[i - 1]:
+----
+
+The value of `i` is 4, therefore, `a[4]` is compared with `a[3]`, that is, 4 is compared with 4. Equal? Yes! Therefore, what comes after the `if` condition will be executed:
+
+[source,python]
+----
+cur = cur + 1
+----
+
+Cur is currently equal to 2, and will become 3.
+
+
+=== Table 1.6. Results of the fourth step of the manual trace
+
+
+[cols="1|1|1|1|1|1|1|1|1|1|1|1", options="header"]
+|===
+| Variable | Value |  |  |  |  |  |  |  |  |  | 
+
+|  | Step +
+0 | Step +
+1 | Step +
+2 | Step +
+3 | Step +
+4 | Step +
+5 | Step +
+6 | Step +
+7 | Step +
+8 | Step +
+9 | Step +
+10
+| A | 5 11 4 4 4 2 2 2 2 2 |  |  |  |  |  |  |  |  |  | 
+| max_val | 1 | 1 |  |  |  |  |  |  |  |  | 
+| cur | 1 | 1 | 1 | 2 | 3 |  |  |  |  |  | 
+| i |  | 1 | 2 | 3 | 4 |  |  |  |  |  | 
+|===
+
+At the same time, the statements in the `else` block are not executed (since the `if` condition was true). And since there are no more statements in the loop body, control is once again passed to the line at the beginning of the loop:
+
+[source,python]
+----
+for i in range(1, 10):
+----
+
+i moves to the next value (was 4, becomes 5). stem:[5 < 10], and so control is once again passed inside the loop:
+
+[source,python]
+----
+if a[i] == a[i - 1]:
+----
+
+The value of `i` is 5, therefore, `a[5]` is compared with `a[4]`, that is, 2 is compared with 4. Equal? No! Therefore, what comes after `else` will be executed:
+
+[source,python]
+----
+else:
+    if cur > max_val:
+        max_val = cur
+----
+
+// Page 35
+
+
+
+Cur is currently equal to 3, max_val is equal to 1. stem:[3 > 1?] Yes. So the statement inside the `if` is executed.
+
+[source,python]
+----
+max_val = cur
+----
+
+And `max_val` receives the value 3.
+
+Let us recall the placement of the statements:
+
+[source,python]
+----
+else:
+    if cur > max_val:
+        max_val = cur
+    cur = 1
+----
+
+The statement `cur = 1` is inside the `else` block at the same indentation level as the `if` statement. This means that in the `else` case it must necessarily be executed:
+
+[source,python]
+----
+cur = 1
+----
+
+*Table 1.7.* Results of the fifth step of the manual trace
+
+
+[cols="1|1|1|1|1|1|1|1|1|1|1|1", options="header"]
+|===
+| Variable | Value |  |  |  |  |  |  |  |  |  | 
+
+|  | Step +
+0 | Step +
+1 | Step +
+2 | Step +
+3 | Step +
+4 | Step +
+5 | Step +
+6 | Step +
+7 | Step +
+8 | Step +
+9 | Step +
+10
+| A | 5 11 4 4 4 2 2 2 2 2 |  |  |  |  |  |  |  |  |  | 
+| max_val | 1 | 1 |  |  |  | 3 |  |  |  |  | 
+| cur | 1 | 1 | 1 | 2 | 3 | 1 |  |  |  |  | 
+| i |  | 1 | 2 | 3 | 4 | 5 |  |  |  |  | 
+|===
+
+And since there are no more statements in the loop body, control is once again passed to the line at the beginning of the loop:
+
+[source,python]
+----
+for i in range(1, 10):
+----
+
+`i` moves to the next value (was 5, becomes 6). 6 < 10, and so control is once again passed inside the loop:
+
+[source,python]
+----
+if a[i] == a[i - 1]:
+----
+
+The value of i is 6. Therefore, `a[6]` is compared with `a[5]`, that is, 2 is compared with 2. Equal? Yes! Therefore, what comes after the `if` condition will be executed:
+
+[source,python]
+----
+cur = cur + 1
+----
+
+`Cur` is currently equal to 1, will become 2.
+
+*Table 1.8.* Results of the sixth step of the manual trace
+
+
+[cols="1|1|1|1|1|1|1|1|1|1|1|1", options="header"]
+|===
+| Variable | Value |  |  |  |  |  |  |  |  |  | 
+
+|  | Step +
+0 | Step +
+1 | Step +
+2 | Step +
+3 | Step +
+4 | Step +
+5 | Step +
+6 | Step +
+7 | Step +
+8 | Step +
+9 | Step +
+10
+| A | 5 11 4 4 4 2 2 2 2 2 |  |  |  |  |  |  |  |  |  | 
+| max_val | 1 | 1 |  |  |  | 3 |  |  |  |  | 
+| cur | 1 | 1 | 1 | 2 | 3 | 1 | 2 |  |  |  | 
+| i |  | 1 | 2 | 3 | 4 | 5 | 6 |  |  |  | 
+|===
+
+At the same time, the statements in the `else` block are not executed (since the `if` condition was true). And since there are no more statements in the loop body, control is once again passed to the line at the beginning of the loop:
+
+[source,python]
+----
+for i in range(1, 10):
+----
+
+`i` moves to the next value (was 6, becomes 7). 7 < 10, and so control is once again passed inside the loop:
+
+[source,python]
+----
+if a[i] == a[i - 1]:
+----
+
+// Page 36
+The value of i is 7. Therefore, a[7] is compared with a[6], that is, 2 is compared with 2. Equal? Yes! Therefore, what comes after the if condition will be executed:
+
+[source,python]
+----
+cur = cur + 1
+----
+
+Cur is currently equal to 2, will become 3.
+
+
+=== Table 1.9. Results of the seventh step of the manual trace
+
+
+[cols="1|1|1|1|1|1|1|1|1|1|1|1", options="header"]
+|===
+| Variable | Value |  |  |  |  |  |  |  |  |  | 
+
+|  | Step +
+0 | Step +
+1 | Step +
+2 | Step +
+3 | Step +
+4 | Step +
+5 | Step +
+6 | Step +
+7 | Step +
+8 | Step +
+9 | Step +
+10
+| A | 5 11 4 4 4 2 2 2 2 2 |  |  |  |  |  |  |  |  |  | 
+| max_val | 1 | 1 |  |  |  | 3 |  |  |  |  | 
+| cur | 1 | 1 | 1 | 2 | 3 | 1 | 2 | 3 |  |  | 
+| i |  | 1 | 2 | 3 | 4 | 5 | 6 | 7 |  |  | 
+|===
+
+At the same time, the statements in the else block are not executed (since the if condition was true). And since there are no more statements in the loop body, control is once again passed to the line at the beginning of the loop:
+
+[source,python]
+----
+for i in range(1, 10):
+----
+
+i moves to the next value (was 7, becomes 8). 8 < 10, and so control is once again passed inside the loop:
+
+[source,python]
+----
+if a[i] == a[i - 1]:
+----
+
+The value of i is 8. Therefore, a[8] is compared with a[7], that is, 2 is compared with 2. Equal? Yes! Therefore, what comes after the if condition will be executed:
+
+[source,python]
+----
+cur = cur + 1
+----
+
+Cur is currently equal to 3, will become 4.
+
+
+=== Table 1.10. Results of the eighth step of the manual trace
+
+
+[cols="1|1|1|1|1|1|1|1|1|1|1|1", options="header"]
+|===
+| Variable | Value |  |  |  |  |  |  |  |  |  | 
+
+|  | Step +
+0 | Step +
+1 | Step +
+2 | Step +
+3 | Step +
+4 | Step +
+5 | Step +
+6 | Step +
+7 | Step +
+8 | Step +
+9 | Step +
+10
+| A | 5 11 4 4 4 2 2 2 2 2 |  |  |  |  |  |  |  |  |  | 
+| max_val | 1 | 1 |  |  |  | 3 |  |  |  |  | 
+| cur | 1 | 1 | 1 | 2 | 3 | 1 | 2 | 3 | 4 |  | 
+| i |  | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |  | 
+|===
+
+At the same time, the statements in the else block are not executed (since the if condition was true). And since there are no more statements in the loop body, control is once again passed to the line at the beginning of the loop:
+
+[source,python]
+----
+for i in range(1, 10):
+----
+
+i moves to the next value (was 8, becomes 9). 9 < 10, and so control is once again passed inside the loop:
+
+[source,python]
+----
+if a[i] == a[i - 1]:
+----
+
+// Page 37
+The value of `i = 9`. Therefore, `a[9]` is compared with `a[8]`, that is, 2 is compared with 2. Equal? Yes! Therefore, what comes after the `if` condition will be executed:
+
+[source,python]
+----
+cur = cur + 1
+----
+
+Cur is currently equal to 4, will become 5.
+
+
+=== Table 1.11. Results of the ninth step of the manual trace
+
+
+[cols="1|1|1|1|1|1|1|1|1|1|1|1", options="header"]
+|===
+| Variable | Value |  |  |  |  |  |  |  |  |  | 
+
+|  | Step +
+0 | Step +
+1 | Step +
+2 | Step +
+3 | Step +
+4 | Step +
+5 | Step +
+6 | Step +
+7 | Step +
+8 | Step +
+9 | Step +
+10
+| A | 5 11 4 4 4 2 2 2 2 2 |  |  |  |  |  |  |  |  |  | 
+| max_val | 1 | 1 |  |  |  | 3 |  |  |  |  | 
+| cur | 1 | 1 | 1 | 2 | 3 | 1 | 2 | 3 | 4 | 5 | 
+| i |  | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 
+|===
+
+At the same time, the statements in the `else` block are not executed (since the `if` condition was true). And since there are no more statements in the loop body, control is once again passed to the line at the beginning of the loop:
+
+[source,python]
+----
+for i in range(1, 10):
+----
+
+i moves to the next value (was 9, becomes 10). `10 is not < 10`, and so the loop is finished and control is passed to the statement following the loop:
+
+[source,python]
+----
+print(max_val)
+----
+
+What is in our variable `max_val`? 3! The number 3 will be output as the answer (Table 1.12). This is an error, since the correct answer is 5 for this test.
+
+
+=== Table 1.12. Final result of the manual trace
+
+
+[cols="1|1|1|1|1|1|1|1|1|1|1|1", options="header"]
+|===
+| Variable | Value |  |  |  |  |  |  |  |  |  | 
+
+|  | Step +
+0 | Step +
+1 | Step +
+2 | Step +
+3 | Step +
+4 | Step +
+5 | Step +
+6 | Step +
+7 | Step +
+8 | Step +
+9 | Step +
+10
+| A | 5 11 4 4 4 2 2 2 2 2 |  |  |  |  |  |  |  |  |  | 
+| max_val | 1 | 1 |  |  |  | 3 |  |  |  |  | 
+| cur | 1 | 1 | 1 | 2 | 3 | 1 | 2 | 3 | 4 | 5 | 
+| i |  | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
+|===
+
+The error is that the algorithm does not handle the case when the largest number of consecutive elements results from the list ending, i.e., when the corresponding consecutive elements are at the end of the list. Fixing the algorithm is easy: it is sufficient to add an additional comparison of the variables `max_val` and `cur` after the loop ends.
+
+[source,python]
+----
+Input A (10 elements, 0-indexed)
+max_val = 1, cur = 1
+for i in range(1, 10):
+    if a[i] == a[i - 1]:
+        cur = cur + 1
+    else:
+        if cur > max_val:
+            max_val = cur
+----
+
+// Page 38
+[source,python]
+----
+        cur = 1
+if cur > max_val:
+    max_val = cur
+print(max_val)
+----
+
+Now that we are convinced the algorithm works correctly, it is easy to write the text of the corresponding program based on it. How this is done is described in the following subsection.
+
+But first, a few remarks about the manual trace. Many probably found that the manual trace is a very labor-intensive process. And some will try to get by without it. This is a dangerous path and may lead to a significantly greater waste of time. Meanwhile, regular use of the manual trace leads to your brain performing this work subconsciously even at the moment when you are just composing the algorithm. This, accordingly, sharply reduces the number of errors you make when developing ever newer algorithms. Furthermore, performing a manual trace makes it easy to find errors during the debugging stage.
+
+
+== Translating an algorithm into a Python program
+
+Let us consider the algorithm and its representation in the Python programming language:
+
+[source,python]
+----
+# Algorithm  # Python
+# max = 1, cur = 1                    max_val = 1; cur = 1
+# for i from 1 to 9 (0-indexed)      for i in range(1, 10):
+#   if a[i] == a[i-1]                     if a[i] == a[i - 1]:
+#     then cur = cur + 1                      cur += 1
+#     else if cur>max then max=cur        else:
+#                                             if cur > max_val:
+#       cur = 1                                   max_val = cur
+#                                             cur = 1
+# if cur>max then max = cur           if cur > max_val:
+#                                         max_val = cur
+# Output (max)                        print(max_val)
+----
+
+Obviously, when translating an algorithm into a Python program, one should follow these simple rules.
+
+
+. Use `=` for assignment (no special assignment operator needed).
+----
+for   if     then   else    output
+for   if     :      else:   print
+----
+
+. Replace keywords with their Python counterparts:
+. Use indentation to define code blocks -- no semicolons or special end markers needed.
+. The most "convenient" rule: Python uses indentation to group statements into blocks. Where the algorithm implies grouping by nesting, simply indent the lines by the same amount. No "operator brackets" like `begin...end` are needed.
+. Python does not require variable or array declarations. Simply assign values as needed, and use lists for arrays. As a result, we obtain the program text.
+
+.Listing 1.6. Solution of the consecutive elements search problem
+[source,python]
+----
+# MaxSucc
+n = 10
+print('Enter 10 numbers')  # Input
+a = [int(input()) for _ in range(n)]  # of a list of n elements
+max_val = 1
+cur = 1
+----
+
+// Page 39
+[source,python]
+----
+for i in range(1, n):  # Loop from index 1 to n-1
+    if a[i] == a[i - 1]:  # If they are consecutive
+        cur += 1  # then count them
+    else:  # else
+        if cur > max_val:  # remember the maximum
+            max_val = cur
+        cur = 1  # start counting from the beginning
+if cur > max_val:
+    max_val = cur
+for i in range(n):  # Output the list
+    print(a[i], end=' ')
+print()
+print('Answer =', max_val)  # Output the result
+----
+
+
+== Basic techniques for working in the Python environment
+
+This subsection provides, in reference format, the basic techniques for working in the Python environment for editing and debugging programs.
+
+
+. Launch -- `python3` (or `python`) from the command line, or use an IDE such as IDLE, VS Code, or PyCharm.
+
+** Open your `.py` file in any text editor or IDE;
+** Use standard editor shortcuts for cut, copy, paste, undo;
+** Save the file with `Ctrl+S`.
+
+** Run the program: `python3 my_program.py`;
+** In IDLE, press `F5` to run;
+** Use the built-in debugger: `python3 -m pdb my_program.py`;
+** Set breakpoints in your IDE for step-by-step execution.
+. Exit -- `exit()` or `Ctrl+D` in the interactive interpreter.
+
+** Use `print()` statements for quick inspection;
+** Use the debugger's `p variable_name` command to inspect values;
+** In an IDE, hover over variables or use the watch window.
+
+
+== Methodological guidelines for solving problems 6, 8, 16-18, 22-24
+
+Solving problems 6, 8, 16-18 will not require you to learn new theoretical material. You only need to consistently apply the plan for developing algorithms and programs proposed in this chapter,
+
+// Page 40
+starting from reformulating the problem statement and ending with the manual trace, and you should succeed!
+
+The author's many years of experience show that it is precisely at this stage that both the student and the teacher can determine whether the student is able and willing to pursue learning programming.
+
+To solve problems 22-24, you need to know a few new facts about the Python programming language, which are presented below.
+
+1. An operation on integers -- `//` -- integer (floor) division:
+
+----
+k = m // n
+----
++
+As a result of this operation, the variable k receives a value equal to the quotient of dividing the integer m by the integer n (rounded down). For example, if m = 11 and n = 4, then the quotient of dividing 11 by 4 is 2, and therefore the variable k will receive the value 2.
++
+2. An operation on integers -- `%` -- obtaining the remainder from division:
+
+----
+k = m % n
+----
+
+As a result of this operation, the variable k receives a value equal to the remainder of dividing the integer m by the integer n. For example, if m = 11 and n = 4, then the remainder of dividing 11 by 4 is 3, and therefore the variable k will receive the value 3.
+
+
+== Problems for independent solving
+
+The problem statements are taken from the first computer science textbook of 1985, compiled by Academician Yu. A. Ershov, who believed that schoolchildren should learn to solve such problems after two years of studying computer science.
+
+The following notations are used below:
+
+
+* _int list_ `a[0:10]` -- a list of 10 integers;
+* _float list_ `a[0:10]` -- a list of 10 real (floating-point) numbers;
+* _int 2D list_ `a[0:5][0:5]` -- a two-dimensional list of 25 numbers (5 rows by 5 columns).
+
+Problem statements:
+
+
+. Find the number of non-zero elements in the list _int list_ `a` of 10 elements.
+. Find the number of elements in the list _float list_ `a` of 10 elements whose absolute value is greater than 7.
+. Compose an algorithm that gives the answer "yes" or "no" depending on whether the number 7 occurs in the list _int list_ `a` of 10 elements.
+. Given an integer list `a` of 10 elements. Find the difference between the largest and smallest numbers in this list.
+
+.. `a[i] < b[i]`;
+.. `a[i] == b[i]`;
+.. `a[i] > b[i]`.
+
+// Page 41
+
+. Given an integer list `a` of 10 elements. Count the number of such `i` that `a[i]` is not less than all previous elements of the list (`a[0]`, `a[1]`, ..., `a[i-1]`).
+. Given a float list `a` of 10 elements. Find the number of elements of this list that are greater than the arithmetic mean of all its elements.
+. Given an integer list `a` of 10 elements. Fill a float list `b` of 10 elements, whose i-th element equals the arithmetic mean of the first i+1 elements of list a:
+
+stem:[b[i] = (a[0] + ... + a[i]) / (i + 1)].
+. Given an integer list `a` of 10 elements. Count how many times the maximum value appears in this list.
+. Given a rectangular integer 2D list `a` of size 5x5. Change all elements in this list to their opposite sign.
+. Given a rectangular integer 2D list `a` of size 5x5. Find the largest number occurring in this list.
+. Given an integer list `a` of 10 elements. Check whether it contains elements equal to 0. If yes, find the index of the first one, i.e., the smallest i for which `a[i] == 0`. If no, output the word "no".
+. Given an integer list `a` of 10 elements. Check whether it contains negative elements. If yes, find the largest i for which `a[i] < 0`.
+. Check whether a rectangular integer 2D list `a` of size 5x5 is a "magic square" (meaning that the sums of numbers in all its columns, all its rows, and both diagonals are equal).
+. Given an integer list `a` of 10 elements. Count the largest number of consecutive identical elements in it.
+. Count the number of distinct numbers occurring in _int list_ `a` of 10 elements. Repeated numbers should be counted once.
+. Given an integer list `a` of 10 elements. Build _int list_ `b` of 10 elements containing the same numbers as list a, but in which all negative elements precede all non-negative ones.
+. Given integer lists `a` and `b`, each of 10 elements, where:
+`a[0] < a[1] < ... < a[9]`, +
+
+`b[0] < b[1] < ... < b[9]`.
+Build a list `c` of 20 elements containing all elements of lists a and b, in which +
+
+`c[0] < c[1] < ... < c[19]`.
+. Given a rectangular integer 2D list `a` of size 5x5. Find the number of those row indices i from 0 to 4 for which `a[i][j] == 0` for some column index j from 0 to 4.
+. Given a rectangular integer 2D list `a` of size 5x5. Find the smallest integer K having the following property: in at least one row of the list, all elements do not exceed K.
+
+// Page 42
+
+. Given a rectangular integer 2D list `a` of size 5x5. Find the largest K having the following property: in every row of the list, there is an element greater than or equal to K.
+. Write a program for factoring natural numbers into prime factors.
+. A natural number is called _perfect_ if it equals the sum of all its divisors, not counting itself (for example, 6 = 1 + 2 + 3 is a perfect number). Write an algorithm that checks whether a given number is perfect.
+. Print in ascending order the first 1000 numbers that have no prime divisors other than 2, 3, and 5. (Beginning of the list: 1, 2, 3, 4, 5, 6, 8, 9, 10, 12, 15 ...).
+
+

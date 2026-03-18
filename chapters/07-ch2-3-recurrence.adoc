@@ -1,0 +1,2169 @@
+== 2.3. Recurrence Relations
+
+There is a number of problems in which, due to the impressive ranges of input data, the recursive approach is fundamentally unable to provide a complete solution. In these cases, a related approach called _recurrence_ comes to the rescue.
+
+
+=== General information about recurrence relations
+
+It should be noted that devising recurrence relations is a process that requires a creative approach. This means that, understanding the meaning of the term _recurrence relation_ and having already solved several problems using it, you may still fail to devise a correct recurrence relation for the next problem. And this is because recurrence relations are constructed with regard to the specifics of the problems, and often very deep specifics. Nevertheless, the more problems you have solved using the recurrence relation method, the higher the probability that you will master this art.
+
+// Page 112
+// Page 113
+you will be able to devise a correct recurrence relation for solving a newly encountered problem.
+
+An important advantage of recurrence relations is the simplicity of implementation. This means that even under limited time (for example, during an olympiad), you can spend an hour or more devising, verifying, and proving the correctness of a recurrence relation, and then 10-15 minutes on implementing, debugging, and testing the corresponding program.
+
+The subsequent material is structured as follows: the main idea of the recurrence relation method is explained and illustrated, and then solutions to a large number of problems from Belarusian national and international (IOI -- International Olympiad in Informatics) informatics olympiads for schoolchildren are presented. Not only the recurrence relation itself is given, but also attempts are made to illustrate the process of investigating the specifics of the problem to construct a correct recurrence relation.
+
+After reviewing the general information, it is recommended to analyze each new problem in the following order: after reading the problem statement, set the material aside and try to solve the problem independently, first by any method that comes to mind (even under much smaller constraints than those actually given in the problem statement, for example, by some simple brute force), then still try to compose a recurrence relation. It is important to note that your simple solution will be useful for verifying the correctness of the composed recurrence relation. The procedure can be as follows: for small values of the input data, you calculate the result manually. Then you solve the problem under significantly smaller constraints than those specified in the problem using some method you know (brute force, recursion, queue, etc.), and you test this solution on manually created tests. Then the recurrence solution can be verified against the "partial solution." If it seems to you that you have reached a dead end and further reflection cannot lead to a useful result, you should return to the material and read the author's analysis of the problem's specifics.
+
+After that, set the material aside again and try once more to compose the recurrence relation independently. Then, if you still cannot solve the problem, read the complete solution and implement it on the computer. The more thorough and intensive the work you have done on the current problem, the greater the chances that you will solve the next problem without resorting to help. Moreover, such work on each of these problems will lead to a significant increase in the chances that you will solve new problems of this class that you will inevitably encounter. Conversely, superficial reading may at best lead to you simply understanding and possibly memorizing the solution of a dozen problems on recurrence relations. This, of course, is also not a small amount, since you may encounter these or similar problems. But the author sets a different goal -- to help you learn to solve new problems in this way.
+
+// Page 114
+
+== The Fibonacci Numbers Problem
+
+Let us consider the classic _Fibonacci numbers problem_, a staple of educational materials on recurrence relations.
+
+In some sources, this problem is formulated as the "rabbit breeding problem": suppose we had one rabbit in the "zeroth" generation and one rabbit in the first generation. It is also known that the number of rabbits in the next generation equals the sum of the numbers of rabbits in the two previous generations. It is required to compute the number of rabbits in generation stem:[N] (for example, stem:[N ≤ 10,000]).
+
+The sequence of numbers built for generations from the 0th to the 7th is as follows:
+
+1 1 2 3 5 8 13 21 34.
+
+That is, in the 2nd generation (stem:[N=2]) there will be stem:[2 (1 + 1)] rabbits, in the 3rd -- stem:[3 (1 + 2)] rabbits, in the 4th -- 5 rabbits, and so on.
+
+This sequence of numbers is called the _Fibonacci sequence_, and the numbers themselves, respectively, _Fibonacci numbers_.
+
+How do we find the number of rabbits in a given generation stem:[N]?
+
+We introduce a list `k` of size `n + 1`. By the problem's conditions, `k[0] = 1`, `k[1] = 1`.
+
+To solve the problem, we fill the list elements as follows:
+
+[source,python]
+----
+for i in range(2, n + 1):
+    k[i] = k[i - 1] + k[i - 2]
+----
+
+And output the result as follows:
+
+[source,python]
+----
+print(k[n])
+----
+
+The complete program text for solving the problem is given in Listing 2.15. Note that Python has arbitrary-precision integers, so unlike some other languages, there is no overflow issue even for very large N.
+
+.Listing 2.15. The Fibonacci Numbers Problem
+[source,python]
+----
+# Fib
+
+n = int(input())
+k = [0] * (n + 1)
+k[0] = 1
+k[1] = 1
+for i in range(2, n + 1):
+    k[i] = k[i - 1] + k[i - 2]
+print(k[n])
+----
+
+Now let us return to the general terminology.
+
+The relation `k[i] = k[i - 1] + k[i - 2]` is called a _recurrence relation_ for the quantity k. The quantity k itself is called _recurrent_. The word "recurrent" here conveys the meaning that the next value of the recurrent quantity is computed from one or more of its previous values.
+
+The quantity i is called the _parameter of the recurrent quantity_. For example, `k[i]` is a recurrent quantity of one parameter i. For storing recurrent quantities of one parameter, a one-dimensional list is typically used.
+
+// Page 115
+However, for example, in the Fibonacci numbers problem, to compute the next number we need to know and, accordingly, store only two previous numbers. Therefore, we could have simply used two variables to store them. In that case, the program could look as shown in Listing 2.16.
+
+.Listing 2.16. The Fibonacci Numbers Problem (second variant)
+[source,python]
+----
+# Fib2
+
+n = int(input())
+k0 = 1
+k1 = 1
+k2 = 1
+for i in range(2, n + 1):
+    k2 = k1 + k0
+    k0 = k1
+    k1 = k2
+print(k2)
+----
+
+Let us note in passing that although this solution looks less understandable and slightly more complex, it can compute Fibonacci numbers for N much larger than 10,000. For example, for N = 100,000. In Python, since integers have arbitrary precision, there is no overflow -- the numbers simply grow as large as needed.
+
+Recurrent quantities can have more than one parameter. For example, the recurrent quantity R[i][j] = R[i-1][j] + R[i-2][j] + ... + R[i-j][j] has two parameters, denoted i and j. In the general case, a two-dimensional list is used in the program to store the values of recurrent quantities of two parameters. To compute the elements of the next row of the list R, one needs to know the computed values of j rows (with numbers i-1, i-2, ..., i-j) above the current one.
+
+The recurrent quantity R[p][k][t] = max(R[p-1][k][t-L[p]] + 1, R[p-1][k][t]) has three parameters p, k, t. And its value for given values of these parameters is computed, as we can see, somewhat more complexly. For storing the values of a recurrent quantity of three parameters, a three-dimensional list is typically used. But there are cases when the maximum values of the recurrent quantities established in the problem constraints are too large to simultaneously store all the values of the recurrent quantity for all possible values of its parameters in memory. Then not all values are stored, but only those that are actually needed for computing new values. Obviously, the program becomes more complex in this case, sometimes insignificantly, and sometimes substantially.
+
+So, the essence of the method of solving problems using recurrence relations is:
+
+
+* establish the fact that the problem can be solved by this method, i.e., make sure that a recurrence relation exists and it makes sense to spend time searching for and deriving it;
+
+// Page 116
+
+* introduce a recurrent quantity of one, two, three, or more parameters;
+* determine how to find the solution result given the computed values of the recurrent quantity;
+* establish the initial values of the recurrent quantity;
+* based on the specifics of the problem, derive a correct recurrence relation (from the author's point of view, such ability is more of an art than a science; and thoughtful solving of a larger number of problems on recurrence relations increases the probability that you will master this art);
+* verify the correctness of the recurrence relation for values computed manually or by auxiliary programs; at this point, you can implement the program itself that computes the recurrent quantity;
+* determine whether the representation of the derived recurrent quantity as a list of the appropriate dimensionality fits in memory; if not, modify the recurrence relation for the program to function correctly within the given constraints, and adjust the program accordingly.
+
+[NOTE]
+====
+Python does not have the same strict static memory limitations as older environments. However, memory is still finite, and for very large problem sizes you may need to optimize by only keeping the rows of a 2D list that are actually needed for computation, rather than storing the entire table.
+
+====
+
+
+== Recurrence Relations with One Parameter
+
+This section presents problems for which it is necessary to compose a recurrence relation with one parameter. This means that the introduced recurrently-defined quantity depends on one argument.
+
+
+=== The "Sums" Problem
+
+Belarusian national olympiad in informatics, 2000. Grades 8-9. Day 1. Problem 2.
+
+Any integer stem:[N > 0] can be represented as a sum of natural addends, each of which is a power of 2. Sums that differ only in the order of addends are considered _identical_. Find stem:[K] -- the number of ways in which the number stem:[N] can be represented as a sum of natural addends, each of which is a power of 2. Constraints: stem:[N ≤ 1000].
+
+For example, for stem:[N = 7]:
+
+
+* stem:[7 = 4 + 2 + 1];
+* stem:[7 = 4 + 1 + 1 + 1];
+* stem:[7 = 2 + 2 + 2 + 1];
+* stem:[7 = 2 + 2 + 1 + 1 + 1];
+
+// Page 117
+
+* stem:[7 = 2 + 1 + 1 + 1 + 1 + 1];
+* stem:[7 = 1 + 1 + 1 + 1 + 1 + 1 + 1];
+
+and, consequently, stem:[K = 6].
+
+In the program that solves the problem, we will read N from the text file SUM.IN, and write the result (K) to the text file SUM.OUT. For example:
+
+
+* SUM.IN +
+
+    132
+* SUM.OUT +
+
+    31196
+
+Let us try to systematically compose several consecutive decompositions:
+
+
+[cols="1|1|1|1|1|1|1", options="header"]
+|===
+| N = 1 | N = 2 | N = 3 | N = 4 | N = 5 | N = 6 | N = 7
+
+| 1 | 2 | 2+1 | 4 | 4+1 | 4+2 | 4+2+1
+|  | 1+1 | 1+1+1 | 2+2 | 2+2+1 | 4+1+1 | 4+1+1+1
+|  |  |  | 2+1+1 | 2+1+1+1 | 2+2+2 | 2+2+2+1
+|  |  |  | 1+1+1+1 | 1+1+1+1+1 | 2+2+1+1 | 2+2+1+1+1
+|  |  |  |  |  | 2+1+1+1+1 | 2+1+1+1+1+1
+|  |  |  |  |  | 1+1+1+1+1+1 | 1+1+1+1+1+1+1
+|===
+
+Let us introduce the notation: stem:[K(i)] -- the number of decompositions of the number i according to the problem's conditions. We immediately notice that stem:[K(1) = 1], stem:[K(2) = 2].
+
+stem:[K(i) = K(i-1)], if i is _odd_ (in each row, +1 is added to the corresponding previous decomposition, and the number of rows does not change). It remains to find out how to compute stem:[K(i)] for even i.
+
+It is natural to assume that stem:[K(i)] depends on stem:[K(i-1)] as follows: stem:[K(i) = K(i-1) + X], meaning the number of decompositions of the i-th number equals the number of decompositions of the number i-1 plus some more. How many more?
+
+As an example, let us examine in more detail the decompositions for stem:[N = 6] and mark (with the symbol "!") those rows that were carried over from the decomposition of stem:[N = 5] by adding +1:
+
+
+[cols="1|1", options="header"]
+|===
+| N = 5 | N = 6
+
+| 4+1 | 4+2
+| 2+2+1 | (!) 4+1+1
+| 2+1+1+1 | 2+2+2
+| 1+1+1+1+1 | (!) 2+2+1+1
+|  | (!) 2+1+1+1+1
+|  | (!) 1+1+1+1+1+1
+|===
+
+Now let us write out the rows that remained unmarked, i.e., those that were added by a different rule (which is precisely what determines X):
+
+4+2 +
+
+2+2+2
+
+// Page 118
+Interestingly, all of them are composed of even numbers. Let us divide all these numbers by 2, obtaining:
+
+----
+
+2+1
+1+1+1
+----
+
+Now notice that this is the decomposition of the number 3, which can be obtained from the number 6 also by dividing by 2. In total we get: `X = K(i // 2)`.
+
+The final recurrence relation has the form:
+
+
+* `K(i) = K(i - 1)`, if `i` is odd;
+* `K(i) = K(i - 1) + K(i // 2)`, if `i` is even.
+
+Let us verify our reasoning on one more test example:
+
+
+[cols="1|1", options="header"]
+|===
+| N = 7 | N = 8
+
+| 4+2+1 | 8
+| 4+1+1+1 | 4+4
+| 2+2+2+1 | 4+2+2
+| 2+2+1+1+1 | (!) 4+2+1+1
+| 2+1+1+1+1+1 | (!) 4+1+1+1+1
+| 1+1+1+1+1+1+1 | 2+2+2+2
+|  | (!) 2+2+2+1+1
+|  | (!) 2+2+1+1+1+1
+|  | (!) 2+1+1+1+1+1+1
+|  | (!) 1+1+1+1+1+1+1+1
+|===
+
+The unmarked rows are:
+
+----
+
+8
+4+4
+4+2+2
+2+2+2+2
+----
+
+After dividing all numbers by 2, we get:
+
+----
+
+4
+2+2
+2+1+1
+1+1+1+1
+----
+
+This is precisely the decomposition of the number 4, which can be obtained from the original `N = 8` by dividing by 2. And then the complete solution of the problem can consist of recurrently filling the list `k[1..n]` and outputting the value `k[n]`.
+
+One can also notice that `k[2] = k[1] + k[2 // 2] = k[1] + k[1] = 2`. That is, `k[2]` can be computed by the general rule. It is sufficient to set only the initial value `k[1]`.
+
+The complete solution to the problem is in Listing 2.17.
+
+// Page 119
+
+=== Listing 2.17. Solution to the "Sums" problem
+
+[source,python]
+----
+# by00m1t2
+
+with open('sum.in', 'r') as fin:
+    n = int(fin.readline())
+
+k = [0] * (n + 1)
+k[1] = 1
+for i in range(2, n + 1):
+    if i % 2 == 1:
+        k[i] = k[i - 1]
+    else:
+        k[i] = k[i - 1] + k[i // 2]
+
+with open('sum.out', 'w') as fout:
+    fout.write(str(k[n]) + '\n')
+----
+
+[NOTE]
+====
+*NOTE* +
+
+Here `i % 2 == 1` checks whether the number i is odd, equivalent to the `odd(i)` function. In Python, you can also use `i % 2 != 0` or `i & 1` for the same purpose.
+
+====
+
+
+== The "Scouting Selection" Problem
+
+Quarter-final of the ACM World Programming Championship for students, Central Region of Russia. October 5-6, 1999.
+
+From stem:[N] soldiers lined up in a row, several must be selected for a scouting mission. To do this, the following operation is performed: if there are more than 3 soldiers in the row, then all soldiers standing at even positions, or all soldiers standing at odd positions, are removed. This procedure is repeated until 3 or fewer soldiers remain in the row. They are sent on the scouting mission. Calculate how many ways scouting groups of exactly three people can be formed in this manner. Constraints: 0 < stem:[N] ≤ 10,000,000.
+
+Input file -- INPUT.TXT (contains the number N), output file -- OUTPUT.TXT (contains the solution -- the number of variants). Time per test -- 5 seconds.
+
+[EXAMPLE]
+====
+*EXAMPLE* +
+
+For stem:[N] = 10, the number of ways to form a scouting group will be 2; for stem:[N] = 4, none, i.e., 0.
+
+====
+
+Let us denote `K(N)` -- the number of ways in which scouting groups can be formed from N people in the row. Then, by the problem's conditions, stem:[K(1) = 0, K(2) = 0, K(3) = 1]. That is, from three people only one group can be formed, and from one or two -- none.
+
+Consider the case of an arbitrary number of soldiers in the row. If N is even, then by applying the deletion operation defined in the problem, we will be left with either `N // 2` soldiers standing at even positions, or `N // 2` soldiers standing at odd positions. The total number of ways can be found by the formula `K(N) = 2 * K(N // 2)` (if N is even). That is, the number of ways
+
+// Page 120
+form a reconnaissance group from the soldiers remaining at even positions, plus the number of ways to form a reconnaissance group from the soldiers remaining at odd positions.
+
+If N is odd, then we are left with either N // 2 soldiers who stood at even positions, or (N // 2) + 1 soldiers who stood at odd positions. The total number of ways in this case is `K(N) = K(N // 2) + K((N // 2) + 1)`.
+
+Thus, the final recurrence relation has the form:
+
+
+* `K(N) = 0`, if `N == 1` or `N == 2`;
+* `K(N) = 1`, if `N == 3`;
+* `K(N) = 2 * K(N // 2)`, if `N` is even;
+* `K(N) = K(N // 2) + K((N // 2) + 1)`, if `N` is odd.
+
+It only remains to note the following facts.
+
+
+. `N` can reach 10,000,000, therefore we cannot allocate a list to store all values of the recurrence `K(N)`;
+. In fact, to compute the answer for a specific N, we need far fewer than all values of `K(N)`. Therefore, it is convenient to use recursive computation of the recurrence `K(N)`:
+
+[source,python]
+----
+import sys
+sys.setrecursionlimit(100000)
+
+def k(n: int) -> int:
+    if n < 3:
+        return 0
+    elif n == 3:
+        return 1
+    elif n % 2 == 1:
+        return k(n // 2) + k(n // 2 + 1)
+    else:
+        return 2 * k(n // 2)
+----
+
+The complete solution to this problem is shown in Listing 2.18.
+
+.Listing 2.18. Solution to the "Reconnaissance Selection" problem
+[source,python]
+----
+# nee4c99g
+import sys
+sys.setrecursionlimit(100000)
+
+def k(n: int) -> int:
+    if n < 3:
+        return 0
+    elif n == 3:
+        return 1
+    elif n % 2 == 1:
+        return k(n // 2) + k(n // 2 + 1)
+    else:
+        return 2 * k(n // 2)
+
+with open('input.txt', 'r') as fin:
+    n = int(fin.readline())
+
+with open('output.txt', 'w') as fout:
+    fout.write(str(k(n)) + '\n')
+----
+
+// Page 121
+
+== Problem "Video Salon"
+
+Belarusian National Olympiad, 1996. Day 2. Problem 3.
+
+The owner of a video salon decided to maximize the income from his business. The video salon has an unlimited number of blank videotapes. The duration of each videotape is stem:[L]. The owner has the opportunity to record stem:[N] movies of duration stem:[A(1), ..., A(N), A(i) < L] onto videotapes. He cannot record the same movie twice on one videotape and cannot leave empty space on a tape that would fit entirely one of the movies not recorded on that tape. Movies are recorded in their entirety. The video salon owner aims to record movies onto tapes in such a way that to watch all the movies, a customer would be forced to rent the maximum number of tapes. Determine this number stem:[K]. Constraints: stem:[A[i], L, N] are natural numbers, stem:[L ≤ 1000, N ≤ 100].
+
+Input — from file Input3.txt:
+
+----
+L
+N
+A[1]
+…
+A[N]
+----
+
+Output — to file output3.txt (stem:[K]).
+
+Consider the following case: let stem:[L = 100, N = 8], and stem:[A[i] = [2 2 3 3 97 97 97 97]] (durations of eight movies).
+
+Since some movies may have the same duration (as in our example), to distinguish these movies when recording, we introduce notation: stem:[2(1)] means a movie of duration 2, the first in the original list, or stem:[97(6)] means a movie of duration 97, the sixth in the original list. If the customer were to determine the order of recording movies onto tapes, then in our example, obviously, they would choose the most advantageous option with the minimum number of tapes:
+
+----
+97(5) + 2(1),
+97(6) + 2(2),
+97(7) + 3(1),
+97(8) + 3(2).
+----
+
+With this arrangement, their payment for renting all movies would be minimal. But the cunning video salon owner records the tapes himself. How will he record them? It would be good if you, before reading further, came up with a "clever" arrangement on your own. And even better — also a method for a "clever" algorithm for recording movies onto videotapes.
+
+Now let us try together to compose this "clever" arrangement. The first tape will remain the same: stem:[97(5) + 2(1)]. But on the second tape, the video salon owner will prefer to record only one new movie — stem:[2(2)], that is, stem:[97(5) + 2(2)]. He will do the same with the 3rd and 4th tapes:
+
+----
+97(5) + 3(1),
+97(5) + 3(2).
+----
+
+// Page 122
+So, the customer is already forced to buy 4 tapes, and yet they haven't seen three of the best movies — 97(6), 97(7), and 97(8) — for recording which, in the video salon owner's "clever" arrangement, they would need to buy three more tapes:
+
+----
+97(5) + 2(1),
+97(6) + 2(1),
+97(7) + 2(1).
+----
+
+What to use to fill the remaining space on these three tapes from the available "short" movies is essentially irrelevant. For example, movie 2(1).
+
+We seem to have figured out this particular arrangement. But what about others? And what is the algorithm for "clever" recording of movies? And finally, how do we determine the required number of videotapes k from the input data L, N, A[i]?
+
+If we reformulate the problem, we are required to compose all possible sums from combinations of the original numbers, and from these sums select the maximum number such that the sequence of numbers in each sum differs from the rest by at least one number (identical numbers at different positions in the input data are considered different).
+
+Since longer movies are more significant for the recording process, we reorder the input data so that movies go in decreasing order of their durations.
+
+Let us examine a single videotape "under a microscope." It has a recording duration of L (let's say L minutes for definiteness). Then we can view a single tape as a one-dimensional list `s` of length L+1. And then each of the aforementioned sums corresponds to exactly one position in this list. We will discard sums exceeding L (since they don't interest us as combinations of movies that don't fit on a single tape). We will store a one in `s[j]` if the recording of the previous movie ended at position j.
+
+Then each new movie we should try to append to all possible positions roughly like this:
+
+----
+if s[j] != 0 and j + a[i] <= L: s[j + a[i]] = 1
+----
+
+If we found a place where we can "squeeze in" a movie and it fits until the end of the tape (a[i] is the duration of the current movie), then we mark the position where this movie will end.
+
+At the same time, before the first movie, `s[j] = 0` for all j from 1 to L, and `s[0] = 1`, meaning we can write movies from the beginning of the tape.
+
+Clearly, the above operation needs to be done for all movies. How do we simultaneously keep track of the number of variants?
+
+Let us introduce another list `ns` of length L+1. We will modify it in parallel with list `s`. But while in `s[j]` we only note the fact that the recording of the previous movie ended at this position, in `ns[j]` we will keep track of the number of ways we have recorded movies up to this point:
+
+----
+if s[j] != 0 and j + a[i] <= L:
+    ...
+----
+
+// Page 123
+[source,python]
+----
+    ns[j + a[i]] = ns[j + a[i]] + max(1, ns[j])
+    ns[j] = 0
+----
+
+If we found a place to record a new movie, then the count of ways "migrates" to the end of the recording of that movie, and we must take into account that:
+
+
+. the counts need to be added — the old one (`ns[j + a[i]]`) and the new one (`ns[j]`);
+. the very first time we simply add 1 (`max(1, ns[j])`);
+. "migration" of the count `ns[j]` means that after we have added it "forward," we need to zero it out at the current position to avoid "inflating" the number of variants.
+
+Good, now for all sums `s[j]` we will count how many different ways `ns[j]` they can be obtained using N movies. And which of these sums `ms[j]` should be added to get the answer K?
+
+To answer this question, let us introduce one more list: `ms` of length L+1. Initially, all its elements will equal 0. Then we will set `ms[j]` to one in the case where we formed subsequent sums from this sum, meaning this sum is intermediate and should not be counted:
+
+[source,python]
+----
+    if s[j] != 0 and j + a[i] <= L:
+        ...
+        ms[j] = 1
+----
+
+And to obtain the answer K, we need to sum elements of list `ns[j]` from the end, as long as `ms[j] == 0`:
+
+[source,python]
+----
+    k = 0
+    j = L
+    while ms[j] == 0:
+        k += ns[j]
+        j -= 1
+    print(k)
+----
+
+And finally, one last remark: generally speaking, we need two lists `s`: one for the current value of `s`, and another for the next one, so as not to append a movie to itself on the same tape. But we can achieve the same effect by working with the same list `s` but processing it for each i from the last element `s[L - a[i]]` to the first `s[0]`:
+
+[source,python]
+----
+    ...
+    for i in range(n):
+        for j in range(L - a[i], -1, -1):
+            if s[j] != 0 and j + a[i] <= L:
+    ...
+----
+
+Clearly, processing `s[j]` for `j > L - a[i]` is pointless: the movie `a[i]` certainly won't fit on the tape if we write it starting from this position j.
+
+The complete solution to this problem is given in Listing 2.19.
+
+.Listing 2.19. Solution to the "Video Salon" problem
+[source,python]
+----
+# by96s2t3 - Video Salon
+
+import sys
+
+
+def solve() -> None:
+    with open('input3.txt', 'r') as fin:
+        data = fin.read().split()
+
+    idx = 0
+    L = int(data[idx]); idx += 1
+    n = int(data[idx]); idx += 1
+    a: list[int] = []
+    for i in range(n):
+        a.append(int(data[idx])); idx += 1
+
+    # Sort movies in decreasing order of duration
+    a.sort(reverse=True)
+
+    s: list[int] = [0] * (L + 1)
+    ns: list[int] = [0] * (L + 1)
+    ms: list[int] = [0] * (L + 1)
+
+    s[0] = 1
+    ns[0] = 0
+
+    for i in range(n):
+        for j in range(L - a[i], -1, -1):
+            if s[j] != 0 and j + a[i] <= L:
+                s[j + a[i]] = 1
+                ns[j + a[i]] = ns[j + a[i]] + max(1, ns[j])
+                ms[j] = 1
+
+    k = 0
+    j = L
+    while ms[j] == 0:
+        k += ns[j]
+        j -= 1
+
+    with open('output3.txt', 'w') as fout:
+        fout.write(f"{k}\n")
+
+
+solve()
+----
+
+// Page 124
+
+== Recurrence Relations with Two Parameters
+
+This section presents problems whose solutions require constructing a recurrence relation with two parameters. This means that the recursively defined quantity depends on two arguments.
+
+
+=== Problem "Triangle"
+
+IOI'94. Day 1. Problem 1.
+
+// Page 125
+----
+
+                    5
+                    7
+                  3 8
+                8 1 0
+              2 7 4 4
+            4 5 2 6 5
+----
+
+A triangle of numbers is shown. Write a program that computes the largest sum of numbers along a path starting at the top of the triangle and ending at the base of the triangle. Constraints:
+
+
+* each step along the path may go diagonally down-left or diagonally down-right;
+* the number of rows in the triangle is greater than 1 and at most 100;
+* the triangle is composed of integers from 0 to 99.
+
+The first number in the input file named INPUT.TXT is the number of rows in the triangle. The output file named OUTPUT.TXT should contain only the largest sum as an integer. For example, for the triangle shown above:
+
+
+* INPUT.TXT
+
+----
+
+5
+7
+3 8
+8 1 0
+2 7 4 4
+4 5 2 6 5
+----
+
+
+* OUTPUT.TXT
+
+----
+
+30
+----
+
+Let us consider step by step the algorithm for finding the sum from the input data:
+
+----
+
+7                7                   7                   7
+3 8              3+7 8+7 =>  10 15                   10 15
+8 1 0                        8+10 1+max(10,15)   15+0   18 16 15
+2 7 4 4
+4 5 2 6 5
+7                7                                   7
+3 8              10  15                              10 15
+8 1 0                18        16                15               => 18 16 15
+2 7 4 4              2+18   7+max(18,16)   4+max(16,15)        4+15 20 25 20 19
+4 5 2 6 5
+7                7                                               7
+3 8              10   15                                     10 15
+8 1 0            18   16       15                            18 16 15
+2 7 4 4          20   25       20       19                   20 25 20 19
+4 5 2 6 5    4+20  5+max(20,25) 2+max(25,20) 6+max(20,19) 5+19   24 30 27 26 24
+----
+
+// Page 126
+So, following the summation rules defined in the problem, we obtained from the original matrix the following:
+
+----
+
+7
+10  15
+18  16  15
+20  25  20  19
+24  30  27  26  24
+----
+
+To output the result, it suffices to find the maximum element in the last row.
+
+Now let us formally write down the recurrence relations that we used when computing the matrix:
+
+
+* `a[i][j] + a[i-1][j]`, if `j == 0` (first column);
+* `a[i][j] + a[i-1][j-1]`, if `j == i` (last element in row);
+* `a[i][j] + max(a[i-1][j-1], a[i-1][j])` — in all other cases, for all rows starting from the second.
+
+To obtain the answer, one then needs to find the maximum element in the last row. The program text for the solution is in Listing 2.20.
+
+.Listing 2.20. Solution to the "Triangle" problem
+[source,python]
+----
+# l004d1t1 - Triangle (IOI'94)
+
+def solve() -> None:
+    with open('input.txt', 'r') as fin:
+        n = int(fin.readline())
+        a: list[list[int]] = []
+        for i in range(n):
+            row = list(map(int, fin.readline().split()))
+            a.append(row)
+
+    for i in range(1, n):
+        for j in range(i + 1):
+            if j == 0:
+                a[i][j] = a[i][j] + a[i - 1][j]
+            elif j == i:
+                a[i][j] = a[i][j] + a[i - 1][j - 1]
+            else:
+                a[i][j] = a[i][j] + max(a[i - 1][j - 1], a[i - 1][j])
+
+    m = max(a[n - 1])
+
+    with open('output.txt', 'w') as fout:
+        fout.write(f"{m}\n")
+
+
+solve()
+----
+
+// Page 127
+[NOTE]
+====
+For better readability of the main loop, we use Python's built-in `max()` function to find the maximum of two numbers.
+
+====
+
+Pay attention to the input. According to the problem statement, not the entire two-dimensional list is read, but only its part below and including the main diagonal:
+
+[source,python]
+----
+for i in range(n):
+    row = list(map(int, fin.readline().split()))
+    a.append(row)
+----
+
+Only these elements are modified.
+
+
+== Problem "Binary Numbers"
+
+Belarusian National Olympiad, 1996. Day 2. Problem 1.
+
+Among all stem:[N]-bit binary numbers, determine the count of those whose binary representation does not contain stem:[K] consecutive ones. The numbers themselves need not be output. stem:[N] and stem:[K] are natural numbers, stem:[K ≤ N ≤ 30].
+
+Input of stem:[N] and stem:[K] — from file `Input1.txt`, output of stem:[M] (the desired count) — to file `Output1.txt`.
+
+[EXAMPLE]
+====
+Let stem:[N = 3], stem:[K = 2]. Then stem:[M = 5]. Indeed, among all 3-bit binary numbers (000, 001, 010, 011, 100, 101, 110, 111), there are 5 numbers (000, 001, 010, 100, 101) whose representation does not have 2 consecutive ones.
+
+====
+
+Let us introduce the recurrence quantity `r[i][j]` — the number of stem:[i]-bit binary numbers whose binary representation does not contain stem:[j] consecutive ones. Then the answer to the problem is `r[n][k]`.
+
+First, let us try to analyze the patterns in filling the matrix `r[i][j]`. If stem:[N = 1], there are only 2 one-bit numbers — 0 and 1. Accordingly, `r[1][1] = 1`, meaning there is one number whose representation does not contain a single one — 0.
+
+`r[1][j] = 2` for all stem:[j ≥ 2], meaning there are two 1-bit numbers whose representation does not contain two (or more) consecutive ones — 0 and 1. Similarly, `r[i][j] = 2^j` for all cases stem:[i < j], meaning the number of stem:[i]-bit numbers whose representation does not contain stem:[j] consecutive ones equals the total count of all such numbers.
+
+Obviously, `r[i][1] = 1` for all stem:[i ≥ 1], meaning there is only one stem:[i]-bit number whose representation contains no ones at all — the number with zeros in all its digits.
+
+And finally, `r[i][i] = 2 * i - 1`, meaning the number of stem:[i]-bit numbers whose representation does not contain stem:[i] consecutive ones equals the total count of all stem:[i]-bit numbers minus one (the one that contains ones in all digits).
+
+Thus, the initial filling of the matrix `r[i][j]` is as follows:
+
+// Page 128
+----
+
+1  2   2   2   2  2
+1  3   4   4   4  4
+1  7   8   8   8
+1  15  16  16
+1  31  32
+1  63
+----
+
+It remains to learn how to fill the table below the main diagonal, that is, to compute `r[i][j]` for the case `i > j`.
+
+Let us consider `r[i][3]` as an example. We need to compute the number of i-bit numbers `(i > 4)` whose representation does not contain 3 consecutive ones. All i-bit numbers are the union of the following groups:
+
+
+. all (i-1)-bit numbers and 0 at the i-th position;
+. all (i-2)-bit numbers and 01 at the last two positions;
+. all (i-3)-bit numbers and 011 at the last three positions;
+. all (i-3)-bit numbers and 111 at the last three positions;
+
+Obviously, among the last group there is _not_ a single number whose representation does not contain three consecutive ones.
+
+All these groups, by definition, share no common numbers, and therefore the required count of desired numbers equals the sum of the counts of desired numbers in each group:
+
+`r[i][3] = r[i-1][3] + r[i-2][3] + r[i-3][3]`.
+
+And in the general case:
+
+`r[i][j] = r[i-1][j] + r[i-2][j] + ... + r[i-j][j]`.
+
+The complete solution program is presented in Listing 2.21.
+
+.Listing 2.21. Program text for the "Binary Numbers" problem solution
+[source,python]
+----
+# by96s2t1 - Binary Numbers
+
+def solve() -> None:
+    with open('input1.txt', 'r') as fin:
+        n, k = map(int, fin.read().split())
+
+    # r is 1-indexed: r[i][j] for i in 1..n, j in 1..n
+    r: list[list[int]] = [[0] * (n + 1) for _ in range(n + 1)]
+
+    for i in range(1, n + 1):
+        r[i][1] = 1
+
+    for i in range(2, n + 1):
+        r[i][i] = 2 * r[i - 1][i - 1] + 1
+        for j in range(i + 1, n + 1):
+            r[i][j] = r[i][i] + 1
+
+    for i in range(3, n + 1):
+        for j in range(2, i):
+            s = 0
+            for m in range(1, j + 1):
+                s += r[i - m][j]
+            r[i][j] = s
+
+    with open('output1.txt', 'w') as fout:
+        fout.write(f"{r[n][k]}\n")
+
+
+solve()
+----
+
+// Page 129
+An attentive reader who has tried to delve deeper into the essence of the proposed computations may note: to fill a two-dimensional matrix we use a triple loop. Moreover, in this innermost loop we are essentially adding up nearly the same numbers each time. Let us try to improve this solution based on more refined reasoning.
+
+Suppose we want to compute first:
+
+stem:[R[i,j] = R[i-1,j] + R[i-2,j] + ... + R[i-j,j].]
+
+And before that we computed:
+
+stem:[R[i-1,j] = R[i-2,j] + R[i-3,j] + .. + R[i-j,j] + R[i-1-j,j].]
+
+One can notice that
+
+stem:[R[i,j] = R[i-1,j] + (R[i-1,j] – R[i-1-j,j]) =]
+
+stem:[= 2 * R[i-1,j] – R[i-1-j,j].]
+
+And then the program can look as shown in Listing 2.22.
+
+.Listing 2.22. Another variant of the "Binary Numbers" problem solution
+[source,python]
+----
+# by96s2t1 - Binary Numbers (optimized)
+
+def solve() -> None:
+    with open('input1.txt', 'r') as fin:
+        n, k = map(int, fin.read().split())
+
+    # r is indexed from 0..n, 1..n
+    r: list[list[int]] = [[0] * (n + 1) for _ in range(n + 1)]
+
+    for i in range(0, n + 1):
+        r[i][1] = 1
+
+    for i in range(2, n + 1):
+        r[0][i] = 1
+        r[1][i] = 2
+        r[i][i] = 2 * r[i - 1][i - 1] + 1
+        for j in range(i + 1, n + 1):
+            r[i][j] = r[i][i] + 1
+
+    for i in range(3, n + 1):
+        for j in range(2, i):
+            r[i][j] = 2 * r[i - 1][j] - r[i - j - 1][j]
+
+    with open('output1.txt', 'w') as fout:
+        fout.write(f"{r[n][k]}\n")
+
+
+solve()
+----
+
+// Page 130
+
+=== NOTE
+
+[NOTE]
+====
+When solving this problem, schoolchildren from Gomel noticed that one can increase stem:[N] and stem:[K] up to 60 simply by using Python's built-in arbitrary-precision integers, which have no size limit — unlike Pascal's `comp` type.
+
+====
+
+
+== Problem "Flower Shop"
+
+IOI'99. Day 1. Problem 2.
+
+You want to arrange the window of your flower shop in the most aesthetically pleasing way. You have stem:[F] bouquets (each bouquet consists of flowers of one kind, and all flowers of one kind are collected in one bouquet) and no fewer vases arranged in a row. The vases are glued to the shelf and numbered from left to right consecutively from 1 to stem:[V], where stem:[V] is the number of vases. Vase 1 is the leftmost in the row, and vase stem:[V] is the rightmost. Bouquets can be placed in different vases, and each bouquet has a unique number in the range from 1 to stem:[F]. The placement order of bouquets in vases is as follows: bouquet number stem:[i] is always placed in a vase that stands to the left of the vase containing bouquet stem:[j], if stem:[i < j]. For example, suppose you have a bouquet of azaleas numbered 1, a bouquet of begonias numbered 2, and a bouquet of carnations numbered 3. All bouquets must be placed in vases. The azalea bouquet must be placed in a vase to the left of the begonias, and the begonia bouquet must be to the left of the carnations. If there are more vases than bouquets, some vases will remain empty. Each vase can contain at most one bouquet.
+
+Each vase has its own characteristics, as do the flowers. Therefore, a bouquet placed in a vase has a certain _aesthetic_ value expressed as an integer. The aesthetic values are given in Table 2.1. An empty vase has an aesthetic value of zero.
+
+*Table 2.1.* Aesthetic values of bouquets in various vases
+
+
+[cols="1|1|1|1|1|1", options="header"]
+|===
+| Bouquet | Vase |  |  |  | 
+
+|  | 1st | 2nd | 3rd | 4th | 5th
+| 1st (azaleas) | 7 | 23 | -5 | -24 | 16
+| 2nd (begonias) | 5 | 21 | -4 | 10 | 23
+| 3rd (carnations) | -21 | 5 | -4 | -20 | 20
+|===
+
+According to Table 2.1, azaleas look wonderful in the second vase and terrible in the fourth. To achieve the best aesthetic arrangement of the display, you must maximize the sum of aesthetic values of flower placements in vases while maintaining the required ordering of bouquets. If there are multiple placements having the maximum sum, you should output only one of them.
+
+Constraints: stem:[1 ≤ F ≤ 100] and stem:[F ≤ V ≤ 100], and also stem:[-50 ≤ Aij ≤ 50], where stem:[Aij] is the aesthetic value obtained by placing bouquet stem:[i] in vase stem:[j].
+
+The input text file is called `flower.inp`, and its first line contains two numbers: stem:[F], stem:[V]. Each of the following stem:[F] lines contains stem:[V] integers: stem:[A[i,j]] is the stem:[j]-th number in the stem:[(i+1)]-th line of the input file.
+
+// Page 131
+
+
+
+The output file — `flower.out` — consists of two lines:
+
+
+* the first line contains the sum of the aesthetic values of your flower placement in vases;
+* the second line contains a sequence of `F` numbers, where the `k`-th number specifies the vase number in which bouquet `k` is placed.
+
+For example:
+
+1) `flower.inp`
+
+----
+3 5
+7  23 -5 -24 16
+5  21 -4  10 23
+-21 5  -4 -20 20
+----
+
+2) `flower.out`
+
+----
+53
+2 4 5
+----
+
+Verification: your program must execute in no more than two seconds. Partial solutions for each test will not be scored.
+
+So, we are trying to devise a recurrence relation for the example given above. We have two parameters: the number of vases and the number of bouquets. Let `r[i][j]` be the score of the best placement of `i` bouquets in `j` vases (`i` from 1 to `F`, `j` from 1 to `V`):
+
+----
+7  23  -5  -24  16  _x  x  x  x  x_
+5  21  -4   10  23  _x  x  x  x  x_
+-21  5  -4  -20  20  _x  x  x  x  x_
+----
+
+Let us start with the case when there is exactly 1 bouquet (azalea). Then for the given number of vases we simply need to choose the best one: if there is only one vase (the first) — then that's the one (aesthetic value equals 7), and for all other numbers of vases (2, 3, 4, 5) — it is best to place this bouquet in the 2nd.
+
+Thus, we have:
+
+----
+7  23  -5  -24  16  7  23  23  23  23
+5  21  -4   10  23  _x  x  x  x  x_
+-21  5  -4  -20  20  _x  x  x  x  x_
+----
+
+Furthermore, it is obvious that if the number of bouquets is exactly equal to the number of vases, then the only possible option is to place each bouquet in the vase with the same number and then add the corresponding values:
+
+----
+7  23  -5  -24  16  7  23  23  23  23
+5  21  -4   10  23  _x_  28  _x  x  x_
+-21  5  -4  -20  20  _x  x_  24  _x  x_
+----
+
+// Page 132
+Elements below the main diagonal are obviously zero (if there are more bouquets than vases). But the problem conditions always ensure that the number of vases is greater than the number of bouquets. Therefore, this part of the list need not be filled.
+
+The remaining elements (above the main diagonal) are logically constructed as follows: `r[2][3]` is the optimal placement of 2 bouquets in 3 vases.
+
+If we place the 2nd bouquet in the 3rd vase, then the total score will be:
+
+`a[2][3] + r[1][2] = -4 + 23 = 19`.
+
+The remaining one bouquet can be optimally placed in the first two vases.
+
+If we do not place the 2nd bouquet in the 3rd vase, then the optimal placement remains the same, as does the optimal score `r[2][2] = 28` (placement of 2 bouquets in 2 vases).
+
+According to the problem conditions, we must choose the better option — 28.
+
+We get:
+
+----
+7  23  -5  -24  16  7  23  23  23  23
+5  21  -4   10  23  x  28  28   x   x
+-21  5  -4  -20  20  x   x  24   x   x
+----
+
+Similarly
+
+`r[2][4] = max(r[2][3], a[2][4] + r[1][3]) = max(28, 10 + 23) = 33`.
+
+----
+7  23  -5  -24  16  7  23  23  23  23
+5  21  -4   10  23  x  28  28  33   x
+-21  5  -4  -20  20  x   x  24   x   x
+----
+
+Next:
+
+`r[2][5] = max(r[2][4], a[2][5] + r[1][4]) = max(33, 23 + 23) = 46`.
+
+----
+7  23  -5  -24  16  7  23  23  23  23
+5  21  -4   10  23  x  28  28  33  46
+-21  5  -4  -20  20  x   x  24   x   x
+----
+
+`r[3][4] = max(r[3][3], a[3][4] + r[2][3]) = max(24, -20 + 28) = 24`.
+
+----
+7  23  -5  -24  16  7  23  23  23  23
+5  21  -4   10  23  x  28  28  33  46
+-21  5  -4  -20  20  x   x  24  24   x
+----
+
+Finally:
+
+`r[3][5] = max(r[3][4], a[3][5] + r[2][4]) = max(24, 20 + 33) = 53`.
+
+----
+7  23  -5  -24  16  7  23  23  23  23
+5  21  -4   10  23  x  28  28  33  46
+-21  5  -4  -20  20  x   x  24  24  53
+----
+
+// Page 133
+`r[3][5] = 53` — this is the desired answer.
+
+Now let us write the corresponding formal relations in general form. We introduce the input data:
+
+
+* `f` — number of bouquets;
+* `v` — number of vases;
+* `a[i][j]` — aesthetic value of bouquet `i` in vase `j`.
+
+Then:
+
+[source,python]
+----
+with open('flower.inp', 'r') as fin:
+    f, v = map(int, fin.readline().split())
+    a: list[list[int]] = [[0] * (v + 1) for _ in range(f + 1)]
+    for i in range(1, f + 1):
+        row = list(map(int, fin.readline().split()))
+        for j in range(1, v + 1):
+            a[i][j] = row[j - 1]
+----
+
+We know that `r[i][j]` is the score of the best placement of `i` bouquets in `j` vases (`i` from `1` to `f`, `j` from `1` to `v`). Then:
+
+
+* `r[1][1] = a[1][1]` — one bouquet in one vase — the only placement;
+* `r[i][i] = r[i-1][i-1] + a[i][i]` — `i` bouquets in `i` vases — the only placement (`i`-th bouquet into the `i`-th vase);
+* `r[1][i] = max of a[1][1], a[1][2], ..., a[1][i]` — if there is one bouquet and several vases, we place it in the best vase for it.
+
+And finally, the general case for all other `i, j`:
+
+[source,python]
+----
+r[i][j] = max(r[i][j - 1], a[i][j] + r[i - 1][j - 1])
+----
+
+That is, the optimal placement of `i` bouquets in `j` vases equals the better of the following placements:
+
+
+. the optimal old placement (`i` bouquets in `j - 1` vases);
+. the last bouquet is placed in the new vase (number `j`) and the remaining `i - 1` bouquets are optimally placed in the remaining `j - 1` vases.
+
+In the program, this takes the form:
+
+[source,python]
+----
+r[1][1] = a[1][1]  # bouquets
+for i in range(2, f + 1):  # as many as vases
+    r[i][i] = r[i - 1][i - 1] + a[i][i]
+
+rmax = a[1][1]  # One bouquet
+for i in range(1, v + 1):
+    if a[1][i] > rmax:
+        rmax = a[1][i]
+    r[1][i] = rmax
+
+for i in range(2, f + 1):  # General case
+    for j in range(i + 1, v + 1):
+        r[i][j] = max(r[i][j - 1], a[i][j] + r[i - 1][j - 1])
+----
+
+Now `r[f][v]` contains the score of the best placement of `f` bouquets in `v` vases. However, the problem also requires outputting the vase numbers in which we placed the bouquets. Let us refer again to the constructed table `r[i][j]`:
+
+// Page 134
+----
+
+7  23  23  23  23
+x  28  28  39  46
+x   x  24  24  53
+----
+
+Let us recover from it the vase numbers in which we placed bouquets for the optimal arrangement. Consider the last row: the largest number in it is 53, and it appears only in the 5th column. Therefore, the last (3rd) bouquet was placed in the 5th vase.
+
+To find out which vase the previous bouquet (2nd) went into, consider the previous (2nd) row. The 5th vase already contains a bouquet (the 3rd). Therefore, we will consider the table starting from the 4th column (corresponding to the 4th vase). The largest of the remaining numbers — 33 — is in the 4th column. Therefore, the 2nd bouquet was placed in the 4th vase.
+
+To find out which vase the previous (1st) bouquet was placed in, we again go up one row. Consider the first row, starting from the 3rd column (the 4th and 5th vases are already occupied). The maximum number in the 1st row is 23. But it appears in both the 3rd and 2nd columns. We must choose the column with the smallest number (that is, the 2nd). So, the bouquets were placed in vases numbered: 2, 4, and 5.
+
+Thus, to recover the numbers of the used vases, it suffices to find in each row, starting from the last, the column number where the maximum number first appeared — `jr[i]`. This will be the vase number in which bouquet `i` was placed in the optimal arrangement.
+
+[source,python]
+----
+jr = [0] * (f + 2)
+jr[f + 1] = v + 1
+for i in range(f, 0, -1):
+    k = jr[i + 1] - 1
+    rmax = r[i][k]
+    for j in range(v, 0, -1):
+        if r[i][j] == rmax:
+            k = j
+    jr[i] = k
+----
+
+And finally, outputting the result according to the problem requirements:
+
+[source,python]
+----
+with open('flower.out', 'w') as fout:
+    fout.write(f"{r[f][v]}\n")
+    fout.write(' '.join(str(jr[i]) for i in range(1, f + 1)) + '\n')
+----
+
+The full program text is in Listing 2.23.
+
+.Listing 2.23. Solution to the "Flower Shop" problem
+[source,python]
+----
+# io99d1t2 - Flower Shop (IOI'99)
+
+def solve() -> None:
+    with open('flower.inp', 'r') as fin:
+        f, v = map(int, fin.readline().split())
+        a: list[list[int]] = [[0] * (v + 1) for _ in range(f + 1)]
+        for i in range(1, f + 1):
+            row = list(map(int, fin.readline().split()))
+            for j in range(1, v + 1):
+                a[i][j] = row[j - 1]
+
+    r: list[list[int]] = [[0] * (v + 1) for _ in range(f + 1)]
+
+    r[1][1] = a[1][1]
+    for i in range(2, f + 1):
+        r[i][i] = r[i - 1][i - 1] + a[i][i]
+
+    rmax = a[1][1]
+    for i in range(1, v + 1):
+        if a[1][i] > rmax:
+            rmax = a[1][i]
+        r[1][i] = rmax
+
+    for i in range(2, f + 1):
+        for j in range(i + 1, v + 1):
+            r[i][j] = max(r[i][j - 1], a[i][j] + r[i - 1][j - 1])
+
+    jr = [0] * (f + 2)
+    jr[f + 1] = v + 1
+    for i in range(f, 0, -1):
+        k = jr[i + 1] - 1
+        rmax = r[i][k]
+        for j in range(v, 0, -1):
+            if r[i][j] == rmax:
+                k = j
+        jr[i] = k
+
+    with open('flower.out', 'w') as fout:
+        fout.write(f"{r[f][v]}\n")
+        fout.write(' '.join(str(jr[i]) for i in range(1, f + 1)) + '\n')
+
+
+solve()
+----
+
+// Page 135
+
+== Problem "Palindrome"
+
+Belarusian National Olympiad of Schoolchildren in Informatics, 1997. Day 1. Problem 2.
+
+A string S is given. It is necessary to remove the minimum number of characters from it so that the result is a _palindrome_ (that is, a string that reads the same from left to right and from right to left).
+
+The string S is non-empty, has a length of at most 100 characters, and consists only of uppercase Latin letters. The string is read from a file named INPUT.TXT. The length of the resulting palindrome and the palindrome itself must be written to a file named OUTPUT.TXT (1st line — length of the palindrome, 2nd line — the palindrome itself). If there are multiple palindromes, only one of them should be output.
+
+Example:
+
+
+----
+ASDDFSA 6
+----
+
+* INPUT.TXT
+----
+6
+ASFDFSA
+----
+
+* OUTPUT.TXT
+
+// Page 136
+
+== Consider 2 strings: the original ASDDFSA and the reversed ASFDDSA. We will fill a two-dimensional list K[i][j].
+
+K[i][j] is the maximum length of the common substring of the initial part of i characters from the original string and the initial part of j characters from the reversed string.
+
+For this example, the list filled with the values of the recurrence K[i][j] looks as follows:
+
+----
+
+0  0  0  0  0  0  0  0
+0  1  1  1  1  1  1  1
+0  1  2  2  2  2  2  2
+0  1  2  2  2  3  3  3
+0  1  2  3  3  4  4  4
+0  1  2  3  3  4  4  4
+0  1  2  3  3  4  5  5
+0  1  2  3  3  4  5  6
+----
+
+Clearly, K[0][i] and K[i][0] equal 0 for all i. That is, no string has common characters with an empty string.
+
+The first row has all ones, since the first characters of the strings (A) matched, and obviously a string of length 1 cannot have a longer common substring. And so on — for example, K[5][6] = 4 means that the substring of length 5 (ASDDF) has with the string of length 6 (ASFDDSA) a maximum common substring of length 4 (ASDD).
+
+In the general case, K[i][j] is computed recursively as follows:
+
+[source,python]
+----
+if s1[i] == s2[j]:
+    k[i][j] = k[i - 1][j - 1] + 1
+else:
+    k[i][j] = max(k[i - 1][j], k[i][j - 1])
+----
+
+If the i-th character of the first string matches the j-th character of the second string, then we increase by 1 the number of matched characters in the substrings of i-1 characters from the first string and j-1 characters from the second string. Otherwise, we choose the maximum value from the previously matched substrings.
+
+The length of the maximum matched substring (the length of the palindrome) is determined by the value K[L][L], where L is the length of the original string.
+
+To output the longest common substring, we also use the list K[i][j], recovering it by backtracking.
+
+The full program text is in Listing 2.24.
+
+.Listing 2.24. Solution to the "Palindrome" problem
+[source,python]
+----
+# by97s1t2 - Palindrome
+
+def solve() -> None:
+    with open('input.txt', 'r') as fin:
+        s1 = fin.readline().strip()
+
+    L = len(s1)
+    s2 = s1[::-1]
+
+    # Use 1-based indexing for the DP table
+    k: list[list[int]] = [[0] * (L + 1) for _ in range(L + 1)]
+
+    for i in range(1, L + 1):
+        for j in range(1, L + 1):
+            if s1[i - 1] == s2[j - 1]:
+                k[i][j] = k[i - 1][j - 1] + 1
+            else:
+                k[i][j] = max(k[i - 1][j], k[i][j - 1])
+
+    # Recover the palindrome by backtracking
+    i = L
+    j = L
+    p = ""
+    while k[i][j] > 0:
+        while k[i][j - 1] == k[i][j]:
+            j -= 1
+        if s1[i - 1] == s2[j - 1]:
+            p = s1[i - 1] + p
+            j -= 1
+        i -= 1
+
+    with open('output.txt', 'w') as fout:
+        fout.write(f"{k[L][L]}\n")
+        fout.write(f"{p}\n")
+
+
+solve()
+----
+
+// Page 137
+
+== Recurrence Relations with Three or More Parameters
+
+This section presents problems whose solutions require constructing a recurrence relation with three or even more parameters. This means that the recursively defined quantity depends on three or more arguments.
+
+
+=== Problem "Audio Salon"
+
+Belarusian National Olympiad of Schoolchildren in Informatics, 1997. Round 2. Problem 2.
+
+During the broadcast of the concert "Old Songs About the Most Important — 3," entrepreneur _K_ decided to make a business out of producing cassettes. He has _M_ cassettes with a playing duration of _D_ each and wants to record the maximum number of songs on them. These songs (their total count is _N_) are broadcast in the order 1, 2, ..., _N_ and have known durations stem:[L(1), L(2), ..., L(N)]. The entrepreneur can perform one of the following actions.
+
+
+. Record the next song onto a cassette (if it fits) or skip it.
+. If the song does not fit on the cassette, he can skip the song or start recording it on a new cassette. In this case, the old cassette is set aside, and nothing more can be recorded on it.
+
+// Page 138
+Determine the maximum number of songs the entrepreneur can record on the cassettes.
+
+The input data is written in the file KASS.DAT as follows: the first line of the file contains the numbers N, M, and D. Starting from the second line are the numbers L(1), L(2), ..., L(N) (one per line). All numbers are natural.
+
+The answer is output to a file named KASS.OUT.
+
+For example:
+
+
+----
+6 2 7
+5
+2
+2
+4
+2
+3
+----
+
+* KASS.DAT
+
+
+----
+5
+----
+
+* KASS.OUT
+
+In the example, there are 6 songs with durations 5, 2, 2, 4, 2, 3. It is required to record the maximum number of them on 2 cassettes with a playing duration of 7 each.
+
+We introduce and will calculate a recurrence quantity of three parameters: the song number, the cassette number, and the unit of playing duration (minutes — for definiteness) R[p][k][t]. R[p][k][t] is the maximum number of the first p songs that can be recorded on k cassettes, up to and including minute t on the k-th cassette.
+
+Obviously, the answer will be contained in R[N][M][D]. It is also clear that the initial values R[0][i][j] are 0 for all i and j.
+
+Let us see how this list R is filled when transitioning from song P-1 to song number P.
+
+
+* P = 0    0 0 0 0 0 0 0
+ +
+            0 0 0 0 0 0 0
+* P = 1    0 0 0 0 1 1 1
+* L[1]=5  1 1 1 1 1 1 1
+
+The 1st song is recorded on a cassette starting from minute 1. This song has a duration of 5. Therefore, its recording will end at minute 5. And this means that starting from minute 5 of the 1st cassette, we can record 1 song out of the 1 song presented onto this set of cassettes.
+
+Now we record the next song:
+
+
+* P = 2    0 1 1 1 1 1 2
+* L[2] = 2  2 2 2 2 2 2 2
+
+Starting from minute 2 of the 1st cassette, one can record 1 song out of those presented (if we skip the first song and immediately record the second song from the beginning). And start-
+
+// Page 139
+
+
+
+ing from minute 7 of the 1st cassette, one can record 2 songs out of the 2 presented (from minute 1 to 5, the 1st song will be recorded, and from minute 6 to 7 — the 2nd song).
+
+P = 3 0 1 1 2 2 2 2
+
+L[3] = 2 2 3 3 3 3 3 3
+
+Starting from minute 4 of the 1st cassette, we can record 2 songs (the 2nd and 3rd, each lasting 2 minutes), and starting from minute 2 of the 2nd cassette, we can record 3 songs (5 + 2 on the 1st cassette and 2 on the 2nd), and so on.
+
+Obviously, when trying to process the next song, we either do not change the value of the list element or add 1 to it. We add one in the case when the song fits on the cassette from the beginning to the current minute (inclusive).
+
+Taking into account all the nuances, the recurrence relation looks as follows:
+
+----
+if t - L[p] >= 0:
+    R[p][k][t] = max(R[p-1][k][t - L[p]] + 1, R[p-1][k][t])
+else:
+    R[p][k][t] = max(R[p][k-1][D], R[p-1][k][t])
+If the current song fits on the current cassette up to minute T
+  (including minute T),
+  then the maximum number of songs from the presented P songs
+  that can be recorded on K cassettes up to minute T (inclusive)
+  equals the maximum of the number of songs that were
+  successfully recorded up to this point when recording P-1 songs, and
+  the count of songs that were successfully recorded up to
+  minute T-L[P] inclusive, increased by 1
+otherwise (if the current song does not fit on the current cassette
+  up to minute T inclusive)
+  the maximum number of songs equals the maximum of
+  the number of songs that were successfully recorded up to this point
+  when recording P-1 songs, and the number of songs that were
+  successfully recorded up to the last minute of the previous cassette.
+----
+
+The full program text for the problem solution is in Listing 2.25.
+
+.Listing 2.25. Solution to the "Audio Salon" problem
+[source,python]
+----
+# by97s2t2 - Audio Salon
+
+def solve() -> None:
+    with open('kass.dat', 'r') as fin:
+        data = fin.read().split()
+
+    idx = 0
+    n = int(data[idx]); idx += 1
+    m = int(data[idx]); idx += 1
+    d = int(data[idx]); idx += 1
+    L: list[int] = [0]  # 1-indexed
+    for i in range(1, n + 1):
+        L.append(int(data[idx])); idx += 1
+
+    # R[p][k][t] - 3D DP table
+    R: list[list[list[int]]] = [
+        [[0] * (d + 1) for _ in range(m + 1)]
+        for _ in range(n + 1)
+    ]
+
+    for k in range(1, m + 1):
+        for t in range(0, d + 1):
+            R[0][k][t] = 0
+
+    for p in range(1, n + 1):
+        for k in range(1, m + 1):
+            for t in range(0, d + 1):
+                if t - L[p] >= 0:
+                    R[p][k][t] = max(R[p-1][k][t - L[p]] + 1, R[p-1][k][t])
+                else:
+                    R[p][k][t] = max(R[p][k-1][d], R[p-1][k][t])
+
+    with open('kass.out', 'w') as fout:
+        fout.write(f"{R[n][m][d]}\n")
+
+
+solve()
+----
+
+_continued ⇨_
+
+// Page 140
+An attentive reader has obviously noticed that in fact we do not need to store the entire three-dimensional list in memory: it suffices to store only two of its components — the "layer" (previous and new song). Therefore, the list can be declared as follows:
+
+[source,python]
+----
+# R has only 2 layers: R[0] and R[1]
+R: list[list[list[int]]] = [
+    [[0] * (d + 1) for _ in range(m + 1)]
+    for _ in range(2)
+]
+----
+
+And to switch between "layers," two variables are used: `p0` (indexes the previous layer) and `p1` (indexes the new layer).
+
+Then the computational part of the program changes as follows:
+
+[source,python]
+----
+p0 = 0
+p1 = 1
+for p in range(1, n + 1):
+    for k in range(1, m + 1):
+        for t in range(0, d + 1):
+            if t - L[p] >= 0:
+                R[p1][k][t] = max(R[p0][k][t - L[p]] + 1, R[p0][k][t])
+            else:
+                R[p1][k][t] = max(R[p1][k - 1][d], R[p0][k][t])
+    p0 = 1 - p0
+    p1 = 1 - p1
+
+print(max(R[0][m][d], R[1][m][d]))
+----
+
+And the entire program will look as shown in Listing 2.26.
+
+
+=== Listing 2.26. Solution to the "Audio Salon" problem (another variant)
+
+[source,python]
+----
+# by97s2t2 - Audio Salon (space-optimized)
+
+def solve() -> None:
+    with open('kass.dat', 'r') as fin:
+        data = fin.read().split()
+
+    idx = 0
+    n = int(data[idx]); idx += 1
+    m = int(data[idx]); idx += 1
+    d = int(data[idx]); idx += 1
+    L: list[int] = [0]  # 1-indexed
+    for i in range(1, n + 1):
+        L.append(int(data[idx])); idx += 1
+
+    # Only 2 layers needed
+    R: list[list[list[int]]] = [
+        [[0] * (d + 1) for _ in range(m + 1)]
+        for _ in range(2)
+    ]
+
+    for k in range(1, m + 1):
+        for t in range(0, d + 1):
+            R[0][k][t] = 0
+
+    p0 = 0
+    p1 = 1
+    for p in range(1, n + 1):
+        for k in range(1, m + 1):
+            for t in range(0, d + 1):
+                if t - L[p] >= 0:
+                    R[p1][k][t] = max(R[p0][k][t - L[p]] + 1, R[p0][k][t])
+                else:
+                    R[p1][k][t] = max(R[p1][k - 1][d], R[p0][k][t])
+        p0 = 1 - p0
+        p1 = 1 - p1
+
+    with open('kass.out', 'w') as fout:
+        fout.write(f"{max(R[0][m][d], R[1][m][0])}\n")
+
+
+solve()
+----
+
+// Page 141
+
+== Problem "Labyrinth"
+
+Quarterfinal of the ACM International Collegiate Programming Contest, Central Region of Russia. October 5-6, 1999.
+
+A labyrinth map is a square field of size stem:[N × N]. Some squares of this field are forbidden for passage. A _step_ in the labyrinth is a move from one allowed cell to another allowed cell adjacent to the first by a side. A _path_ is some sequence of such steps. It is required to count the number of different paths from cell stem:[(1, 1)] to cell stem:[(N, N)] in exactly stem:[K] steps (that is, to be in cell stem:[(N, N)] after the stem:[K]-th step). Each cell, including the starting and ending ones, can be visited multiple times. The starting and ending cells are always allowed for passage.
+
+_Constraints:_ stem:[1 < N ≤ 20], stem:[0 < K ≤ 50].
+
+The first line of the input file INPUT.TXT consists of just two numbers: N and K, separated by one or more spaces. The following N lines, each containing N characters, contain the labyrinth map starting from cell stem:[(1, 1)]. The character `'0'` denotes a cell that is not forbidden for passage, and the character `'1'` denotes a forbidden one.
+
+The output file OUTPUT.TXT contains the result — the number of possible different paths of length stem:[K].
+
+Time per test — 15 seconds.
+
+Consider two examples:
+
+1. INPUT.TXT
++
+----
+3 6
+000
+101
+100
+----
++
+OUTPUT.TXT
++
+----
+5
+----
+
+2. INPUT.TXT
++
+----
+3 6
+000
+111
+000
+----
++
+OUTPUT.TXT
++
+----
+0
+----
+
+// Page 142
+We will construct a recurrence relation for the quantity `A[k][i][j]` — the number of ways to reach cell `(i, j)` in exactly `k` steps. Clearly, in 0 steps one can only be in cell `(1, 1)`. Therefore, `A[0][1][1] = 1` and `A[0][i][j] = 0` for all `i` and `j`. On step `k`, cell `(i, j)` can be reached (if it is not forbidden for passage) only from neighboring cells according to the rules established in the problem: `(i-1, j)`, `(i+1, j)`, `(i, j-1)`, `(i, j+1)`.
+
+The total number of ways to reach a given cell after step `k` will equal the sum of the numbers of ways to reach the neighboring cells on the previous `(k-1)`-th step, or 0 if the cell is forbidden for passage.
+
+It is easy to calculate that storing all values of the recurrence `A[k][i][j]` requires stem:[50 * 20 * 20 = 20,000] elements. In Python, memory is not as tightly constrained as in old Turbo Pascal, but we can still optimize by storing only the two actually needed last layers.
+
+The complete solution to the problem is in Listing 2.27.
+
+.Listing 2.27. Program "Labyrinth"
+[source,python]
+----
+# need4c99g - Labyrinth
+
+def solve() -> None:
+    with open('input.txt', 'r') as fin:
+        first_line = fin.readline().split()
+        n = int(first_line[0])
+        K = int(first_line[1])
+
+        # Read the labyrinth (1-indexed)
+        C: list[list[str]] = [[''] * (n + 1)]
+        for i in range(1, n + 1):
+            line = fin.readline().strip()
+            row = [''] + list(line)
+            C.append(row)
+
+    # A has 2 layers, indices 0..n+1 for boundary handling
+    # We use n+2 to avoid index-out-of-range when accessing i+1 or j+1
+    def make_layer() -> list[list[int]]:
+        return [[0] * (n + 2) for _ in range(n + 2)]
+
+    A: list[list[list[int]]] = [make_layer(), make_layer()]
+
+    A[0][1][1] = 1
+    k0 = 0
+    k1 = 1
+
+    for step in range(1, K + 1):
+        # Clear k1 layer
+        for i in range(0, n + 2):
+            for j in range(0, n + 2):
+                A[k1][i][j] = 0
+
+        for i in range(1, n + 1):
+            for j in range(1, n + 1):
+                if C[i][j] == '0':
+                    A[k1][i][j] = (A[k0][i][j - 1] + A[k0][i - 1][j] +
+                                   A[k0][i][j + 1] + A[k0][i + 1][j])
+                else:
+                    A[k1][i][j] = 0
+
+        k0 = 1 - k0
+        k1 = 1 - k1
+
+    # After all steps, result is in layer k0 (the last written layer)
+    # Since we swapped at the end, the result is in k0
+    # But let's just check: after the loop, we swapped k0/k1,
+    # so the latest result is in A[k0] (which was k1 before swap)
+    # Actually, the result is in A[1 - k1], i.e., A[k0]
+    result = A[k0][n][n]
+
+    with open('output.txt', 'w') as fout:
+        fout.write(f"{result}\n")
+
+
+solve()
+----
+
+// Page 143
+[NOTE]
+====
+Unlike Pascal's `comp` type which has limited precision, Python integers have arbitrary precision and can handle numbers of any size. Therefore, no "long" addition implementation is needed — Python handles it natively.
+
+====
+
+
+== Problem "Anniversary"
+
+Belarusian National Olympiad of Schoolchildren in Informatics, 1998. Day 1. Problem 2.
+
+In connection with the opening of the 1998 informatics olympiad in Mogilev, stem:[N] people (stem:[N ≤ 10]) decided to throw a party. To hold the party, it suffices to buy `MF` bottles of Fanta, `MB` bananas, and `MC` cakes. It is required to determine the minimum contribution per party participant. Note that when purchasing certain sets of goods, wholesale trade rules apply: the cost of a set of goods may differ from the total cost of individual items.
+
+Write a program that determines the minimum contribution per party participant from the input data. The input data is in a text file named `PART.IN` and has the following format:
+
+
+* the first line contains the numbers `N` (number of people, stem:[N ≤ 10]) and `M` (number of possible sets, stem:[≤ 100,000]);
+* each of the following `M` lines contains 4 numbers: `F`, `B`, `C` (number of Fanta bottles, bananas, and cakes in the set, stem:[0 ≤ F, B, C ≤ 1000]) and `S` (cost of the set, stem:[S ≤ 100,000]).
+* the last line contains the numbers `MF`, `MB`, and `MC` (`MF`, `MB`, `MF` stem:[≤ 9]).
+
+The output data should be in a text file named `PART.OUT` and contain the number `V` — the minimum contribution per participant.
+
+So, our task is to form, taking into account all discounts, the list `o[f][b][c]` (dimensions `10 × 10 × 10`), where `o[f][b][c]` is the minimum cost of purchasing `f` bottles of Fanta, `b` bananas, and `c` cakes.
+
+First, let us deal with the input data: the conditions state that the number of discounts on input can be stem:[≤ 100,000]. But we know that for the party we need no more than 9 items of each type, so all discounts can be stored in `sk[f][b][c]` — a 3D list of minimum discounts for purchasing `f` bottles of Fanta, `b` bananas, and `c` cakes. The discount input can be done by first filling the lists `o` and `sk` with a very large value (acting as infinity):
+
+[source,python]
+----
+INF = float('inf')
+o = [[[INF] * 10 for _ in range(10)] for _ in range(10)]
+sk = [[[INF] * 10 for _ in range(10)] for _ in range(10)]
+----
+
+If you don't buy anything, you don't spend anything, so we zero out the element `o[0][0][0]`, that is:
+
+[source,python]
+----
+o[0][0][0] = 0
+----
+
+// Page 144
+Now we read the next of the 100,000 discounts and use it to form the next element in the sk list. If a discount contains a number (of Fanta bottles, bananas, or cakes) greater than 9, we replace it with 9. And we enter the corresponding cost into the sk list only if it is less than the one already stored in the list at that position (that is, only if the new discount is better than the old one).
+
+[source,python]
+----
+with open('part.in', 'r') as fin:
+    n, m = map(int, fin.readline().split())
+    for i in range(m):
+        f, b, c, s = map(int, fin.readline().split())
+        if f > 9: f = 9
+        if b > 9: b = 9
+        if c > 9: c = 9
+        if sk[f][b][c] > s:
+            sk[f][b][c] = s
+    mf, mb, mc = map(int, fin.readline().split())
+----
+
+Now we need to use the discount list sk to recursively form the list o, taking into account the following considerations.
+
+
+. Suppose we have the optimal cost — o[i1][i2][i3] — of purchasing exactly i1 bottles of Fanta, i2 bananas, i3 cakes, and we have a discount s for f bottles of Fanta, b bananas, c cakes. Then we can construct the optimal cost for purchasing i1 + f bottles of Fanta, i2 + b bananas, and i3 + c cakes as the minimum of o[i1+f][i2+b][i3+c] and s + o[i1][i2][i3].
+. Each of the numbers i1 + f, i2 + b, i3 + c may turn out to be greater than 9, so in that case we replace them with 9 (the problem statement says that we can buy no fewer goods than we need — the main thing is at the lowest cost).
+. We must apply _every_ real (not equal to infinity) discount from the list of original discounts sk to every real (not equal to infinity) cost from the list o.
+
+[source,python]
+----
+for f in range(10):
+    for b in range(10):
+        for c in range(10):
+            s = sk[f][b][c]
+            if s == INF:
+                continue
+            for i1 in range(10):
+                for i2 in range(10):
+                    for i3 in range(10):
+                        i1f = min(i1 + f, 9)
+                        i2b = min(i2 + b, 9)
+                        i3c = min(i3 + c, 9)
+                        if o[i1][i2][i3] != INF and \
+                           o[i1f][i2b][i3c] > s + o[i1][i2][i3]:
+                            o[i1f][i2b][i3c] = s + o[i1][i2][i3]
+----
+
+// Page 145
+
+=== NOTE
+
+[NOTE]
+====
+In Python, the `continue` statement skips to the next iteration of the loop, just like in other languages.
+
+====
+
+Now we need to find the _minimum_ element of the part of the optimal discounts list `o[mf..9][mb..9][mc..9]`, where `mf`, `mb`, `mc` are the original values denoting the minimum quantity of the corresponding products needed for the party, and divide it by the number of participants.
+
+[source,python]
+----
+min_cost = INF
+for i1 in range(mf, 10):
+    for i2 in range(mb, 10):
+        for i3 in range(mc, 10):
+            if o[i1][i2][i3] < min_cost:
+                min_cost = o[i1][i2][i3]
+res = min_cost // n
+----
+
+And the final touch: the problem author V. M. Kotov tested the attentiveness of olympiad participants by specifying the party location (Mogilev) in the problem. He was hinting that Belarusian money should be used, and at that time Belarusian currency had _no_ denominations smaller than hundreds in circulation. This means the result needs to be rounded to hundreds:
+
+[source,python]
+----
+res = (min_cost // (n * 100)) * 100  # rounding
+if min_cost % (n * 100) > 0:  # to hundreds
+    res += 100
+----
+
+The full program text is given in Listing 2.28.
+
+.Listing 2.28. Program "Anniversary"
+[source,python]
+----
+# by98d1t2 - Anniversary
+
+def solve() -> None:
+    INF = float('inf')
+
+    o = [[[INF] * 10 for _ in range(10)] for _ in range(10)]
+    sk = [[[INF] * 10 for _ in range(10)] for _ in range(10)]
+    o[0][0][0] = 0
+
+    with open('part.in', 'r') as fin:
+        n, m = map(int, fin.readline().split())
+        for i in range(m):
+            f, b, c, s = map(int, fin.readline().split())
+            f = min(f, 9)
+            b = min(b, 9)
+            c = min(c, 9)
+            if sk[f][b][c] > s:
+                sk[f][b][c] = s
+
+        for f in range(10):
+            for b in range(10):
+                for c in range(10):
+                    s = sk[f][b][c]
+                    if s == INF:
+                        continue
+                    for i1 in range(10):
+                        for i2 in range(10):
+                            for i3 in range(10):
+                                i1f = min(i1 + f, 9)
+                                i2b = min(i2 + b, 9)
+                                i3c = min(i3 + c, 9)
+                                if o[i1][i2][i3] != INF and \
+                                   o[i1f][i2b][i3c] > s + o[i1][i2][i3]:
+                                    o[i1f][i2b][i3c] = s + o[i1][i2][i3]
+
+        mf, mb, mc = map(int, fin.readline().split())
+
+    min_cost = INF
+    for i1 in range(mf, 10):
+        for i2 in range(mb, 10):
+            for i3 in range(mc, 10):
+                if o[i1][i2][i3] < min_cost:
+                    min_cost = o[i1][i2][i3]
+
+    res = (int(min_cost) // (n * 100)) * 100  # rounding
+    if int(min_cost) % (n * 100) > 0:  # to hundreds
+        res += 100
+
+    with open('part.out', 'w') as fout:
+        fout.write(f"{res}\n")
+
+
+solve()
+----
+
+// Page 146
+
+== Problem "Trade Discounts"
+
+IOI'95 — 7th International Olympiad in Informatics (The Netherlands). Day 1. Problem 2.
+
+In a store, each product has a price. For example, the price of one flower is 2 ICU (Informatics Currency Units), and the price of one vase is 5 ICU. To attract more customers, the store introduced discounts that consist of selling a set of identical or different products at a reduced price. For example: three flowers for 5 ICU instead of 6, or two vases together with one flower for 10 ICU instead of 12.
+
+Write a program that computes the lowest price a customer must pay for the given purchases. The optimal solution must be obtained by taking discounts into account. The set of goods to be purchased cannot be supplemented with anything, even if it would reduce the total cost. For the prices and discounts described above, the lowest price for 3 flowers and 2 vases is 14 ICU: 2 vases and 1 flower are sold at the discounted price of 10 ICU, and 2 flowers at the regular price of 4 ICU.
+
+The input data is contained in two files: INPUT.TXT and OFFER.TXT. The first file describes the purchases ("shopping basket"). The second file describes the discounts. Both files contain only integers. The first line of INPUT.TXT contains the number b of different product types in the basket (0 ≤ b ≤ 5). Each of the following b lines contains values c, k, and p. The value c is the unique product code (1 ≤ c ≤ 999). The value k specifies how many units of the product are in the basket
+
+// Page 147
+
+
+
+
+149
+
+(1 ≤ k ≤ 5). The value p specifies the regular (undiscounted) price per unit (1 ≤ P ≤ 999). Note that the total number of products in the basket can be at most 5*5 = 25 units.
+
+The first line of OFFER.TXT contains the number s of possible discounts (0 ≤ s ≤ 99). Each of the following s lines describes one discount, specifying a set of products and the total cost of the set. The first number n in such a line specifies the number of different product types in the set (1 ≤ n ≤ 5). The following n pairs of numbers (c,k) indicate that k units of product with code c are included in the discount set (1 ≤ k ≤ 5, 1 ≤ c ≤ 999). The last number in the line p specifies the discounted cost of the set (1 ≤ p ≤ 9999). The cost of a set is less than the total cost of individual product units in the set.
+
+The output file OUTPUT.TXT contains one line with the lowest possible total cost of purchases specified in the input file.
+
+Input and output example:
+
+----
+2
+7 3 2
+8 2 5
+----
+
+----
+2
+1 7 3 5
+2 7 1 8 2 10
+----
+
+----
+14
+----
+
+[EXAMPLE]
+====
+INPUT.TXT
+
+OFFER.TXT
+
+OUTPUT.TXT
+
+====
+
+So, we are told that there can be no more than five types of products and no more than 5 units of each product. Then the input data can be transformed to the form:
+
+
+* `o[i][j]` — sets of possible purchases;
+* `i` — number of the possible purchase set (discount);
+* `j` — product number;
+* `o[i][j]` — number of units of product j that must be bought when using set i. i ≤ number of products + number of discounts, j ≤ 5;
+* `p[i]` — cost of the i-th set from table `o[i][j]`.
+
+For example, for the original example, `o[i][j]` and `p[i]` look as follows:
+
+----
+o[i][j]    p[i]
+1 0 0 0 0  2  (corresponds to line) 7 3 2
+0 1 0 0 0  5                          8 2 5
+3 0 0 0 0  5                          1 7 3 5
+1 2 0 0 0 10                          2 7 1 8 2 10
+----
+
+It is required to find the minimum cost of the purchase defined by list `k[0..4]`, where `k[i]` is the number of products of type i that need to be purchased.
+
+For the given example, the list k has the form:
+
+----
+3 2 0 0 0
+----
+
+// Page 148
+An attentive reader may notice that we renumbered the products from 1 to 5, while in the problem conditions products can have any numbers. This is true, but no more than 5 different numbers. And since these numbers are not used anywhere else, the products can be _renumbered_ practically right after input.
+
+We read the products to be purchased `c[i]`, their quantity `k[i]`, and their base price `p[i]`:
+
+[source,python]
+----
+with open('input.txt', 'r') as fin:
+    b = int(fin.readline())
+    c: list[int] = [0] * (b + 1)
+    k: list[int] = [0] * (b + 1)
+    p: list[int] = [0] * 105
+    o: list[list[int]] = [[0] * 6 for _ in range(105)]
+    for i in range(1, b + 1):
+        ci, ki, pi = map(int, fin.readline().split())
+        c[i] = ci
+        k[i] = ki
+        p[i] = pi
+        for j in range(1, 6):
+            o[i][j] = 0
+        o[i][i] = 1
+----
+
+Note that we immediately form b rows in the table o. Purchases at the base price can participate just like discounts!
+
+The next step is reading the discounts. For each discount read, we populate a new row numbered `kp` in the purchase set list o and add the corresponding element to the set cost list p.
+
+[source,python]
+----
+def find_product(cs: int) -> int:
+    """Find the product index (1..b) by its code."""
+    i = 1
+    while c[i] != cs:
+        i += 1
+    if i <= b:
+        return i
+    else:
+        print('error')
+        raise SystemExit(1)
+
+kp = b
+with open('offer.txt', 'r') as fin:
+    s = int(fin.readline())
+    for i in range(s):
+        parts = list(map(int, fin.readline().split()))
+        n_items = parts[0]
+        kp += 1
+        for j in range(1, 6):
+            o[kp][j] = 0
+        idx = 1
+        for j in range(n_items):
+            cs = parts[idx]; idx += 1
+            ks = parts[idx]; idx += 1
+            o[kp][find_product(cs)] = ks
+        p[kp] = parts[idx]
+----
+
+The trick with the numbers, which can be arbitrary on input (but we need to convert them to corresponding numbers from 1 to 5), is "hidden" in the function `find_product(cs)`. `cs` is the number we read, and `find_product(cs)` is the corresponding number in the range from 1 to 5.
+
+// Page 149
+The logic of this function is simple: by the problem conditions, we know that _all_ different product numbers must have been entered when specifying the products to buy. Therefore, the list `c[i]` contains all possible product codes. So each of them corresponds to its own number from 1 to 5 in the list `c`. The function, given a code as a parameter, simply scans all elements in the list `c` and finds its number. If there is no such code, it means an error in the input data.
+
+So, we have formed the lists:
+
+
+* `o[i][j]` — with five columns and `kp = b + s` rows, where `b` is the number of products that can be purchased, and `s` is the number of discounts established by the store;
+* `p[i]` — with `kp` elements;
+* `k[i]` — with 5 elements.
+
+The problem conditions emphasize that there can be at most 5 products and no more than 5 units of each can be purchased.
+
+We introduce the function `r[i1][i2][i3][i4][i5]`, which determines the optimal cost of purchasing `i1` products of type 1, `i2` of type 2, `i3` of type 3, `i4` of type 4, and `i5` products of type 5. Here stem:[0 ≤ i1, i2, i3, i4, i5 ≤ 5]. Obviously, `r[0][0][0][0][0] = 0`, meaning if you don't buy anything, you don't have to pay anything.
+
+[source,python]
+----
+INF = float('inf')
+# 5D list: r[i1][i2][i3][i4][i5]
+r = [[[[[INF for _ in range(6)]
+         for _ in range(6)]
+         for _ in range(6)]
+         for _ in range(6)]
+         for _ in range(6)]
+r[0][0][0][0][0] = 0
+for i in range(1, kp + 1):
+    r[o[i][1]][o[i][2]][o[i][3]][o[i][4]][o[i][5]] = p[i]
+----
+
+First, we set the maximum possible price for all variants and zeroed out the cost of an "empty purchase." Then we entered the costs of purchasing items both at their nominal price and with available discounts. Next, we recalculate the cost of all possible purchase variants using all `kp` available discount variants.
+
+[source,python]
+----
+for i in range(1, kp + 1):
+    for i1 in range(6):
+        for i2 in range(6):
+            for i3 in range(6):
+                for i4 in range(6):
+                    for i5 in range(6):
+                        if r[i1][i2][i3][i4][i5] != INF:
+                            j1 = min(i1 + o[i][1], 5)
+                            j2 = min(i2 + o[i][2], 5)
+                            j3 = min(i3 + o[i][3], 5)
+                            j4 = min(i4 + o[i][4], 5)
+                            j5 = min(i5 + o[i][5], 5)
+                            cost = p[i] + r[i1][i2][i3][i4][i5]
+                            if r[j1][j2][j3][j4][j5] > cost:
+                                r[j1][j2][j3][j4][j5] = cost
+----
+
+// Page 150
+If we have a set of goods that can be purchased at the optimal price, then based on it we build the optimal costs of all purchases that can be made using the current discount: `o[i][1]`, `o[i][2]`, `o[i][3]`, `o[i][4]`, `o[i][5]`. The number of units of goods should be from 0 to 5, and a new variant is better if the resulting cost is less than the one calculated earlier.
+
+And finally, as the answer we output the computed value `r[k[1]][k[2]][k[3]][k[4]][k[5]]`:
+
+[source,python]
+----
+with open('output.txt', 'w') as fout:
+    fout.write(f"{int(r[k[1]][k[2]][k[3]][k[4]][k[5]])}\n")
+----
+
+.Listing 2.29. Program "Trade Discounts"
+[source,python]
+----
+# io95dit2 - Trade Discounts (IOI'95)
+
+def solve() -> None:
+    INF = float('inf')
+
+    c: list[int] = [0] * 105
+    k: list[int] = [0] * 105
+    p: list[int] = [0] * 105
+    o: list[list[int]] = [[0] * 6 for _ in range(105)]
+
+    def find_product(cs: int) -> int:
+        """Find product index (1..b) by its code."""
+        i = 1
+        while c[i] != cs:
+            i += 1
+        if i <= b:
+            return i
+        else:
+            print('error')
+            raise SystemExit(1)
+
+    # Read purchases
+    with open('input.txt', 'r') as fin:
+        b = int(fin.readline())
+        for i in range(1, b + 1):
+            ci, ki, pi = map(int, fin.readline().split())
+            c[i] = ci
+            k[i] = ki
+            p[i] = pi
+            for j in range(1, 6):
+                o[i][j] = 0
+            o[i][i] = 1
+
+    # Read discounts
+    kp = b
+    with open('offer.txt', 'r') as fin:
+        s = int(fin.readline())
+        for i in range(s):
+            parts = list(map(int, fin.readline().split()))
+            n_items = parts[0]
+            kp += 1
+            for j in range(1, 6):
+                o[kp][j] = 0
+            idx = 1
+            for j in range(n_items):
+                cs = parts[idx]; idx += 1
+                ks = parts[idx]; idx += 1
+                o[kp][find_product(cs)] = ks
+            p[kp] = parts[idx]
+
+    # Initialize 5D DP table
+    r = [[[[[INF for _ in range(6)]
+             for _ in range(6)]
+             for _ in range(6)]
+             for _ in range(6)]
+             for _ in range(6)]
+    r[0][0][0][0][0] = 0
+
+    for i in range(1, kp + 1):
+        r[o[i][1]][o[i][2]][o[i][3]][o[i][4]][o[i][5]] = p[i]
+
+    # Fill DP table
+    for i in range(1, kp + 1):
+        for i1 in range(6):
+            for i2 in range(6):
+                for i3 in range(6):
+                    for i4 in range(6):
+                        for i5 in range(6):
+                            if r[i1][i2][i3][i4][i5] != INF:
+                                j1 = min(i1 + o[i][1], 5)
+                                j2 = min(i2 + o[i][2], 5)
+                                j3 = min(i3 + o[i][3], 5)
+                                j4 = min(i4 + o[i][4], 5)
+                                j5 = min(i5 + o[i][5], 5)
+                                cost = p[i] + r[i1][i2][i3][i4][i5]
+                                if r[j1][j2][j3][j4][j5] > cost:
+                                    r[j1][j2][j3][j4][j5] = cost
+
+    # Output result
+    with open('output.txt', 'w') as fout:
+        fout.write(f"{int(r[k[1]][k[2]][k[3]][k[4]][k[5]])}\n")
+
+
+solve()
+----
+
+// Page 151
+[source,python]
+----
+    read_data()
+    for i1 in range(6):
+        for i2 in range(6):
+            for i3 in range(6):
+                for i4 in range(6):
+                    for i5 in range(6):
+                        r[i1][i2][i3][i4][i5] = float('inf')
+    r[0][0][0][0][0] = 0
+    for i in range(1, kp + 1):
+        r[o[i][1]][o[i][2]][o[i][3]][o[i][4]][o[i][5]] = p[i]
+    for i in range(1, kp + 1):
+        for i1 in range(6):
+            for i2 in range(6):
+                for i3 in range(6):
+                    for i4 in range(6):
+                        for i5 in range(6):
+                            if r[i1][i2][i3][i4][i5] != float('inf'):
+                                ni1 = i1 + o[i][1]
+                                ni2 = i2 + o[i][2]
+                                ni3 = i3 + o[i][3]
+                                ni4 = i4 + o[i][4]
+                                ni5 = i5 + o[i][5]
+                                if (0 <= ni1 <= 5 and
+                                    0 <= ni2 <= 5 and
+                                    0 <= ni3 <= 5 and
+                                    0 <= ni4 <= 5 and
+                                    0 <= ni5 <= 5 and
+                                    r[ni1][ni2][ni3][ni4][ni5] >
+                                    p[i] + r[i1][i2][i3][i4][i5]):
+                                    r[ni1][ni2][ni3][ni4][ni5] = (
+                                        p[i] + r[i1][i2][i3][i4][i5]
+                                    )
+    with open('output.txt', 'w') as f_out:
+        print(r[k[1]][k[2]][k[3]][k[4]][k[5]], file=f_out)
+----
+
+
+== General Techniques for Solving Recurrence Relation Problems
+
+Earlier in this chapter, we examined many problems whose solutions involved devising a recurrence relation. Some readers may have gotten the impression that solving each such problem is a special art. In reality, the art lies in devising such a recurrence relation for a _new class_ of problems. Below are the classes of problems covered in this chapter. Once you recognize a given problem as belonging to one of these standard types, you can simply use the corresponding standard recurrence relation.
+
+
+=== Forming All Possible Sums
+
+Suppose we have a set of integers (let there be N of them with values `L[i]`) and we need to construct all possible variants of their sums. We proceed as follows: we create a one-dimensional list (say, `s[j]`) with a maximum size equal to the maximum possible sum (`M`, for definiteness). Then, iterating over all our numbers `L[i]`, we sequentially modify all elements of the list `s[j]`:
+
+// Page 152
+[source,python]
+----
+s = [0] * (M + 1)
+s[0] = 1
+for i in range(n):
+    for j in range(M - L[i], -1, -1):
+        if s[j] == 1:
+            s[j + L[i]] = 1
+----
+
+As a result, the list `s` will have ones at positions corresponding to sum values that can be formed from the given numbers `L[i]`.
+
+Can you recall which of the problems solved above used this technique in one modification or another? Yes, that's right — the "Video Salon" and "Audio Salon" problems. I would also add to this list all the discount problems: "Flower Shop," "Anniversary," and "Trade Discounts." Although formally, summation was performed not on one-dimensional lists but on three-dimensional and even five-dimensional lists (for the last problem).
+
+
+== Restoring the Optimal Path
+
+If a problem requires outputting not only the computed optimal value of the recurrence quantity but also the list of elements that produce this optimal value, then it is necessary to _restore the optimal path_. This was done in the "Flower Shop" problem (when restoring the specific optimal assignment of bouquets to vases) and in the "Palindrome" problem (when finding the specific characters from the original string that form the longest palindrome). In both problems, it was necessary to process the constructed two-dimensional lists of recurrence values "from optimal values back to initial ones" ("bottom-up" and "right-to-left"), that is, in the reverse order of list filling.
+
+
+== Reducing Memory Usage
+
+As mentioned at the beginning, sometimes it is necessary to reduce the memory occupied by the list storing the values of the recurrence quantity. For example, when computing Fibonacci numbers, instead of a one-dimensional list we used three variables. When solving the "Audio Salon" problem, instead of storing a three-dimensional list of all songs `r[101][101][101]` (which would use a huge amount of memory), we stored only two "layers": `r[2][101][101]`, which required 50 times less memory! And finally, for the "Video Salon" problem, we processed a one-dimensional list `s[0:100]` "from the end" in order to avoid storing two copies (that is, to avoid turning it into a two-dimensional list `s[2][100]`).
+
+
+== Recursive Computation of Recurrence Relations
+
+The problem of insufficient memory for computing recurrence quantities can in some cases be solved by using recursive functions for computing recurrence values, as was done in the "Reconnaissance Selection" problem.
+
+
+== Recurrence Relations on Strings
+
+If we need to solve problems involving strings, we can, as in the "Palindrome" problem, construct a recurrence relation `r[i][j]` — with the goal of finding
+
+// Page 153
+the optimal solution for `i` characters of the first string and `j` characters of the second string. If, for example, we need to process three strings, then we would consider a recurrence relation with three parameters: `r[i][j][k]`, where `k` is the first stem:[k] characters of the third string.
+
+

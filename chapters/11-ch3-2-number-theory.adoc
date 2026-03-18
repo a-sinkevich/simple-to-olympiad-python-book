@@ -1,0 +1,468 @@
+== 3.2. Some Facts from Number Theory
+
+There is a significant class of programming problems whose straightforward solution assumes the student's knowledge of the following topics from number theory:
+
+
+* properties of the remainder of dividing number stem:[X] by number stem:[Y] (`X % Y`);
+* positional number systems and fast polynomial evaluation;
+* the exponent with which a given prime stem:[P] enters the product stem:[N!];
+* properties of GCD (greatest common divisor).
+
+This section is devoted to presenting the corresponding facts and examples of their application to solving specific problems.
+
+
+=== Properties of X % Y
+
+Let stem:[X] and stem:[Y] be integers. Dividing stem:[X] by stem:[Y] with integer division, we obtain two numbers — the _quotient_ (denoted `q`) and the _remainder_ (`r`). In Python, the corresponding operations for finding `q` and `r` are:
+
+[source,python]
+----
+q = x // y
+r = x % y
+----
+
+Let us consider some properties of the remainder of division.
+
+1. stem:[(A + B) mod Y = (A mod Y + B mod Y) mod Y].
+
+That is, to find the remainder of dividing the sum of two numbers stem:[A] and stem:[B] by number stem:[Y], it suffices to find the remainders of dividing numbers stem:[A] and stem:[B] by stem:[Y], add the resulting numbers, and then take the remainder of dividing the computed sum by stem:[Y].
+
+Suppose we need to compute the remainder of dividing the number 197 by 5. The traditional method involves long division of 197 by 5:
+
+----
+
+  197 | 5
+− 15  | 39
+  ——
+   47
+−  45
+  ——
+    2
+----
+
+// Page 223
+It turns out that the quotient is 39 and the remainder is 2.
+
+But no one asked us for the quotient. This means we most likely performed unnecessary work. Let us count how many operations were performed in total:
+
+
+. 3 * 5 = 15;
+. 19 – 15 = 4;
+. 9 * 5 = 45;
+. 47 – 45 = 2.
+
+In fact, we performed even more operations. After all, to find the digits 3 and 9 of the quotient, we had to search by trial for a digit whose product with 5 would be the maximum but less than 19 — in the first case (when we were selecting the digit 3) and less than 47 — in the second case (when we were selecting the digit 9).
+
+Now let us try to solve the same problem using property 1.
+
+197 mod 5 = (190 + 7) mod 5 = +
+
+((190 mod 5) + (7 mod 5)) mod 5 = +
+
+(0 + 2) mod 5 = 2.
+
+Obviously, this method is much simpler (especially in the more general case — with an arbitrary divisor).
+
+
+. (A * B) mod Y = ((A mod Y) * (B mod Y)) mod Y.
+
+That is, to find the remainder of dividing the product of two numbers A and B by number Y, it suffices to find the remainders of dividing numbers A and B by Y, multiply the resulting numbers, and then take the remainder of dividing the computed product by Y.
+
+Suppose we need to compute the remainder of dividing the number 100 by 7. The traditional method involves long division of 100 by 7:
+
+----
+
+   100│ 7
+     7 │14
+    30
+    28
+     2
+----
+
+It turns out that the quotient is 14 and the remainder is 2.
+
+Now let us try to find the same result using property 2:
+
+100 mod 7 = (10 * 10) mod 7 = +
+
+((10 mod 7) * (10 mod 7)) mod 7 = (3 * 3) mod 7 = +
+
+9 mod 7 = 2.
+
+Obviously, this method is significantly simpler.
+
+// Page 224
+
+== Positional Number Systems and Fast Polynomial Evaluation
+
+Consider a _polynomial_:
+
+a₀ + a₁ * x + ... + aₙ₋₁ * xn-1 + aₙ * xn.
+
+Suppose we are given a list of polynomial coefficients a[0], a[1], ..., a[n-1], a[n] and some number x for which we need to evaluate this polynomial. Then the program can be written, for example, as follows:
+
+[source,python]
+----
+s = 0
+y = 1
+for k in range(n + 1):
+    s = s + a[k] * y
+    y = y * x
+----
+
+Python does have the `**` exponentiation operator, but computing powers incrementally by multiplication (as in `y = y * x`) is a common technique in competitive programming.
+
+In mathematics, the summation sign is used to abbreviate polynomial notation:
+
+n +
+∑ _expression_. +
+k=0
+
+This reads as follows: the sum of the expressions following the summation sign for _k_ from 0 to _n_.
+
+Using this notation, the polynomial takes the form:
+
+n +
+∑ A[k] · xk. +
+k=0
+
+And the rules for computing the modulus of a polynomial, following from properties 1 and 2, can be written as follows:
+
+1. n +
+ ∑ A[k] · xk mod M = (n +
+ ∑ A[k](xk mod M)) mod M. +
+ k=0 k=0
+
+2. xk mod M = (x(xk-1 mod M)) mod M (for x < M).
+
+3. (P + Q) mod M = (P mod M + Q) mod M (for 0 < M).
+
+Now let us return to the polynomial evaluation program:
+
+[source,python]
+----
+s = 0
+y = 1
+for k in range(n + 1):
+    s = s + a[k] * y
+    y = y * x
+----
+
+Some readers have probably already noticed that one could also write it as:
+
+// Page 225
+[source,python]
+----
+s = a[0]
+y = x
+for k in range(1, n + 1):
+    s = s + a[k] * y
+    y = y * x
+----
+
+Then there would be one fewer addition and multiplication operation each — n and 2n respectively.
+
+But can we write this program so as to further reduce the number of operations (additions and/or multiplications)?
+
+So, suppose we have the polynomial:
+
+stem:[A = an + a1x + a2x2 + ... + aNx2 (0 ≤ ak < N)],
+
+which represents the number _A_ in a positional number system, where stem:[ak] are the digits and stem:[x] is the base of the number system.
+
+Denoting stem:[ak] as `a[k]` and reversing the order of terms in the polynomial, we get:
+
+stem:[A = a[N] * xn + ... + a[k] * x2 + ... + a[0]].
+
+Let us introduce the notation:
+
+
+* `s[n] = a[n]`
+* `s[n-1] = s[n] * x + a[n-1] = a[n] * x + a[n-1]`
+* `s[n-2] = s[n-1] * x + a[n-2] = a[n] * x**2 + a[n-1] * x + a[n-2]`
+* ...
+* `s[0] = s[1] * x + a[0] = a[n] * x**n + a[n-1] * x**(n-1) + ... + a[0]`
+
+Now the polynomial evaluation algorithm looks as follows:
+
+----
+s[n] = a[n]                                    ! fast polynomial
+For i from n to 1 s[i-1] = s[i]*x + a[i-1]    ! evaluation
+----
+
+And the corresponding program fragment:
+
+[source,python]
+----
+s = [0] * (n + 1)
+s[n] = a[n]
+for i in range(n, 0, -1):
+    s[i - 1] = s[i] * x + a[i - 1]
+----
+
+Since each time we only need the one previous value of s to compute the next one, this program fragment can be simplified:
+
+[source,python]
+----
+s = a[n]
+for i in range(n, 0, -1):
+    s = s * x + a[i - 1]
+----
+
+Now we can finally write the complete program text (Listing 3.1), which, given the argument stem:[x] and polynomial coefficients `a[i]`, evaluates the polynomial itself.
+
+.Listing 3.1. Polynomial evaluation program
+[source,python]
+----
+# poly3
+def main() -> None:
+    x = int(input())
+    n = int(input())
+    a: list[int] = []
+    for i in range(n + 1):
+        a.append(int(input()))
+    s = a[n]
+    for i in range(n, 0, -1):
+        s = s * x + a[i - 1]
+    print(s)
+
+
+main()
+----
+
+// Page 226
+.Listing 3.1 (continued)
+What makes this program better than the one written earlier, which had n additions and 2n multiplications? It has exactly n additions and n multiplications, meaning the number of multiplications has been halved. This means the program will require half the execution time. There are problems for which this is very important.
+
+
+== The Polynomial Remainder Problem
+
+A number is given in the K-ary number system:
+
+stem:[anan-1...a0 (K ≤ 36)].
+
+Find the remainder of dividing it by stem:[m]. The numbers stem:[K], stem:[n], and stem:[M] (as well as the remainder of division by stem:[m]) are represented in the decimal number system.
+
+The idea of the solution is to use the properties of the `%` operator and the fast polynomial evaluation algorithm.
+
+If K is the base of the number system, then the number stem:[anan-1...a0] should be evaluated as follows:
+
+stem:[S = a[n]Kn + a[n-1]Kn-1 + ... + a[0]].
+
+And the corresponding algorithm looks like this:
+
+[source,pseudocode]
+----
+Input N, A[0..N], K, M
+S = a[n] % M                       Quickly compute the remainder
+For i from n to 1                   of dividing the polynomial by M,
+  S = (S*K+ a[i-1]) % M            using % properties along the way
+Output S
+----
+
+.Listing 3.2. Solution to the polynomial remainder problem
+[source,python]
+----
+# poly4
+def main() -> None:
+    n = int(input())
+    a: list[int] = []
+    for i in range(n + 1):
+        a.append(int(input()))
+    k, m = map(int, input().split())
+    s = a[n] % m
+    for i in range(n, 0, -1):
+        s = (s * k + a[i - 1]) % m
+    print(s)
+
+
+main()
+----
+
+
+== The Divisibility by 15 Problem
+
+A number is entered in its binary representation (the length of the number does not exceed 10,000 binary digits). Determine whether the number is divisible by 15.
+
+// Page 227
+We will reason in the hexadecimal number system. It is easy to convert to it by replacing tetrads in the entered binary number with the corresponding hexadecimal digits (from right to left).
+
+Similarly to the divisibility rule for 9 in the decimal number system, if the sum of the hexadecimal digits is divisible by 15, then the number is also divisible by 15.
+
+Here is the proof:
+
+∑k=0n a[k]16k = a[0] + ∑k=1n 16a[k]16k-1 = ∑k=0n a[k] + ∑k=1n 15a[k]16k-1.
+
+As a result of the transformations, we obtained two summands. The second one is divisible by 15, since each element of the sum has a factor of 15. Thus, the original number is divisible by 15 if the sum of the digits of number _A_ is divisible by 15.
+
+The algorithm for solving the problem can be written as follows:
+
+[source,pseudocode]
+----
+Input n, a[0..n]                    a[i] - coefficient at 2i
+K = (n % 4)+1                      Number of hexadecimal digits in the original number
+Convert A to H[0..K]               Build the list of hex digits (numbers 0 - 15)
+S = H[0]                           Store the least significant digit in S
+For i from 1 to K                  For all remaining digits
+  S = ( S + H[i] ) % 15            add the digit to S and take the remainder
+If S==0                            If the sum of digits is divisible by 15,
+  then divisible                   then the number is divisible
+  else not divisible               otherwise it is not
+
+CONVERTING A -> H
+For i from n+1 to 4*K-1 A[i]=0     Pad the most significant tetrad with zeros
+For i from 0 to K-1                Form a hex digit H[i] from each tetrad
+  m = 4*i
+  H[i] = A[m] + A[m+1]*2 + A[m+2]*4 + A[m+3]*8
+----
+
+.Listing 3.3. Solution to the divisibility by 15 problem
+[source,python]
+----
+# poly5
+def main() -> None:
+    n = int(input())
+    a: list[int] = []
+    for i in range(n + 1):
+        a.append(int(input()))
+    k = (n % 4) + 1
+    # Pad with zeros to fill the last tetrad
+    for i in range(n + 1, 4 * k):
+        a.append(0)
+    # Build hex digits from tetrads
+    h: list[int] = []
+    for i in range(k):
+        m = 4 * i
+        h.append(a[m] + a[m + 1] * 2 + a[m + 2] * 4 + a[m + 3] * 8)
+    s = h[0] % 15
+    for i in range(1, k):
+        s = (s + h[i]) % 15
+    if s == 0:
+        print("Yes")
+    else:
+        print("No")
+
+
+main()
+----
+
+// Page 228
+
+== Formula for the Occurrence of a Prime Factor in N-Factorial
+
+Consider the number stem:[N!]. Obviously, it can be represented as:
+
+stem:[N! = 2k2 * 3k3 * 5k5 * 7k7 * ... * PkP],
+
+where the exponent stem:[kP] indicates the count of numbers stem:[P] (prime) in the product stem:[N!]. This exponent equals:
+
+stem:[kP = [N/P] + [N/P2] + ... + [N/Pk]] (as long as stem:[N > Pk]),
+
+where stem:[[Y]] denotes the integer part of the number stem:[Y].
+
+Explanation of the formula's meaning:
+
+
+* every stem:[P]-th number is divisible by stem:[P];
+* every stem:[P2]-th number is divisible by stem:[P2];
+* every stem:[P3]-th number is divisible by stem:[P3];
+* and so on, for all stem:[k] as long as stem:[N > Pk].
+
+Consider the following problem.
+
+A number N is entered. Find how many trailing zeros are in the number stem:[N! = 1 * 2 * 3 * ... * N].
+
+Solution idea: write N! as stem:[N! = 2k2 * 3k3 * 5k5 * 7k7 * ...] and count k2 and k5 (since a number represented as a product of primes can end in zero(s) only if 2 and 5 are among those primes). Obviously, K (the number of zeros) = `min(k2, k5) = k5`.
+
+Algorithm:
+
+[source,pseudocode]
+----
+Input N
+K = N // 5; D = K
+While (D >= 5)                  While there is something to add,
+  D = D // 5, K = K + D        compute and add
+----
+
+.Listing 3.4. Solution to the problem of prime factor occurrence in N!
+[source,python]
+----
+# pfact
+def main() -> None:
+    n = int(input())
+    k = n // 5
+    d = k
+    while d >= 5:
+        d = d // 5
+        k = k + d
+    print(k)
+
+
+main()
+----
+
+
+== Properties of the Greatest Common Divisor
+
+By definition, the _greatest common divisor_ (GCD) of two numbers stem:[a] and stem:[b] is the largest of the numbers that are divisors of both number stem:[a] and number stem:[b] simultaneously.
+
+// Page 229
+
+
+
+For the numbers 12 and 18, the greatest common divisor is 6. Indeed:
+
+
+* divisors of 12: 1, 2, 3, 4, 6, 12;
+* divisors of 18: 1, 2, 3, 4, 6, 9, 18.
+
+In the school mathematics course, the following algorithm was proposed for finding the greatest common divisor: find all divisors of each number and select the largest of the common divisors.
+
+In computer science, various accelerated methods for finding the GCD of two numbers stem:[a] and stem:[b] are used, based on the following properties:
+
+1. GCD = {GCD(stem:[a − b,b]), if stem:[a > b], +
+
+stem:[a],] +
+
+GCD(stem:[a,b − a]), if stem:[b > a].]
++
+2. GCD = {2·GCD(stem:[a/2, b/2]), if stem:[a] and stem:[b] are even; +
+
+GCD(stem:[a/2, b]), if stem:[a] is even, stem:[b] is odd;] +
+
+GCD(stem:[a, b/2]), if stem:[a] is odd, stem:[b] is even;] +
+
+GCD(stem:[a, |b−a|/2]), if stem:[a] and stem:[b] are odd.]
++
+3. GCD(stem:[a,b]) = GCD(stem:[a − b,b]) = GCD(stem:[a + b,b]), if stem:[a > b].
+
+.Listing 3.5. Finding the GCD
+[source,python]
+----
+import math
+
+
+def gcd(a: int, b: int) -> int:
+    """Find GCD using subtraction-based Euclidean algorithm."""
+    if a > b:
+        return gcd(a - b, b)
+    elif a < b:
+        return gcd(a, b - a)
+    else:
+        return a
+
+
+def main() -> None:
+    a, b = map(int, input().split())
+    # Manual implementation:
+    print(gcd(a, b))
+    # Python also provides a built-in: math.gcd(a, b)
+
+
+main()
+----
+
+For example, the program above (see Listing 3.5) finds the GCD using the recursive function `gcd(a, b)`. Python also provides a built-in `math.gcd()` function that you can use directly.
+
+// Page 230
+

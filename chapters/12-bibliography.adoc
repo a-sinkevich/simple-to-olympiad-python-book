@@ -1,0 +1,30 @@
+== Bibliography
+
+
+. _Valvachev A. N., Krisevich V. S._ Programming in the PASCAL Language for ES Personal Computers. — Minsk: Vyssh. shk., 1989. 223 pp. (Note: examples in this edition have been adapted to Python.)
+. _Emelichev V. A., Melnikov O. I., Sarvanov V. I., Tyshkevich R. I._ Lectures on Graph Theory. — Moscow: Nauka, 1990. 384 pp.
+. _Zuev E. A._ Programming in TURBO PASCAL 6.0, 7.0. — Moscow: Radio i svyaz, 1993. 384 pp. (Note: examples in this edition have been adapted to Python.)
+. _Kasyanov V. N., Sabelfeld V. K._ Collection of Problems for Computer Practicum. — Moscow: Nauka, 1986. 272 pp.
+. _Kiryukhin V. M., Lapunov A. V., Okulov S. M._ Problems in Informatics: International Olympiads 1989–1996. — Moscow: AVF, 1996. 272 pp.
+. _Knuth D._ The Art of Computer Programming. Vol. 1: Fundamental Algorithms. — Moscow: Mir, 1976. 735 pp.
+. _Knuth D._ The Art of Computer Programming. Vol. 2: Seminumerical Algorithms. 3rd ed. — Moscow: Williams Publishing House, 2000. 828 pp.
+. _Knuth D._ The Art of Computer Programming. Vol. 3: Sorting and Searching. — Moscow: Mir, 1978. 844 pp.
+. _Cormen T., Leiserson C., Rivest R._ Introduction to Algorithms. — Moscow: MTsNMO, 1999. 960 pp.
+. _Kotov V. M., Volkov I. A., Kharitonovich A. I._ Methods of Algorithmization: Textbook for 8th Grade of Secondary School with Advanced Study of Informatics. — Minsk: Narodnaya asveta, 1996. 127 pp.
+. _Kotov V. M., Volkov I. A., Lapo A. I._ Methods of Algorithmization: Textbook for 9th Grade of Secondary School with Advanced Study of Informatics. — Minsk: Narodnaya asveta, 1997. 160 pp.
+. _Kotov V. M., Melnikov O. I._ Methods of Algorithmization: Textbook for 10th–11th Grades of Secondary School with Advanced Study of Informatics. — Minsk: Narodnaya asveta, 2000. 221 pp.
+. _Christofides N._ Graph Theory: An Algorithmic Approach. — Moscow: Mir, 1988. 250 pp.
+
+// Page 231
+
+== Bibliography
+
+
+. _Lipsky V._ Combinatorics for Programmers. – Moscow: Mir, 1988. 368 pp.
+. _Novikov F. A._ Discrete Mathematics for Programmers. – St. Petersburg: Piter, 2000. 304 pp.
+. _Ovsyannikov A. P., Ovsyannikova T. V., Marchenko A. P., Prokhorov R. V._ Selected Problems from Informatics Olympiads. – Moscow: Trovant, 1997. 95 pp.
+. _Okulov S. M._ Lecture Notes on Informatics (Algorithms on Graphs): Textbook. – Kirov: Vyatka State Pedagogical University, 1996. 117 pp.
+. _Shen A._ Programming: Theorems and Problems. – Moscow: MTsNMO, 1995. 264 pp.
+
+// Page 232
+

@@ -1,0 +1,551 @@
+== 1.2. Features of the Python programming language
+
+The previous section was aimed at "quick immersion" of the thoughtful reader into program development in Python. This basic knowledge -- integer and float variables, arithmetic and logical expressions, assignment, conditional, and loop statements -- is sufficient to write a solution to almost any problem. Nevertheless, the Python programming language has many additional features and built-in functions that simplify program development and debugging. This section is devoted to an overview of these features.
+
+
+=== Computer arithmetic
+
+Theoretically, one can write programs without knowing in detail how exactly the computer is built and works, how the problem data is stored, how it is processed, and so on. But having such an understanding certainly enables one to write programs faster and more efficiently. The author finds it appropriate to draw a comparison with driving a car. Yes, you can drive a car knowing how to start it and steer it. However, it is obvious that the more the driver knows about the car's design, the more likely they are to avoid an accident by pressing the gas or brake pedal at the wrong time, not to stop in the middle of the road because of running out of fuel, and so on.
+
+
+=== Bit representation of information in a computer
+
+A computer is designed in such a way that the minimum unit of information storage is a _bit_, which can hold only one digit -- 0 or 1. Interestingly, the computer manufacturing technology may change (mechanical, electromechanical, electronic, optical, biochemical), but at the core there is always the ability to represent, using various physical, chemical, or biological processes, two numbers -- 0 and 1. It has been theoretically proven that if it is possible to do this, and also to ensure the execution of two simple operations _NOT_ and _2-AND_, then an arbitrarily complex computer can be built on such a basis! This means that any computer can be constructed from elements of _only_ these two types.
+
+// Page 43
+
+
+
+Let us explain how each of these elements works.
+
+
+** A signal stem:[X] arrives at the input (let us remind you once more that it can take only one of two possible values -- 0 or 1).
+
+... if 1 was received, then 0 will appear at the output;
+... if 0 was received, then 1 will appear at the output.
+In table form, these rules are written as follows:
+
+
+[cols="1|1", options="header"]
+|===
+| X | Y
+
+| 0 | 1
+| 1 | 0
+|===
+
+
+** If both input signals are equal to 1: stem:[X1 = 1] and stem:[X2 = 1], then the output signal is stem:[Y = 1].
+** Otherwise stem:[Y = 0].
+Below is the truth table for the _2-AND_ element:
+
+
+[cols="1|1|1", options="header"]
+|===
+| X1 | X2 | Y
+
+| 0 | 0 | 0
+| 0 | 1 | 0
+| 1 | 0 | 0
+| 1 | 1 | 1
+|===
+
+
+== Byte
+
+It is clear that a person wants to process numbers larger than 0 and 1. To represent any numbers, sequences of 0s and 1s are used, or, as they also say, sequences of _bits_.
+
+A sequence of 8 bits is called a _byte_.
+
+Question: how many distinct 8-bit sequences exist? Or the same question, phrased somewhat differently: how many distinct numbers can be represented in one byte?
+
+Let us try to list all 8-bit sequences (Table 1.13). For greater clarity, we will split the byte into 2 parts of four bits each, or, as they also say, represent the byte as two _nibbles_.
+
+Have we listed all possible 8-bit sequences? Clearly, not all, but only those whose first 2 bits are zeros. In other words, we have listed all _6-bit_ sequences (if we ignore (or erase) the first two zeros of each 8-bit sequence). In total, we obtained
+
+// Page 44
+64 distinct sequences, which can represent 64 distinct numbers -- we numbered them from 0 to 63.
+
+*Table 1.13.* Numbers (from 0 to 63) and the corresponding 8-bit sequences -- bytes
+
+
+[cols="1|1|1|1", options="header"]
+|===
+| Number | Sequence | Number | Sequence
+
+| 0 | 0000 0000 | 32 | 0010 0000
+| 1 | 0000 0001 | 33 | 0010 0001
+| 2 | 0000 0010 | 34 | 0010 0010
+| 3 | 0000 0011 | 35 | 0010 0011
+| 4 | 0000 0100 | 36 | 0010 0100
+| 5 | 0000 0101 | 37 | 0010 0101
+| 6 | 0000 0110 | 38 | 0010 0110
+| 7 | 0000 0111 | 39 | 0010 0111
+| 8 | 0000 1000 | 40 | 0010 1000
+| 9 | 0000 1001 | 41 | 0010 1001
+| 10 | 0000 1010 | 42 | 0010 1010
+| 11 | 0000 1011 | 43 | 0010 1011
+| 12 | 0000 1100 | 44 | 0010 1100
+| 13 | 0000 1101 | 45 | 0010 1101
+| 14 | 0000 1110 | 46 | 0010 1110
+| 15 | 0000 1111 | 47 | 0010 1111
+| 16 | 0001 0000 | 48 | 0011 0000
+| 17 | 0001 0001 | 49 | 0011 0001
+| 18 | 0001 0010 | 50 | 0011 0010
+| 19 | 0001 0011 | 51 | 0011 0011
+| 20 | 0001 0100 | 52 | 0011 0100
+| 21 | 0001 0101 | 53 | 0011 0101
+| 22 | 0001 0110 | 54 | 0011 0110
+| 23 | 0001 0111 | 55 | 0011 0111
+| 24 | 0001 1000 | 56 | 0011 1000
+| 25 | 0001 1001 | 57 | 0011 1001
+| 26 | 0001 1010 | 58 | 0011 1010
+| 27 | 0001 1011 | 59 | 0011 1011
+| 28 | 0001 1100 | 60 | 0011 1100
+| 29 | 0001 1101 | 61 | 0011 1101
+| 30 | 0001 1110 | 62 | 0011 1110
+| 31 | 0001 1111 | 63 | 0011 1111
+|===
+
+So how many 8-bit sequences are there after all? To find out, we need to write three more such tables: the numbers in the first table will have the first 2 bits as 0 and 1, in the second -- 1 and 0, and in the third -- 1 and 1. The total number of sequences of
+
+// Page 45
+eight bits is 256. Try as an exercise to list all these numbers yourself.
+
+So, in one _byte_ one can represent 256 distinct numbers (we numbered them from 0 to 255).
+
+Let us think: could we have obtained this number -- 256 -- without listing all possible 8-bit sequences?
+
+So, we have 8 positions in total, and each of them can contain one of two numbers -- 0 or 1.
+
+Thus, for 2-bit numbers there are stem:[2 * 2 = 4] variants, for 3-bit numbers -- stem:[2 * 2 * 2 = 8] variants, for 4-bit numbers -- stem:[2 * 2 * 2 * 2 = 16] variants. And for a byte -- stem:[2 * 2 * 2 * 2 * 2 * 2 * 2 * 2 = 256] variants.
+
+Or using exponentiation, this can be written as
+
+stem:[28 = 256].
+
+This is read as: two raised to the eighth power (i.e., 2 multiplied by itself 8 times) equals 256.
+
+
+== Hexadecimal number system
+
+Already while listing Table 1.13, you may have noticed that representing numbers as sequences of 0s and 1s (or, as they also say, in the binary number system) is extremely tedious for a human, although this is exactly how they are stored in computer memory. Therefore, humans invented yet another way of representing numbers -- the hexadecimal number system. This system has the following remarkable properties.
+
+
+* Hexadecimal numbers are much more understandable and easier to read for humans than binary ones.
+* There are simple methods for converting numbers from the decimal number system to hexadecimal and back.
+* There are extremely simple methods for converting numbers from the hexadecimal number system to binary and back.
+
+Let us start with the simplest -- converting numbers from binary to hexadecimal and back.
+
+First of all, you need to memorize the _hexadecimal number table_ (Table 1.14).
+
+To convert numbers from binary to hexadecimal, it suffices to replace each nibble with the corresponding digit or letter. For example: `0011 1011 = 3B`.
+
+To convert numbers from hexadecimal to binary, it suffices to perform the reverse action -- replace the letter or digit with the corresponding nibble (from the table below). For example: `C7 = 1100 0111`.
+
+[NOTE]
+====
+The space between nibbles is left for clarity.
+
+====
+
+// Page 46
+
+== Table 1.14. Number notation systems
+
+
+[cols="1|1|1", options="header"]
+|===
+| Decimal | Binary | Hexadecimal
+
+| 0 | 0000 | 0
+| 1 | 0001 | 1
+| 2 | 0010 | 2
+| 3 | 0011 | 3
+| 4 | 0100 | 4
+| 5 | 0101 | 5
+| 6 | 0110 | 6
+| 7 | 0111 | 7
+| 8 | 1000 | 8
+| 9 | 1001 | 9
+| 10 | 1010 | A
+| 11 | 1011 | B
+| 12 | 1100 | C
+| 13 | 1101 | D
+| 14 | 1110 | E
+| 15 | 1111 | F
+|===
+
+The rules for converting numbers from the decimal number system to hexadecimal and back are somewhat more complex. But since knowledge of them is not required for understanding the subsequent material, they are not provided here.
+
+
+== Numeric data types
+
+In this subsection, we will look at the ways of representing numbers of various _types_ in Python programs. Unlike many compiled languages, Python handles most numeric details automatically, but understanding how numbers are stored in a computer helps you write better programs.
+
+
+=== Python's numeric types
+
+Python provides the following built-in numeric types:
+
+
+* `int` -- integers of arbitrary precision (Python automatically handles big numbers, so there is no overflow!).
+* `float` -- floating-point numbers (64-bit double precision, similar to C's `double`).
+* `complex` -- complex numbers (rarely needed in competitive programming).
+
+Unlike languages such as C or Pascal, Python's `int` type has *no upper limit*. You can work with numbers as large as you need without worrying about overflow. This is a huge advantage in competitive programming!
+
+Python's `float` type uses 8 bytes (64 bits) and provides about 15-16 significant decimal digits, with a range approximately from stem:[5.0x10-324] to stem:[1.7x10308].
+
+.Listing 1.7. Division of real numbers
+[source,python]
+----
+# e1
+l1 = int(input())
+l2 = int(input())
+r = l1 / l2
+print(r)
+----
+
+By default, Python outputs floating-point numbers with full precision. For example, if in program `e1` (Listing 1.7) you enter 5 and 3 as the input data for `l1` and `l2`, then the answer will be displayed as: 1.6666666666666667.
+
+To output a real number in a more familiar form with a specific number of decimal places, you can use formatted output:
+
+[source,python]
+----
+print(f"{r:.3f}")
+----
+
+And the answer will be obtained in the following form: 1.667.
+
+That is, we told the computer to output the real number rounded to three significant digits after the decimal point.
+
+Python does not require any special compiler options to use different numeric types -- they are all available by default.
+
+For example:
+
+[source,python]
+----
+# e2
+l1 = int(input())
+l2 = int(input())
+----
+
+// Page 48
+[source,python]
+----
+d = l1 / l2
+print(f"{d:.3f}")
+----
+
+To compute the integer remainder or quotient from dividing integers, you should use the `%` or `//` operators respectively. More details on this have already been written in the "Non-standard algorithms and programs" section.
+
+In Python, the result of the `/` operator is always a `float`, even if both operands are integers. Use `//` for integer (floor) division.
+
+Python's `int` type has unlimited precision, so you never need to worry about integer overflow -- unlike many other programming languages.
+
+
+== Range checking in Python
+
+Python does not have built-in subrange types like some other languages. However, you can easily validate ranges yourself using assertions or if-statements:
+
+[source,python]
+----
+# e3
+day1 = int(input())
+assert 1 <= day1 <= 31, "Day must be between 1 and 31"
+day2 = day1 + 1
+assert 1 <= day2 <= 31, "Day must be between 1 and 31"
+print(day1, day2)
+----
+
+Now, upon attempting to enter a number for the variable `day1` that is greater than 31 or less than 1 (for example, 32 or 0), the assertion will raise an error. Moreover, if 31 is entered for `day1`, an error will be raised on the assertion for `day2`, since when `day1 = 31`, `day2` would have to receive the value 32, which is outside the valid range.
+
+Python's philosophy is "we are all consenting adults here" -- the language trusts the programmer to validate input when needed, rather than enforcing rigid type constraints.
+
+
+== Boolean (logical) type bool
+
+Most programs being developed have a _nonlinear_ structure, meaning that depending on certain input data values, different parts of the program may be executed. Logical variables can be useful for controlling the selection of the needed parts of the program.
+
+In Python, boolean variables are of type `bool`. They can take only 2 values: `False` and `True`.
+
+The following operations are defined on boolean variables:
+
+
+. `and` -- "AND";
+. `or` -- "OR";
+. `^` -- "Exclusive OR";
+. `not` -- "NOT".
+
+A boolean variable can also be formed as a result of arithmetic comparisons: "less than", "less than or equal to", "greater than", "greater than or equal to", "equal to", and "not equal to" (respectively `<`, `<=`, `>`, `>=`, `==`, `!=`).
+
+Examples of declaration and use:
+
+[source,python]
+----
+is_empty_s: bool = True
+decision_achieved: bool = False
+----
+
+// Page 50
+Two boolean variables are declared -- `is_empty_s` and `decision_achieved`; the first is assigned the value `True`, the second -- the value `False`.
+
+[source,python]
+----
+decision_achieved = (k == edge_number)
+----
+
+The variable `decision_achieved` will receive the value `True` if the value of variable `k` equals the value of variable `edge_number`, and the value `False` otherwise. That is, this is a shorter way of writing the following statement:
+
+[source,python]
+----
+if k == edge_number:
+    decision_achieved = True
+else:
+    decision_achieved = False
+----
+
+And here are statements for independent analysis:
+
+[source,python]
+----
+is_current_decision = k > max_k
+is_all_one_line = p != 0
+----
+
+Below is an example of organizing a loop using boolean variables:
+
+[source,python]
+----
+while k > 0 and not decision_achieved:
+    ...
+----
+
+that is:
+
+----
+while k > 0 and decision_achieved is False:
+    ...
+----
+
+Again, a statement for independent analysis:
+
+[source,python]
+----
+while not is_empty_s:
+    ...
+----
+
+An example of using boolean variables in a conditional statement:
+
+[source,python]
+----
+if is_current_may_continued and (not is_out):
+    k += 1
+----
+
+If `is_current_may_continued` is True and `is_out` is False then `k = k + 1`
+
+And again, a statement for independent analysis:
+
+[source,python]
+----
+if is_current_decision:
+    put_decision()
+----
+
+
+== Character and string types
+
+Until now, we have studied programs that can process numbers (integers and floats) and lists of numbers. But in real life, programs that process textual information are also needed. For example, a program for creating/editing a class register that needs to input, output, and edit student surnames.
+
+
+=== Characters in Python
+
+How does the computer manage to process letters if we have already agreed that there is nothing in computer memory except 0s and 1s? The thing is that there exist so-called _encoding tables_, in which each character (letters, digits, punctuation marks and arithmetic operation signs, etc.) is associated with its own number. In Python, there is no separate character type -- a single character is simply a string of length 1. Python uses Unicode by default, which includes the older _ASCII_ table (American Standard Code for Information Interchange) as a subset.
+
+// Page 51
+
+
+
+In Python, you can get the numeric code of a character and vice versa:
+
+
+* `ord('A')` -- returns the Unicode code of the character (65 for 'A');
+* `chr(65)` -- returns the character with the given code ('A');
+* `hex(ord('A'))` -- returns the hexadecimal code as a string ('0x41').
+
+Here is an example of working with characters:
+
+[source,python]
+----
+ch = input("Press a key and Enter: ")
+# In Python, input() reads a full line; we take the first character
+if len(ch) > 0:
+    ch = ch[0]
+    print(f"You entered: '{ch}', code: {ord(ch)}")
+----
+
+Even more interesting is to write a program for reading characters and outputting their corresponding codes. By running it, you will be able to find out the code of any character. This program requires entering one character from the keyboard and outputs its code on the screen, until you type the letter z.
+
+.Listing 1.8. A program that outputs the code of the entered character on the screen
+[source,python]
+----
+# ReadKeys
+while True:
+    line = input('Press any key and Enter: ')
+    if not line:
+        continue
+    c = line[0]
+    print(f'You pressed "{c}", Unicode code = {ord(c)}')
+    if c in ('z', 'Z'):
+        break
+----
+
+Python uses Unicode by default, which means it handles characters from virtually any language (including Russian, Chinese, Arabic, etc.) without any special effort. Unlike older systems where different encoding tables caused problems, Python 3 makes working with international text straightforward.
+
+
+=== String type str
+
+In Python, strings are built-in objects of type `str`. You can create them simply by assigning a value:
+
+[source,python]
+----
+s = "Hello, World!"  # s is a string of 13 characters
+----
+
+Python strings have no fixed maximum length -- they can grow as large as your computer's memory allows. This is much more convenient than in languages where you must pre-declare a maximum string size.
+
+Strings in Python are _immutable_ -- once created, individual characters cannot be changed. To modify a string, you create a new one.
+
+// Page 52
+
+== Standard type conversion functions
+
+It is often very useful to convert between types -- for example, from float to int, or from string to number and back. Python has built-in functions for this. Brief information about them is provided below.
+
+*Table 1.17.* Standard type conversion functions in Python
+
+
+[cols="1|1|1|1", options="header"]
+|===
+| Function | Argument type | Result type | Conversion
+
+| `n % 2 != 0` | int | bool | True if the number is odd, otherwise False
+| `int()` | float/str | int | Truncates the fractional part (or converts a string)
+| `round()` | float | int | Rounds to the nearest integer
+| `ord()` | str (1 char) | int | Returns the Unicode code of the character
+| `chr()` | int | str (1 char) | Returns the character with the given code
+| `int(s)` / `float(s)` | str | int / float | Converts a string to a number
+| `str()` | any | str | Converts a value to a string
+|===
+
+// Page 53
+
+== Text files
+
+In most olympiad problems, input from one text file and output to another text file are required.
+
+A _text file_ is a sequence of character strings of variable length, separated by newline characters; it ends at the end of the file.
+
+In Python, you work with files using the built-in `open()` function:
+
+[source,python]
+----
+f = open('input.txt', 'r')  # open for reading
+----
+
+The main operations with text files that interest us are:
+
+
+* _opening for reading, reading lines;_
+* _opening for writing, writing lines;_
+* _checking for end of file;_
+* _closing._
+
+
+== Redirecting standard input/output at launch
+
+Suppose we have a program `p_cut_v9.py` that reads from standard input and writes to standard output, and a file with prepared test data `test7.dat` is located in the same directory.
+
+To ensure the program reads data from the test file and outputs to another file (in the example, `test7.out`), it suffices to use shell redirection:
+
+
+* `python3 p_cut_v9.py <test7.dat` -- read from file test7.dat;
+* `python3 p_cut_v9.py >test7.out` -- output to file test7.out;
+* `python3 p_cut_v9.py <test7.dat >test7.out` -- read from file and output to file;
+* `python3 p_cut_v9.py <test7.dat >/dev/null` -- read from file, output "to nowhere".
+
+// Page 54
+
+== Redirecting standard input/output within a program
+
+Below is a technique for redirecting standard input within a Python program. You can use the `sys` module to redirect `stdin` and `stdout`:
+
+[source,python]
+----
+import sys
+
+if len(sys.argv) < 2:
+    print('No data file name')
+    sys.exit(1)
+else:
+    print(f' file: {sys.argv[1]}')
+
+sys.stdin = open(sys.argv[1], 'r')
+# Now input() will read from the specified file
+----
+
+Here:
+
+
+* `sys.argv` -- a list of command-line arguments;
+* `len(sys.argv)` -- the number of arguments (including the program name);
+* `sys.argv[1]` -- the first command-line argument (the file name);
+* `sys.stdin` -- the standard input stream (used by `input()`);
+* `sys.stdout` -- the standard output stream (used by `print()`).
+
+
+== Running a program from the command line
+
+To run a Python program with a test file passed as a command-line argument:
+
+----
+python3 p_cut_v9.py test7.dat
+----
+
+
+== A simple example of working with text files
+
+Listing 1.9 presents the text of a program that reads data from a file and outputs the result to another file. In Python, this is done using the `open()` function and optionally redirecting `sys.stdin` and `sys.stdout`.
+
+// Page 55
+.Listing 1.9. Example of working with text files
+[source,python]
+----
+import sys
+
+# Open input file for reading
+sys.stdin = open('test7.dat', 'r')
+
+# Read variables n and m from file
+n, m = map(int, input().split())
+
+# ... process data here ...
+
+# Close input
+sys.stdin.close()
+
+# Open output file for writing
+sys.stdout = open('test7.out', 'w')
+
+# Write variables n and m to file
+print(n, m)
+
+# Close output
+sys.stdout.close()
+----
+
+

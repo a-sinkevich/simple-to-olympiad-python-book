@@ -1,0 +1,466 @@
+== CHAPTER 3 Additional Information
+
+The previous chapter was devoted to examining fundamental algorithms that cover a wide range of practical needs and competition problems, including: queue and stack, recursion, recurrence relations and dynamic programming, graphs, and generation of combinatorial objects. This chapter collects less significant facts and algorithms when considered from the perspective of the facts and algorithms of the previous chapter. Nevertheless, practice shows that the information gathered in this chapter is also very useful when solving various problems on the corresponding topics: "analytic geometry on the plane" and "some facts from number theory." In addition, problems are often "combined," meaning that solving such problems requires knowledge from not only the previous chapter but also this one.
+
+
+== 3.1. Analytic Geometry on the Plane
+
+A huge number of programming problems belong to the class of "geometry on the plane" problems. To solve these problems, it is very useful to know certain facts and formulas from the course of analytic geometry, which are presented in this section.
+
+
+=== Point, Line, Area
+
+A point _A_ on the plane in the _Cartesian coordinate system_ is defined by its coordinates along the _OX_ and _OY_ axes: _A(x1, y1)_.
+
+The _distance D_ between two points _A(x1,y1)_ and _B(x2, y2)_ is determined by the formula:
+
+stem:[D = √((x1 - x2)² + (y1 - y2)²)].
+
+In Python, this is written as follows:
+
+[source,python]
+----
+import math
+
+d = math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
+----
+
+[NOTE]
+====
+In all problems (unless stated otherwise), the coordinates of points are real numbers (type `float`). Accordingly, the distance between points is always a real number.
+
+====
+
+// Page 213
+
+== Midpoint Coordinates of a Segment
+
+The _midpoint coordinates_ stem:[(x, y)] of a segment with endpoints at stem:[(x1, y1)] and stem:[(x2, y2)] are determined by the following formulas:
+
+x = (x1 + x2) / 2,
+
+y = (y1 + y2) / 2.
+
+
+== Straight Line on the Plane. Equation of a Line
+
+A _straight line_ on the plane is uniquely determined by any two points lying on that line. However, such a representation of a line (effectively as a segment) is inconvenient for solving problems.
+
+There is an alternative way to define a line on the plane — using the _equation of a line_. That is, for any line there exists an equation with two variables stem:[x] and stem:[y] of the following form:
+
+Ax + By + C = 0.
+
+This equation becomes an identity when the coordinates of any point belonging to the given line are substituted for stem:[x] and stem:[y] (stem:[A], stem:[B], and stem:[C] are integer or real number constants). This method of defining a line is the one used when solving problems.
+
+
+== Equation of a Line Passing Through Two Given Points
+
+As mentioned earlier, a line is uniquely determined by any two points lying on it. Therefore, knowing the coordinates of these points, we can always construct the equation of the line.
+
+Let the line pass through points with coordinates stem:[(x1, y1)] and stem:[(x2, y2)]. Then the _coefficients_ in the equation of the line are determined by the following formulas:
+
+A = y2 − y1, +
+
+B = x1 − x2, +
+
+C = y1 * (x2 − x1) − x1 * (y2 − y1).
+
+
+== Distance from a Point to a Line
+
+The distance stem:[d] from a point stem:[(x1, y1)] to a line stem:[Ax + By + C = 0] is determined by the formula:
+
+d = |Ax1 + By1 + C| / √(A² + B²).
+
+In Python, this is written as follows:
+
+[source,python]
+----
+import math
+
+d = abs(a * x1 + b * y1 + c) / math.sqrt(a ** 2 + b ** 2)
+----
+
+// Page 214
+
+== Finding the Intersection Point of Two Lines
+
+Very often when solving problems, it is necessary to find the intersection point of two lines.
+
+Let two lines be given by their equations:
+
+stem:[A1x + B1y + C1 = 0, A2x + B2y + C2 = 0.]
+
+Then to find the intersection point of these lines, one must solve the _system_ consisting of these two equations. For this, one can use _Cramer's theorem_. We will limit ourselves to the conclusions from this theorem for our system of equations.
+
+Let us introduce auxiliary quantities stem:[d, dx, dy]. Then the solution of the system is found by the formulas:
+
+stem:[d = A1 * B2 – B1 * A2,] +
+
+stem:[dx = – C1 * B2 + B1 * C2,] +
+
+stem:[dy = – A1 * C2 + C1 * A2.]
+
+If stem:[d = 0], then the lines are _parallel_ (if stem:[C1 * A2 ≠ C2 * A1]) or coincide (if stem:[C1 * A2 = C2 * A1]). Otherwise (stem:[d ≠ 0]), the lines intersect and the coordinates of the intersection point stem:[(x, y)] are:
+
+stem:[x = dx / d,] +
+
+stem:[y = dy / d.]
+
+
+== Perpendicular to a Line Passing Through a Given Point
+
+Let a line stem:[Ax + By + C = 0] be given. The coefficients in the equation of the line _perpendicular_ to the given one and passing through point stem:[(x1, y1)] are determined by the following formulas:
+
+stem:[A1 = – B,] +
+
+stem:[B1 = A,] +
+
+stem:[C1 = Bx – Ay.]
+
+
+== Constructing the Circumscribed Circle of a Triangle
+
+The center of the _circumscribed circle of a triangle_ lies at the intersection of the perpendicular bisectors of its sides. Therefore, the sequence of steps for constructing the circumscribed circle should be as follows.
+
+
+. Find the midpoints of any two sides of the triangle.
+. Construct the equations of the lines on which these sides lie.
+. Construct the equations of the lines perpendicular to these sides and passing through their midpoints.
+
+// Page 215
+
+== Computing Areas of Plane Figures
+
+The _area S of a triangle_ with side lengths stem:[a, b], and stem:[c] is conveniently determined using Heron's formula:
+
+stem:[S = √[p(p-a)(p-b)(p-c)],]
+
+where stem:[p = (a + b + c) / 2] is the semi-perimeter.
+
+
+=== Area of a Circle with Radius R
+
+The _area S of a circle_ with radius stem:[R] is computed by the formula:
+
+stem:[S = πR².]
+
+Since Python's `math` module provides the constant `math.pi` which returns the value of the number stem:[π = 3.141592653589793238]5, the computation of the area of a circle is written as follows:
+
+[source,python]
+----
+import math
+
+s = math.pi * r ** 2
+----
+
+The area of an arbitrary _plane polygon_ (not necessarily convex) with vertices at points stem:[(x1, y1), ..., (xn, yn)] is determined by the formula:
+
+stem:[S = |Σ (xᵢ - xᵢ₊₁)(yᵢ₊₁ + yᵢ) / 2|] from stem:[i=1] to stem:[n].
+
+In this case, stem:[x_{n+1} = x1, y_{n+1} = y1]. In Python, this can be written as follows:
+
+[source,python]
+----
+s = 0.0
+for i in range(n):
+    next_i = (i + 1) % n
+    s += (x[i] - x[next_i]) * (y[i] + y[next_i]) / 2
+s = abs(s)
+----
+
+
+== Point Belonging to a Figure
+
+This section is devoted to algorithms that answer the question of whether a point, given by its coordinates, is inside or on the boundary of a figure defined by the coordinates of the points that determine the given figure.
+
+
+=== Point Belonging to a Triangle
+
+Let a triangle _ABC_ and a point _M_ be given. _Point M belongs to the region bounded by triangle ABC_ if the following condition holds:
+
+stem:[S_{ABC} = S_{ABM} + S_{ACM} + S_{BCM}.]
+
+// Page 216
+That is, the area of triangle _ABC_ equals the sum of the areas of three triangles with bases being the sides of the given triangle and the vertex at the given point _M_.
+
+[NOTE]
+====
+Here and everywhere when comparing real numbers (floats), one must account for computational error.
+
+====
+
+Taking error into account, the condition is rewritten as:
+
+|SABC − SABM − SACM − SBCM| < Pogr,
+
+where _Pogr_ is the maximum error value (for example, 0.001).
+
+
+== Point Belonging to a Segment
+
+_Point C belongs to segment AB_ if for the lengths of segments _AB_, _AC_, and _CB_ the following equality holds:
+
+AB = AC + CB
+
+or taking error into account:
+
+|AB − AC − CB| < Pogr.
+
+
+== Point Belonging to a Rectangle
+
+Let a rectangle with sides parallel to the coordinate axes be given by the coordinates of its lower-left (_x1, y1_) and upper-right (_x2, y2_) points. Then the condition for _a point with coordinates (x, y) belonging to this rectangle_ is written as follows:
+
+x1 ≤ x ≤ x2 and y1 ≤ y ≤ y2.
+
+The condition for _a point being inside the rectangle_ is written the same way, only the inequalities in this case are strict.
+
+
+== Angle at Which a Segment is Seen from a Point
+
+The algorithm for finding the _angle_ at which segment _BC_ is seen from point _A_ is left for the reader to devise independently.
+
+
+== Point Belonging to the Interior of a Polygon
+
+To check whether _point M belongs to the interior of an arbitrary_ (not necessarily convex) _polygon P_ with vertex coordinates (_x1, y1_), ..., (_xN, yN_), the following algorithm can be used: the _sum of angles_ at which the edges of the polygon are seen from point _M_ is computed.
+
+[source,pseudocode]
+----
+IF none of the angles in absolute value equals Pi and
+     point M does not coincide with any vertex of polygon P.
+THEN IF | SUM OF ANGLES | > Pogr
+----
+
+// Page 217
+
+=== Minimum Convex Hull
+
+This section is devoted to introducing the concept of the minimum convex hull and analyzing the algorithm for constructing it.
+
+
+=== Non-Self-Intersecting Polyline
+
+A _polyline_ is called _non-self-intersecting_ if no two of its edges intersect (except for intersections of adjacent edges at endpoints, including the first and last).
+
+Two segments _intersect_ if the lines on which they lie intersect and the intersection point belongs to both segments, or one of the endpoints of one segment belongs to the other segment.
+
+The latter condition is necessary here for the case when the segments lie on the same line and overlap. In this case, the lines do not intersect, but the polyline should be considered _self-intersecting_.
+
+
+=== Convexity of a Polygon
+
+A _polygon_ is _convex_ if all its vertices lie on the same side of any of its sides.
+
+To determine whether two points lie on the same side of a line stem:[Ax + By + C = 0], the following rule is used: _two points lie on opposite sides of a given line_ if and only if substituting the coordinates of these points into the equation of the line yields values of opposite signs.
+
+
+=== Constructing the Minimum Convex Hull of a Set of Points
+
+One of the algorithms for constructing the minimum convex hull of a set of points on the plane is as follows.
+
+
+. Find the leftmost point of the set and take it as the first vertex of the hull.
+. As the next vertex of the hull, choose the point of the set for which the segment formed by this point and the previous vertex of the hull is seen from the current last vertex of the hull at the maximum angle. (For the first vertex of the hull, the point with coordinates stem:[(x + 1, y)], where stem:[(x, y)] are the coordinates of the first vertex, should be taken as the previous one.)
+. Step 2 is repeated until the next found vertex turns out to be the first vertex of the hull.
+
+// Page 218
+
+== Basic Relations in a Triangle
+
+This section presents formulas relating the side lengths and angle values of a triangle. The solution of many practical and competition problems is based on these formulas.
+
+
+=== Basic Relations in a Right Triangle
+
+Let a right triangle be given with _legs_ (sides adjacent to the right angle) stem:[a] and stem:[b] and _hypotenuse_ (side opposite the right angle) stem:[c]. Let us introduce the notation:
+
+
+* stem:[A1] — the angle opposite leg stem:[a];
+* stem:[B1] — the angle opposite leg stem:[b].
+
+Then the following relations hold:
+
+stem:[c² = a² + b²] (Pythagorean theorem);
+
+stem:[sin(A1) = a/c, cos(A1) = b/c;]
+
+stem:[sin(B1) = b/c, cos(B1) = a/c;]
+
+stem:[tg(A1) = a/b, tg(B1) = b/a.]
+
+Note that Python's `math` module provides `math.sin(x)` and `math.cos(x)` functions, and for the tangent you can use `math.tan(x)`. You can also compute it as:
+
+stem:[tan(x) = sin(x)/cos(x).]
+
+Using the above relations, it is easy to:
+
+
+. find the third side, knowing any two sides of a right triangle;
+. find the other two sides and an angle, knowing one side and an angle.
+
+How to find an acute angle knowing two sides of a right triangle? To do this, one must first find the tangent of the desired angle (variable `t`), and then use the `math.atan` function:
+
+[source,python]
+----
+import math
+
+a1 = math.atan(t)
+----
+
+Note that both the argument stem:[x] in the functions `math.sin(x)`, `math.cos(x)`, and the result stem:[y] in the function `y = math.atan(x)` are angles measured in radians, not degrees.
+
+
+=== Basic Relations in an Arbitrary Triangle
+
+Let an arbitrary triangle with sides stem:[a, b, c] be given.
+
+Let us introduce the notation:
+
+// Page 219
+
+* stem:[A1] — the angle opposite side stem:[a];
+* stem:[B1] — the angle opposite side stem:[b];
+* stem:[C1] — the angle opposite side stem:[c].
+
+Then the following relations hold:
+
+stem:[a / sin(A1) = b / sin(B1) = c / sin(C1)] (law of sines),
+
+stem:[c² = a² + b² − 2ab · cos(C1)] (law of cosines).
+
+Obviously, knowing three sides, or two sides and the angle between them, or one side and two adjacent angles in a triangle, and using these formulas, it is easy to find the unknown components (sides and angles) of the triangle.
+
+
+== Problems for Independent Solution
+
+[NOTE]
+====
+These problems for beginners are adapted from [8] for the distance learning system http://dl.gsu.unibel.by.
+
+====
+
+_Conventions for outputting computation results:_ all output data that are real numbers are displayed with a precision of two decimal places. Problem statements:
+
+
+** Input: side lengths of the triangle a, b, c.
+** Output: answer as "YES/NO."
+
+** Input: side lengths of the quadrilateral a, b, c, d.
+** Output: answer as "YES/NO."
+
+** Input: coordinates of point A, coordinates of the center of the circle and its radius.
+** Output: position of the point (on the circle/inside the circle/outside the circle).
+
+** Input from file (line by line):
+
+.. coordinates of the center of the first circle and its radius;
+.. coordinates of the center of the second circle and its radius.
+
+// Page 220
+
+222
+
+
+* Output: relative position of the circles (inside/internally tangent/externally tangent/outside/intersecting/coinciding).
+
+
+** Input from file (line by line):
+
+.. stem:[R];
+.. stem:[X0 Y0];
+.. stem:[X1 Y1];
+.. stem:[X2 Y2].
+
+** Output: relative position of the circle and line (intersecting/not intersecting/tangent).
+
+** Input: stem:[X0, Y0, R].
+** Output: number of points.
+
+** Input from file (line by line):
+
+.. stem:[X1 Y1 R1];
+.. stem:[X2 Y2 R2].
+
+** Output: coordinates of the intersection points in ascending order of stem:[X] (if stem:[X] values are equal, then in ascending order of stem:[Y]). Each point on a separate line.
+
+** Input from file (line by line):
+
+.. stem:[X1 Y1];
+.. stem:[A B C].
+
+** Output: coordinates of the point.
+
+** Input from file (line by line):
+
+.. coordinates of the first point;
+.. coordinates of the second point;
+.. coefficients of the equation of the given line.
+
+** Output: coordinates of the desired point.
+. Given three points with coordinates stem:[(x1, y1)], stem:[(x2, y2)], and stem:[(x3, y3)], which are vertices of a certain rectangle with sides parallel to the coordinate axes. Find the coordinates of the fourth point.
+
+// Page 221
+
+
+
+
+** Input: coordinates of the points in traversal order.
+** Output: answer as "convex/non-convex."
+
+** Input: coordinates of the points.
+** Output: as "YES/NO" for each of the figures.
+
+** Input from file (line by line):
+1) stem:[x1 y1];
+
+2) stem:[x2 y2].
+
+
+** Output: points in ascending order of stem:[X], each point on a separate line. If stem:[X] values are equal, then sort by stem:[Y].
+
+** Input from file (line by line):
+1) stem:[x1 y1];
+
+2) stem:[x2 y2];
+
+3) stem:[x3 y3].
+
+
+** Output: as "YES/NO."
+
+** Input: coordinates of the triangle's vertices in traversal order.
+** Output: coordinates of the intersection point of the triangle's medians.
+
+** Input from file (line by line):
+1) stem:[x1 y1];
+
+2) stem:[x2 y2];
+
+3) stem:[x3 y3].
+
+
+** Output: lengths of the altitudes in ascending order (each altitude on a separate line).
+
+[start=17]
+. Determine the coefficients of the equation of a line parallel to the given line defined by the equation stem:[Ax + Bx + C = 0] and passing through the point with coordinates stem:[(x0, y0)].
+
+// Page 222
+
+* Input: coordinates of the point through which the line parallel to the given one passes.
+* Output: coefficients of the equation of the line parallel to the given one.
+
+. Determine the coefficients of the equation of a line perpendicular to the given line defined by the equation stem:[Ax + Bx + C = 0] and passing through the point with coordinates (stem:[x0, y0]).
+
+
+* Input from file (line by line):
+
+
+. coordinates of the point;
+. coefficients of the equation of the line.
+
+
+* Output: coefficients of the equation of the line perpendicular to the given one.
+
+

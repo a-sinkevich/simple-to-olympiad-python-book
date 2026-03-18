@@ -1,0 +1,2793 @@
+== 2.4. Graph Algorithms
+
+There is an entire class of programming problems that can be reformulated in terms of _graph theory_ to simplify their solution. However, this requires a certain set of knowledge, skills, and abilities in the area of _graph algorithms_.
+
+[NOTE]
+====
+Graph theory contains a huge number of definitions, theorems, and algorithms. Therefore, the material presented below cannot claim, and does not claim, to be comprehensive. However, in the author's opinion, the information offered represents a good compromise between the volume of material and its "efficiency factor" in practical programming and solving competition problems.
+
+====
+
+It should be noted that this material relies substantially on the student having certain skills in using recursive functions and recurrence relations.
+
+The further presentation of the material is structured as follows: first, a basic amount of theory is provided, followed by solutions to a large number of problems from Belarusian national and international (IOI — International Olympiad in Informatics) computer science olympiads for school students.
+
+The author recommends that after familiarizing yourself with the general information, you approach each new problem in the following order: after reading the problem statement, set the material aside and try to solve the problem on your own. If you feel that you have reached a dead end and further thinking cannot lead to a useful result, return to the material, read the complete solution, and implement it on your computer independently. The more thorough and intensive your work on the current problem, the greater your chances of solving the next problem on your own.
+
+
+=== General Information about Graph Algorithms
+
+First, a few words about how the concept of a _graph_ arises from natural problem conditions. Here are several examples.
+
+
+* Suppose we have a road map in which, for each city, the distance to all its neighboring cities is given. Here two cities are called _neighbors_ if there is a road directly connecting them.
+* Similarly, one can consider streets and intersections within a single city. Note that there may be one-way streets.
+* A network of computers connected by wired communication lines.
+
+// Page 154
+
+* A set of words, each of which starts with a certain letter and ends with the same or another letter.
+* A set of dominoes. Each domino has two numbers — the left and right halves of the tile.
+* A device consisting of microchips connected to each other by sets of conductors.
+* Genealogical trees illustrating family relationships between people.
+* And finally, _graphs_ themselves, indicating relationships between some abstract concepts, for example, numbers.
+
+Thus, informally a _graph_ can be defined as a set of vertices (cities, intersections, computers, letters, digits on a domino tile, microchips, people, etc.) and connections between them (roads between cities; streets between intersections; wired communication lines between two computers; words starting with one letter and ending with another or the same letter; conductors connecting microchips; family relationships, for example, Alexei is the son of Peter).
+
+Bidirectional connections (for example, two-way roads) are commonly called _edges of the graph_; while unidirectional connections (one-way roads) are called _arcs of the graph_.
+
+A graph in which vertices are connected by edges is called an _undirected graph_, while a graph in which at least some vertices are connected by arcs is called a _directed graph_.
+
+
+== Shortest Distances in Graphs
+
+As an example of a _graph_, consider the following undirected graph with six vertices:
+
+----
+(1)--(3) (5)
+ |    |   |
+ |    |   |
+(2)--(4) (6)
+----
+
+Graphs can be specified using an _adjacency matrix_. For example, for the graph shown above, the adjacency matrix stem:[G] looks as follows:
+
+----
+0  1  1  0  0  0
+1  0  0  1  0  0
+1  0  0  1  0  0
+0  1  1  0  0  0
+0  0  0  0  0  1
+0  0  0  0  1  0
+----
+
+stem:[Gij] = 1 if there is an arc from vertex stem:[i] to vertex stem:[j], and stem:[Gij] = 0 otherwise.
+
+// Page 155
+Often of interest is also the reachability matrix of a graph, in which stem:[Gij = 1] if there exists a path along edges (arcs) of the original graph from vertex `i` to vertex `j`. For example, for the graph in our example, the reachability matrix would be:
+
+----
+
+1  1  1  1  0  0
+1  1  1  1  0  0
+1  1  1  1  0  0
+1  1  1  1  0  0
+0  0  0  0  1  1
+0  0  0  0  1  1
+----
+
+A graph is called _weighted_ if weights are assigned to its arcs (for example, road lengths between cities).
+
+In a weighted graph, stem:[Gij] is the weight of the arc from vertex `i` to vertex `j`.
+
+On weighted graphs, one can solve the problem of finding the shortest distance between vertices.
+
+The simplest method to implement for finding the shortest distances from every vertex to every other is _Floyd's method_:
+
+[source,python]
+----
+for k in range(n):
+    for i in range(n):
+        for j in range(n):
+            g[i][j] = min(g[i][j], g[i][k] + g[k][j])
+----
+
+As a result of executing this algorithm, `g[i][j]` will contain the shortest distance from vertex `i` to vertex `j` for all pairs of vertices in the graph. Note that:
+
+
+[source,python]
+----
+GREAT = 10**9
+g = [[GREAT] * n for _ in range(n)]
+----
+
+. the initial values of `g[i][j]` for vertices `i` and `j` between which there is no arc in the original graph must be initialized with a deliberately extremely large value `GREAT`, for example:
+
+here `GREAT` is a constant appropriate for the context; it is not recommended to use `float('inf')` without care, since unexpected behavior may occur during comparisons;
+. a side benefit of Floyd's algorithm is the ability to build the reachability matrix for the original graph, since if `g[i][j]` remains equal to `GREAT`, this means that vertex `j` is unreachable from vertex `i`;
+. Floyd's algorithm also works in the case when some edges of the original graph have negative weights, but it is guaranteed that the graph has no negative-weight cycles.
+
+In cases where it is necessary to find the distance between two specific vertices or the distance from a specific vertex to all others, one can use the somewhat more complex _Dijkstra's method_ for faster execution and reduced memory usage (as in the "Pyramid of Cheops" and "Oh, the Roads" problems).
+
+// Page 156
+
+== Problem "Maneuvers"
+
+National Olympiad in Informatics, 2000.
+
+On the territory of a certain state with heavily rugged mountainous terrain, military maneuvers are underway between two opposing sides: the "Blues" and the "Greens." The features of the landscape and complex climatic conditions force units of both sides to be stationed only in certain populated areas. The total number of populated areas in this state is stem:[N].
+
+The "Blues'" tactics for conducting military operations are based on delivering fast and sudden strikes against the enemy, which is possible only if motorized units are used in operations, and their movement occurs only along roads. The diversity of military equipment used means that the travel time of different combat units from one point to another turns out to be different and is determined by the value stem:[Vi] — the speed of movement of the combat unit stationed at the stem:[j]-th populated area.
+
+Using their overwhelming superiority in equipment, the "Blues" plan to organize a night raid on the enemy's bases (code-named "Greens") and completely destroy them. All combat units of the "Blues" begin the operation simultaneously. If a "Blues" combat unit storms into a populated area occupied by the "Greens," then, taking advantage of the element of surprise, they manage to completely destroy that group.
+
+Unfortunately, the brilliant execution of this operation was hindered by the fact that time stem:[T] after the start of the operation, the "Greens" intercepted a radio message about the ongoing operation. After the radio intercept, the "Greens'" groups instantly disperse into the surrounding mountains and remain unharmed.
+
+Determine how many enemy groups and in which populated areas the "Blues" will still manage to defeat the "Greens."
+
+It is assumed that at the initial moment the "Greens'" and "Blues'" groups cannot be in the same populated area. If the alarm is received at the moment when a "Blues" combat unit is just storming into a populated area occupied by the "Greens," then, using their superior knowledge of the terrain, the "Greens" still manage to escape into the mountains. The overwhelming superiority in equipment and personnel allows the "Blues'" combat units to organize any number of expeditions from each unit to defeat the "Greens." Nothing prevents one expedition from destroying several groups during the operation.
+
+The initial data for the problem is contained in files `MAP.IN` and `TROOPS.IN`. The structure of the file `MAP.IN` describes the terrain map. The first line of this file contains two integers: `N` — the number of populated areas (stem:[0 < N < 256]) and `K` — the number of roads connecting these populated areas (stem:[0 ≤ K ≤ 1000]). Roads do not intersect anywhere. In the subsequent `K` lines of the file, the road network is described. Each line contains a pair of two natural numbers `i` and `j` and one positive real number `Lij`, meaning that between populated areas `i` and `j` there exists a road of length `Lij` kilometers (`Lij` < 1000).
+
+// Page 157
+The contents of the file `TROOPS.IN` reflect the deployment of combat units of the warring sides. The first line of the file contains the number `MF` — the number of "Blues" combat units. Each of the following `MF` lines contains two numbers. The first is an integer `j` — the number of the populated area where the unit is stationed; the second is a non-negative real number `Vj` — the speed of movement of this unit's combat columns in kilometers per hour (`Vj < 110`). Next, on a separate line of the file, the number `MB` — the number of "Greens" combat groups — is written, followed by `MB` numbers — the numbers of populated areas where these groups are located. And finally, the last line of the file contains a positive real number `T`, measured in hours (`T < 24`). All numbers in the file lines are separated by spaces.
+
+The result of solving the problem must be written to a text file `VICTORY.OUT`. The first line of the file contains the number of defeated groups, and the second line contains the numbers of populated areas (in ascending order) where these groups were stationed.
+
+Consider the following example:
+
+----
+8 7
+1 2 80
+2 4 25
+4 5 10
+6 2 5
+2 3 40
+7 6 10
+8 7 15
+----
+
+----
+2
+1 50
+6 20
+4 4 5 3 8
+2.0
+----
+
+----
+2
+4 8
+----
+
+[EXAMPLE]
+====
+*MAP.IN*
+
+*TROOPS.IN*
+
+*VICTORY.OUT*
+
+====
+
+Briefly, the solution algorithm can be described as follows: using Floyd's method, we compute the shortest distances from every vertex to every other. Then, iterating over all "Greens" vertices and all "Blues" vertices, we check: if the "Blues" arrive in time, then the corresponding "Greens" group is defeated.
+
+Let us examine the solution in more detail. First, the input data:
+
+[source,python]
+----
+data = open('map.in').read().split()
+idx = 0
+n = int(data[idx]); idx += 1  # Read the number of areas
+k = int(data[idx]); idx += 1  # and roads
+
+GREAT = 1e12
+a = [[GREAT] * (n + 1) for _ in range(n + 1)]  # Initialize for Floyd's method
+
+for _ in range(k):
+    x = int(data[idx]); idx += 1
+    y = int(data[idx]); idx += 1
+    z = float(data[idx]); idx += 1
+    a[x][y] = z  # Update the adjacency matrix
+    a[y][x] = z
+----
+
+// Page 158
+[source,python]
+----
+troops = open('troops.in').read().split()
+tidx = 0
+num_blue = int(troops[tidx]); tidx += 1  # Read positions and speeds
+                                              # of the "Blues"
+blue = [0] * (num_blue + 1)
+v_blue = [0.0] * (num_blue + 1)
+for i in range(1, num_blue + 1):
+    blue[i] = int(troops[tidx]); tidx += 1
+    v_blue[i] = float(troops[tidx]); tidx += 1
+
+num_green = int(troops[tidx]); tidx += 1  # Read positions of the "Greens"
+green = [0] * (num_green + 1)
+for i in range(1, num_green + 1):
+    green[i] = int(troops[tidx]); tidx += 1
+
+T = float(troops[tidx]); tidx += 1  # Read operation duration
+----
+
+Then, computing distances between all populated areas using Floyd's method:
+
+[source,python]
+----
+for i in range(1, n + 1):
+    for x in range(1, n + 1):
+        for y in range(1, n + 1):
+            a[x][y] = min(a[x][y], a[x][i] + a[i][y])
+----
+
+Computing the number of defeated groups:
+
+[source,python]
+----
+deleted = 0
+num_list: list[int] = []
+for i in range(1, num_green + 1):  # For all "Greens"
+    for j in range(1, num_blue + 1):  # For all "Blues"
+        if a[green[i]][blue[j]] < v_blue[j] * T:  # If the "Blues" arrive in time
+            deleted += 1  # Increment defeated count
+            num_list.append(green[i])  # Store the number
+            break  # Move to the next "Greens"
+----
+
+Finally, in accordance with the problem requirements, we sort the numbers of the defeated groups and output them:
+
+[source,python]
+----
+num_list.sort()
+with open('victory.out', 'w') as f_out:
+    print(deleted, file=f_out)
+    print(' '.join(str(x) for x in num_list), file=f_out)
+----
+
+[NOTE]
+====
+In Python there is no static memory limitation like in old compilers, so the full 256x256 matrix can be used without issues.
+
+====
+
+.Listing 2.30. Program "Maneuvers"
+[source,python]
+----
+# Maneuvers
+import sys
+
+def solve() -> None:
+    # Read map
+    with open('map.in') as f:
+        data = f.read().split()
+    idx = 0
+    n = int(data[idx]); idx += 1
+    k = int(data[idx]); idx += 1
+
+    GREAT = 1e12
+    a = [[GREAT] * (n + 1) for _ in range(n + 1)]
+
+    for _ in range(k):
+        x = int(data[idx]); idx += 1
+        y = int(data[idx]); idx += 1
+        z = float(data[idx]); idx += 1
+        a[x][y] = z
+        a[y][x] = z
+----
+
+// Page 159
+[source,python]
+----
+  # Read troops
+    with open('troops.in') as f:
+        tdata = f.read().split()
+    tidx = 0
+    num_blue = int(tdata[tidx]); tidx += 1
+
+    blue: list[int] = [0] * (num_blue + 1)
+    v_blue: list[float] = [0.0] * (num_blue + 1)
+    for i in range(1, num_blue + 1):
+        blue[i] = int(tdata[tidx]); tidx += 1
+        v_blue[i] = float(tdata[tidx]); tidx += 1
+
+    num_green = int(tdata[tidx]); tidx += 1
+    green: list[int] = [0] * (num_green + 1)
+    for i in range(1, num_green + 1):
+        green[i] = int(tdata[tidx]); tidx += 1
+    T = float(tdata[tidx]); tidx += 1
+
+    # Floyd's algorithm
+    for i in range(1, n + 1):
+        for x in range(1, n + 1):
+            for y in range(1, n + 1):
+                a[x][y] = min(a[x][y], a[x][i] + a[i][y])
+
+    # Determine defeated groups
+    deleted = 0
+    num_list: list[int] = []
+
+    for i in range(1, num_green + 1):
+        for j in range(1, num_blue + 1):
+            if a[green[i]][blue[j]] <= v_blue[j] * T + 0.00001:
+                deleted += 1
+                num_list.append(green[i])
+                break
+
+    num_list.sort()
+
+    with open('victory.out', 'w') as f_out:
+        print(deleted, file=f_out)
+        print(' '.join(str(x) for x in num_list), file=f_out)
+
+solve()
+----
+
+
+== Problem "Pyramid of Cheops"
+
+National Olympiad in Informatics, 1996.
+
+Inside the Pyramid of Cheops, there are stem:[N] rooms containing stem:[2M] modules that make up stem:[M] devices, each consisting of two modules located in different rooms, and designed for teleportation between the pair of rooms in which these modules are installed. Teleportation takes 0.5 time units. At the initial moment, the modules of all devices enter "preparation mode." Each module has its own integer time period during which it remains in "preparation mode."
+
+// Page 160
+After this time elapses, the module instantly "activates," after which it returns to "preparation mode" again. A device can only be used at the moment when both of its modules "activate" simultaneously.
+
+Indiana Jones managed to penetrate the pharaoh's tomb (room 1). After examining it, he turned on the devices and was about to leave, but at that moment the tomb guardian woke up. Now Jones needs to reach room stem:[N] as quickly as possible, which contains the exit from the pyramid. He can only move from room to room using the devices, since the awakened guardian has locked all doors in the pyramid's rooms.
+
+It is necessary to write a program that takes as input descriptions of the devices' locations and their characteristics, and outputs the optimal time and the sequence of devices that must be used to get from room 1 to room stem:[N] in that time.
+
+Input file — input2.txt, output file — output2.txt.
+
+Input format (line by line):
+
+
+* N
+* M
+* R11 T11 R12 T12
+* ...
+* RM1 TM1 RM2 TM2
+
+That is, the following data is provided:
+
+
+* stem:[N (2 < N < 100)] — the number of rooms;
+* stem:[M (M < 100)] — the number of devices;
+* Ri1 and Ri2 — the numbers of the rooms in which the modules of device i are located;
+* Ti1, Ti2 (Ti1, Ti2 < 1000) — the time periods after which the corresponding modules activate.
+
+The output file should contain the optimal time and the sequence of devices that need to be used to achieve the desired result.
+
+All numbers are natural.
+
+As an example, consider the following:
+
+
+----
+4
+5
+1 5 3 2
+1 1 2 1
+2 5 3 5
+4 4 3 2
+3 5 4 5
+----
+
+* input2.txt
+----
+8.5
+2 3 4
+----
+
+* output2.txt
+
+// Page 161
+
+
+
+By representing rooms as vertices and pairs of devices (with activation times) as weighted arcs, we can apply Dijkstra's algorithm to find the shortest path from the first vertex to the last. More precisely, Dijkstra's algorithm will build the shortest paths from the first to all other vertices, but in this problem we are only interested in the shortest path from the first to the last. It must be taken into account that arcs exist only at moments that are multiples of the activation times.
+
+Let us examine the solution in more detail. We begin with reading the input data:
+
+[source,python]
+----
+from math import gcd
+
+data = open('input2.txt').read().split()
+idx = 0
+n = int(data[idx]); idx += 1  # Read the number of rooms
+m = int(data[idx]); idx += 1  # Read the number of devices
+kg: list[int] = [0] * (n + 1)
+
+# Adjacency list: g[v] = [(neighbor, lcm_period), ...]
+g: list[list[tuple[int, int]]] = [[] for _ in range(n + 1)]
+
+for i in range(m):
+    r1 = int(data[idx]); idx += 1
+    t1 = int(data[idx]); idx += 1
+    r2 = int(data[idx]); idx += 1
+    t2 = int(data[idx]); idx += 1
+    lcm_val = (t1 * t2) // gcd(t1, t2)  # lcm - least common multiple
+    g[r1].append((r2, lcm_val))
+    g[r2].append((r1, lcm_val))
+----
+
+The original graph (by the problem conditions) is undirected. Therefore, we add both arcs. The graph is represented as a list of arcs adjacent to the current one:
+
+
+* `g[i]` — the list of arcs from vertex i, each as a `(neighbor, weight)` tuple;
+* `g[i][j][0]` — the vertex to which arc j goes from vertex i;
+* `g[i][j][1]` — the weight of the arc from vertex i to vertex `g[i][j][0]`.
+
+To compute the GCD, Python's built-in `math.gcd` function is used (which implements the Euclidean algorithm internally):
+
+[source,python]
+----
+from math import gcd
+# gcd(a, b) returns the greatest common divisor of a and b
+# LCM can be computed as: (a * b) // gcd(a, b)
+----
+
+Then preparation for executing Dijkstra's algorithm is performed:
+
+[source,python]
+----
+FREE = 1
+DONE = 2
+
+INF = float('inf')
+label: list[int] = [FREE] * (n + 1)  # Mark all as free
+pred: list[int] = [1] * (n + 1)  # Predecessor is the first
+d: list[float] = [INF] * (n + 1)  # Distance to the first is max
+
+label[1] = DONE  # First vertex is processed
+pred[1] = 0  # Predecessor of the first is 0
+d[1] = 0.0  # Distance from first to first is 0
+for neighbor, weight in g[1]:  # For all arcs from the first vertex
+    d[neighbor] = weight + 0.5  # Distance to the first vertex
+                                       # equals edge weight + 0.5
+----
+
+Note that in the last line, 0.5 is added to the edge weights, because, according to the problem conditions, teleportation using devices from one room to another takes 0.5 time units.
+
+Next comes the main loop of Dijkstra's algorithm:
+
+[source,python]
+----
+for i in range(n - 1):
+    # Find the nearest unprocessed vertex to the first
+----
+
+// Page 162
+Recalculate shortest distances through the nearest vertex to vertices adjacent to the nearest
+
+The first step — finding the nearest unprocessed vertex to the first:
+
+[source,python]
+----
+    min_d = INF  # min_d - max
+    bliz = -1
+    for j in range(1, n + 1):  # For all vertices
+        if label[j] == FREE and d[j] < min_d:  # if the vertex is free
+                                         # and the distance from it to the first
+                                         # vertex is less than min_d
+            min_d = d[j]  # Store this distance in min_d
+            bliz = j  # Remember the vertex as the nearest
+    label[bliz] = DONE  # Mark the found nearest as
+                                         # processed
+----
+
+The second step — recalculating shortest distances through the nearest vertex to vertices adjacent to the nearest:
+
+[source,python]
+----
+    for neighbor, weight in g[bliz]:  # For all vertices adjacent to
+                                         # the nearest
+        if label[neighbor] == FREE:  # If the vertex has not yet been
+                                         # processed
+            new_time = calculat(d[bliz], weight)  # Compute
+                                         # the distance to it
+                                         # in problem terms - the travel
+                                         # time to it
+            if d[neighbor] > new_time + 0.5:  # If the new time is better
+                d[neighbor] = new_time + 0.5  # store it in list d
+                pred[neighbor] = bliz  # set the nearest as
+                                         # predecessor for the current
+----
+
+When computing the shortest distance to the current vertex through the nearest (in Dijkstra's algorithm terms) or the travel time from the first room through the nearest to the current (in this problem's terms), the function `calculat(t, t_lcm)` is used:
+
+[source,python]
+----
+def calculat(t: float, t_lcm: int) -> int:
+    t_res = 0
+    while t > t_res:
+        t_res += t_lcm
+    return t_res
+----
+
+This function computes the time `t_res` — the nearest time greater than the current time `t` (t equals the minimum time required to optimally travel from the first vertex to the nearest) and a multiple of `t_lcm` — the activation period of the pair of devices connecting rooms `bliz` (nearest) and the current neighbor.
+
+// Page 163
+
+
+
+After executing Dijkstra's algorithm, the following lists are formed:
+
+
+* d[j] — the shortest distance from the starting vertex to vertex j;
+* pred[j] — the predecessor of vertex j on the optimal route.
+
+Taking this information into account, the result output is performed as follows:
+
+[source,python]
+----
+tg = n
+path: list[int] = []
+while tg != 0:  # while there are predecessors
+    path.append(tg)  # Store current in the path list
+    tg = pred[tg]  # Reset the predecessor
+
+path.reverse()
+
+with open('output2.txt', 'w') as f_out:
+    print(f'{d[n]:.1f}', file=f_out)
+    print('required sequence:', ' '.join(str(v) for v in path[1:]), file=f_out)
+----
+
+The full program text is in Listing 2.31.
+
+.Listing 2.31. Program "Pyramid of Cheops"
+[source,python]
+----
+# Pyramid of Cheops
+from math import gcd
+
+FREE = 1
+DONE = 2
+
+def calculat(t: float, t_lcm: int) -> int:
+    t_res = 0
+    while t > t_res:
+        t_res += t_lcm
+    return t_res
+
+def solve() -> None:
+    with open('input2.txt') as f:
+        data = f.read().split()
+    idx = 0
+    n = int(data[idx]); idx += 1
+    m = int(data[idx]); idx += 1
+
+    # Adjacency list: list of (neighbor, lcm_period)
+    g: list[list[tuple[int, int]]] = [[] for _ in range(n + 1)]
+
+    for _ in range(m):
+        r1 = int(data[idx]); idx += 1
+        t1 = int(data[idx]); idx += 1
+        r2 = int(data[idx]); idx += 1
+        t2 = int(data[idx]); idx += 1
+        lcm_val = (t1 * t2) // gcd(t1, t2)
+        g[r1].append((r2, lcm_val))
+        g[r2].append((r1, lcm_val))
+----
+
+// Page 164
+
+=== Listing 2.31 (continued)
+
+[source,python]
+----
+    INF = float('inf')
+    label: list[int] = [FREE] * (n + 1)
+    pred: list[int] = [0] * (n + 1)
+    d: list[float] = [INF] * (n + 1)
+
+    label[1] = DONE
+    pred[1] = 0
+    d[1] = 0.0
+    for neighbor, weight in g[1]:
+        d[neighbor] = weight + 0.5
+
+    for _ in range(n - 1):
+        # Find nearest unprocessed vertex
+        min_d = INF
+        bliz = -1
+        for j in range(1, n + 1):
+            if label[j] == FREE and d[j] < min_d:
+                min_d = d[j]
+                bliz = j
+        if bliz == -1:
+            break
+        label[bliz] = DONE
+
+        # Relax neighbors
+        for neighbor, weight in g[bliz]:
+            if label[neighbor] == FREE:
+                new_time = calculat(d[bliz], weight)
+                if d[neighbor] > new_time + 0.5:
+                    d[neighbor] = new_time + 0.5
+                    pred[neighbor] = bliz
+
+    # Reconstruct path
+    tg = n
+    path: list[int] = []
+    while tg != 0:
+        path.append(tg)
+        tg = pred[tg]
+    path.reverse()
+
+    with open('output2.txt', 'w') as f_out:
+        print(f'{d[n]:.1f}', file=f_out)
+        print(' '.join(str(v) for v in path[1:]), file=f_out)
+
+solve()
+----
+
+
+== Problem "Oh, the Roads"
+
+National Olympiad in Informatics, 1998.
+
+There are stem:[N] cities numbered from 1 to stem:[N] (where stem:[N] is a natural number, stem:[1 ≤ N ≤ 100]). Some of them are connected by two-way roads that intersect only at cities. There are two types of roads — highways and railways. For each road, the base fare for traveling on it is known.
+
+You need to travel from city stem:[A] to city stem:[B], paying the minimum total fare. The cost of travel depends on the set of roads traveled and the mode of travel. If you have arrived at city stem:[C] via a highway (railway) road stem:[X→C] and want to continue along road stem:[C→Y] of the same type, then you only need to pay the base fare for road stem:[C→Y]. If the type of road stem:[C→Y] differs from the type of road stem:[X→C], then you must pay the base fare for road stem:[C→Y] plus 10% of the base fare for that road (insurance fee). When
+
+// Page 165
+
+
+
+departing from city _A_, the insurance fee is always charged. Write a program that finds the cheapest travel route as a sequence of cities and computes the travel cost along this route.
+
+The input data is in a text file named `TOUR.IN` with the following format: the first line contains the number `N`. The second line contains the number `M` (the number of roads, `M` is a natural number and `M ≤ 1000`); each of the following `M` lines contains four numbers: `x`, `y`, `t`, and `p`, separated by spaces, where `x` and `y` are the numbers of the cities connected by the road, `t` is the road type (`0` — highway, `1` — railway), and `p` is the base fare for traveling on it (`p` is real, `0 < p ≤ 1000`). The last line contains the numbers of the starting and ending cities `A` and `B`.
+
+The output data must be written to a text file named `TOUR.OUT` with the following format: the first line contains the number `S` — the travel cost along the cheapest route with 2 decimal places of precision. Each of the subsequent lines, except the last, contains two numbers — the number of the next city in the route (starting from city `A`) and the type of road used to depart from that city (`0` or `1`), separated by a space. The last line contains a single number — the number of city `B`.
+
+Consider the following example:
+
+
+----
+3
+2
+1 2 0 10.00
+2 3 1 10.00
+1 3
+----
+
+* TOUR.IN:
+
+
+----
+22.0
+1 0
+2 1
+3
+----
+
+* TOUR.OUT:
+
+Dijkstra's method cannot be applied directly (with cities as vertices), since the optimal route may require visiting the same city twice in order to pay less for the insurance fee when departing from that city.
+
+We introduce `2 * N` vertices (where `N` is the number of cities). That is, for each city we create two vertices: the first if we entered the city via a road of type `0`, the second via a road of type `1`. Now Dijkstra's method can be directly applied to compute the shortest distances from the given city `A` to all introduced vertices. For the destination city `B`, we choose the better of the options — entering `B` via a road of type `0` or via a road of type `1`.
+
+Dijkstra's method allows sequentially saving all intermediate vertices in the optimal route, which is necessary for outputting the complete answer in the required format.
+
+Let us examine the solution in more detail, based on the text of the solution program. Input data is read as follows:
+
+[source,python]
+----
+data = open('tour.in').read().split()
+idx = 0
+n = int(data[idx]); idx += 1  # N - number of cities
+m = int(data[idx]); idx += 1  # M - number of roads
+----
+
+// Page 166
+[source,python]
+----
+MAXR = 1e4
+# p[x][y][t] - travel cost from x to y via road of type t
+p = [[[MAXR] * 2 for _ in range(n + 1)] for _ in range(n + 1)]
+
+for _ in range(m):  # x - city number "from"
+    x = int(data[idx]); idx += 1  # y - city number "to"
+    y = int(data[idx]); idx += 1  # t - road type
+    t = int(data[idx]); idx += 1  # p[x][y][t] - travel cost
+    cost = float(data[idx]); idx += 1  # from x to y via road of type t
+    p[x][y][t] = cost
+    p[y][x][t] = cost
+
+A = int(data[idx]); idx += 1  # Start and end points of the route
+B = int(data[idx]); idx += 1
+----
+
+Preparation for executing Dijkstra's algorithm:
+
+[source,python]
+----
+FREE = 0
+DONE = 1
+
+for i in range(1, n + 1):  # When departing from city A
+    for t in range(2):  # the insurance fee
+        p[A][i][t] = 1.1 * p[A][i][t]  # is always charged
+
+# d[i][t] - shortest cost to city i entering via road type t
+d = [[MAXR] * 2 for _ in range(n + 1)]
+for i in range(1, n + 1):  # For all cities
+    d[i][0] = p[A][i][0]  # shortest costs to the first
+    d[i][1] = p[A][i][1]  # via highway / via railway
+
+label = [[FREE] * 2 for _ in range(n + 1)]  # For all cities
+pred = [[A] * 2 for _ in range(n + 1)]  # Previous city equals A
+                                                  # for both road types
+label[A][0] = DONE  # Starting city is processed
+label[A][1] = DONE  # for both road types
+pred[A][0] = 0  # Predecessor of the starting city is 0
+pred[A][1] = 0  # for both road types
+----
+
+The main part of Dijkstra's algorithm is a loop over the number of remaining unprocessed vertices:
+
+[source,python]
+----
+def cost_factor(t1: int, t2: int) -> float:
+    """Insurance fee multiplier when switching road types."""
+    return 1.0 if t1 == t2 else 1.1
+
+for _ in range(2 * n - 2):
+    # Find the nearest unprocessed vertex to the first
+    # Recalculate minimum costs through the nearest vertex
+    # to vertices adjacent to the nearest
+----
+
+The first step — finding the nearest unprocessed vertex to the first:
+
+[source,python]
+----
+    min_d = MAXR  # min_d - maximum
+    bliz = -1
+    bt = -1
+    for j in range(1, n + 1):  # For all cities
+        for t in range(2):  # For roads of both types
+            if (label[j][t] == FREE  # If entry into city j via road of type t
+                    and  # has not been processed yet and
+                    min_d > d[j][t]):  # cost from city A to city j
+                                                  # via road of type t is less than min_d
+                bliz = j  # Nearest is j
+                bt = t  # its type is bt
+                min_d = d[j][t]  # minimum cost into min_d
+    label[bliz][bt] = DONE  # Mark as processed the vertex
+                                                  # with minimum cost from city A
+                                                  # among still unprocessed vertices
+----
+
+// Page 167
+
+
+
+The second step — recalculating minimum costs through the nearest vertex to vertices adjacent to the nearest:
+
+[source,python]
+----
+    typp = [[0] * 2 for _ in range(n + 1)]  # (initialized before main loop)
+
+    for j in range(1, n + 1):  # For all cities
+        for t1 in range(2):  # For roads of both types
+            if (label[j][t1] == FREE  # If the road to city j of type t is unprocessed
+                    and d[j][t1]  # and the cost to it from vertex A
+                    >  # is greater than
+                    d[bliz][bt] + cost_factor(t1, bt) * p[bliz][j][t1]):  # cost through nearest
+                d[j][t1] = d[bliz][bt] + cost_factor(t1, bt) * p[bliz][j][t1]  # replace cost
+                pred[j][t1] = bliz  # remember
+                typp[j][t1] = bt  # the previous city and road type
+----
+
+When computing the travel cost through the nearest vertex, we account for the insurance fee when switching from one road type to another using the function `cost_factor(t1, t2)`:
+
+[source,python]
+----
+def cost_factor(t1: int, t2: int) -> float:
+    if t1 == t2:
+        return 1.0
+    else:
+        return 1.1
+----
+
+Output of results is done as follows:
+
+[source,python]
+----
+g_city = B
+is_count = 0
+t = 0 if d[B][0] < d[B][1] else 1  # Current city is the final city
+                                        # Entry type is the better of two options
+stg: list[int] = [0] * (n + 2)
+stt: list[int] = [0] * (n + 2)
+stt[1] = t  # Current type is the chosen best
+
+while g_city != 0:  # While the current city is not 0
+    is_count += 1  # Increment the number of cities
+    stg[is_count] = pred[g_city][t]  # save the current city to the path
+    stt[is_count + 1] = typp[g_city][t]  # and its type
+    ng = pred[g_city][t]  # Reset the current city
+    nt = typp[g_city][t]  # and type to the previous city
+    g_city = ng  # and type
+    t = nt
+
+with open('tour.out', 'w') as f_out:
+    print(f'{min(d[B][0], d[B][1]):.2f}', file=f_out)  # Output the minimum cost
+    for i in range(is_count - 1, 0, -1):  # and the path
+        print(stg[i], stt[i], file=f_out)
+    print(B, file=f_out)  # add the last city
+----
+
+The full program text is in Listing 2.32.
+
+.Listing 2.32. Program "Oh, the Roads"
+[source,python]
+----
+# Oh, the Roads
+FREE = 0
+DONE = 1
+MAXR = 1e4
+
+def cost_factor(t1: int, t2: int) -> float:
+    if t1 == t2:
+        return 1.0
+    else:
+        return 1.1
+
+def solve() -> None:
+    with open('tour.in') as f:
+        data = f.read().split()
+    idx = 0
+    n = int(data[idx]); idx += 1
+    m = int(data[idx]); idx += 1
+
+    p = [[[MAXR] * 2 for _ in range(n + 1)] for _ in range(n + 1)]
+    for _ in range(m):
+        x = int(data[idx]); idx += 1
+        y = int(data[idx]); idx += 1
+        t = int(data[idx]); idx += 1
+        cost = float(data[idx]); idx += 1
+        p[x][y][t] = cost
+        p[y][x][t] = cost
+    A = int(data[idx]); idx += 1
+    B = int(data[idx]); idx += 1
+----
+
+// Page 168
+[source,python]
+----
+  # Apply insurance fee for departures from city A
+    for i in range(1, n + 1):
+        for t in range(2):
+            p[A][i][t] = 1.1 * p[A][i][t]
+
+    d = [[MAXR] * 2 for _ in range(n + 1)]
+    for i in range(1, n + 1):
+        d[i][0] = p[A][i][0]
+        d[i][1] = p[A][i][1]
+
+    label = [[FREE] * 2 for _ in range(n + 1)]
+    pred = [[A] * 2 for _ in range(n + 1)]
+    typp = [[0] * 2 for _ in range(n + 1)]
+
+    label[A][0] = DONE
+    label[A][1] = DONE
+    pred[A][0] = 0
+    pred[A][1] = 0
+
+    for _ in range(2 * n - 2):
+        min_d = MAXR
+        bliz = -1
+        bt = -1
+        for j in range(1, n + 1):
+            for t in range(2):
+                if label[j][t] == FREE and min_d > d[j][t]:
+                    bliz = j
+                    bt = t
+                    min_d = d[j][t]
+        if bliz == -1:
+            break
+        label[bliz][bt] = DONE
+
+        for j in range(1, n + 1):
+            for t1 in range(2):
+                if (label[j][t1] == FREE and
+                        d[j][t1] > d[bliz][bt] + cost_factor(t1, bt) * p[bliz][j][t1]):
+                    d[j][t1] = d[bliz][bt] + cost_factor(t1, bt) * p[bliz][j][t1]
+                    pred[j][t1] = bliz
+                    typp[j][t1] = bt
+----
+
+// Page 169
+[source,python]
+----
+  # Reconstruct the path
+    g_city = B
+    is_count = 0
+    t = 0 if d[B][0] < d[B][1] else 1
+    stg: list[int] = [0] * (2 * n + 2)
+    stt: list[int] = [0] * (2 * n + 2)
+    stt[1] = t
+    while g_city != 0:
+        is_count += 1
+        stg[is_count] = pred[g_city][t]
+        stt[is_count + 1] = typp[g_city][t]
+        ng = pred[g_city][t]
+        nt = typp[g_city][t]
+        g_city = ng
+        t = nt
+
+    with open('tour.out', 'w') as f_out:
+        print(f'{min(d[B][0], d[B][1]):.2f}', file=f_out)
+        for i in range(is_count - 1, 0, -1):
+            print(stg[i], stt[i], file=f_out)
+        print(B, file=f_out)
+
+solve()
+----
+
+
+== Depth-First Search
+
+Consider an example of an undirected graph with six vertices:
+
+----
+
+            (1)--(3) (5)
+             I \/ I   I
+             I /\ I   I
+            (2)--(4) (6)
+----
+
+In computer processing, a graph can be specified by a list of _edges_ (arcs) for each vertex. For example, for the graph in our example, this list looks as follows:
+
+
+* 1: 2, 3, 4 (that is, vertex 1 is connected to vertices 2, 3, and 4);
+* 2: 1, 3, 4;
+* 3: 2, 3, 4;
+* 4: 1, 2, 3;
+* 5: 6;
+* 6: 5.
+
+To store this information in computer memory, one can use a list of lists `g[i]`, where each `g[i]` contains the neighbors of vertex `i`. In Python, this is naturally represented as `g: list[list[int]]` — an adjacency list.
+
+Then to process the connection list of the current vertex `u`, one can write:
+
+[source,python]
+----
+for v in g[u]:
+    ...
+----
+
+Thus we obtain processing of the arc connecting vertices `u` and `v` for all vertices directly connected to `u`.
+
+To process all connections of all vertices, one can use _depth-first search_ (DFS — Depth-First Search):
+
+// Page 170
+[source,python]
+----
+import sys
+sys.setrecursionlimit(10000)  # Increase for large graphs
+
+WHITE = 1
+GRAY = 2
+
+color: list[int] = [WHITE] * (n + 1)
+
+def dfs(u: int) -> None:
+    color[u] = GRAY
+    for v in g[u]:
+        dfs(v)
+
+for u in range(1, n + 1):
+    if color[u] == WHITE:
+        dfs(u)
+----
+
+The introduced notations:
+
+
+** `WHITE` (constant=1) — white, if we have not yet visited this vertex;
+** `GRAY` (constant=2) — gray, if we have visited this vertex;
+. `dfs(u)` — a recursive function that calls itself for all descendant vertices of the given vertex.
+
+That is, to perform depth-first search on a given graph `g` represented as adjacency lists, we first set all vertices to color `WHITE`, and then for all vertices that have not yet been visited (`color[v] == WHITE`), we call the recursive function `dfs`.
+
+In this way, all possible routes in the graph are formed. There are no restrictions on how many times arcs and vertices can be used. If, however, the problem conditions require visiting each vertex no more than once, in order to form routes from non-repeating vertices, this can be ensured in the `dfs` function by a _conditional call_:
+
+[source,python]
+----
+def dfs(u: int) -> None:
+    color[u] = GRAY
+    for v in g[u]:
+        if color[v] == WHITE:
+            dfs(v)
+----
+
+If each arc must be used no more than once, then arc coloring can be introduced — for example, a set of visited edges or a 2D list `edge_color[u][j]` — with values `FREE` or `DONE`.
+
+The `dfs` function for forming such routes where each arc is used in the route no more than once would look as follows:
+
+[source,python]
+----
+FREE = 1
+DONE = 2
+
+def dfs(v: int) -> None:
+    for j in range(len(g[v])):
+        if edge_color[v][j] == FREE:
+            ...
+----
+
+// Page 171
+[source,python]
+----
+            edge_color[v][j] = DONE
+            dfs(g[v][j])
+            edge_color[v][j] = FREE
+            ...
+----
+
+Here arc labels are introduced — `edge_color[v][j]`. `edge_color[v][j] == FREE` if the arc has not yet been processed, and `DONE` if it is included in the current path.
+
+If the problem requires outputting the found path, then a special list `path` is introduced for storing it. The vertices of the current path are added to this list and removed from it during graph traversal:
+
+[source,python]
+----
+path: list[int] = []
+
+def dfs(v: int) -> None:
+    for j in range(len(g[v])):
+        ...
+        path.append(g[v][j])
+        dfs(g[v][j])
+        path.pop()
+        ...
+----
+
+Now it is time to move on to applying the presented theoretical information to solving specific problems.
+
+
+=== Problem "Roads"
+
+National Olympiad in Informatics, 1997.
+
+Given a system of one-way roads defined by a set of city pairs. Each such pair (_i_, _j_) indicates that one can travel from city _i_ to city _j_, but this does not mean that one can travel in the reverse direction.
+
+It is necessary to determine whether one can travel from a given city _A_ to a given city _B_ in such a way as to visit city _C_ without traveling along any road more than once.
+
+The input data is specified in a file named `PATH.IN` as follows: the first line contains the natural number `N` (`N ≤ 50`) — the number of cities (cities are numbered from 1 to `N`). The second line contains the natural number `M` (`M ≤ 100`) — the number of roads. Each of the following lines contains pairs of city numbers connected by a road. The last, (`M + 3`)-rd, line contains the city numbers _A_, _B_, and _C_.
+
+The answer is a sequence of cities starting with city _A_ and ending with city _B_ that satisfies the problem conditions. The answer must be written to the file `PATH.OUT` as a sequence of city numbers (one number per line). The first line of the file must contain the number of cities in the sequence. If no path exists, write the number -1 to the first line of the file.
+
+// Page 172
+
+== PATH.IN
+
+----
+
+3
+2
+1 2
+2 3
+1 3 2
+----
+
+
+== PATH.OUT
+
+----
+
+3
+1
+2
+3
+----
+
+The solution idea can be stated as follows:
+
+[source,pseudocode]
+----
+Depth-first search
+If we encounter vertex B, set the corresponding flag
+If we encounter vertex C and flag B is set - output the result and
+terminate
+After the search completes (required route not found) output -1
+----
+
+Let us present the solution in more detail. Input data is read as follows:
+
+[source,python]
+----
+data = open('path.in').read().split()
+idx = 0
+n = int(data[idx]); idx += 1
+m = int(data[idx]); idx += 1
+
+FREE = 1
+DONE = 2
+
+# Adjacency list with edge colors
+g: list[list[int]] = [[] for _ in range(n + 1)]
+edge_color: list[list[int]] = [[] for _ in range(n + 1)]
+
+for _ in range(m):
+    x = int(data[idx]); idx += 1
+    y = int(data[idx]); idx += 1
+    g[x].append(y)
+    edge_color[x].append(FREE)
+
+A = int(data[idx]); idx += 1
+B = int(data[idx]); idx += 1
+C = int(data[idx]); idx += 1
+----
+
+Here, as before, `g[i]` is the list of vertices connected from vertex `i` by arcs. In addition, arc color is introduced: `FREE` (free) and `DONE` (occupied). `FREE` and `DONE` are constants.
+
+The main program essentially includes only the following statements:
+
+[source,python]
+----
+lab_c = 0  # Set the label - vertex C has not been visited yet
+path: list[int] = []
+dfs(A)  # Depth-first search from vertex A
+print(-1)  # Output the no-path indicator
+----
+
+The recursive depth-first search function from vertex `v` looks as follows:
+
+[source,python]
+----
+import sys
+
+def dfs(v: int) -> None:
+    global lab_c
+    for j in range(len(g[v])):
+        if edge_color[v][j] == FREE:
+            if g[v][j] == B and lab_c == 1:
+                out_res()
+                sys.exit()
+            if g[v][j] == C:
+                lab_c = 1
+            edge_color[v][j] = DONE
+            path.append(g[v][j])
+            dfs(g[v][j])
+            edge_color[v][j] = FREE
+            path.pop()
+            if g[v][j] == C:
+                lab_c = 0
+----
+
+// Page 173
+For all not yet processed (`edge_color[v][j] == FREE`) arcs from the current vertex, we determine whether it leads to the destination, and if city C has already been visited, the result output function is called.
+
+If the current arc leads to city C, we set the corresponding label (`lab_c = 1`). We mark the arc as processed, add it to the `path` list, which contains the current path being processed.
+
+Then we call the `dfs` function from the vertex (`g[v][j]`) to which the current arc leads. Before exiting the `dfs` function, we restore the state that was "original" before its call: we remove the processing mark from the arc (`edge_color[v][j] = FREE`) and remove it from the `path` list (`path.pop()`).
+
+And finally, the result output function:
+
+[source,python]
+----
+def out_res() -> None:
+    with open('path.out', 'w') as f_out:
+        print(len(path) + 2, file=f_out)
+        print(A, file=f_out)
+        for v in path:
+            print(v, file=f_out)
+        print(B, file=f_out)
+----
+
+Since, by the construction algorithm, the starting (A) and ending (B) cities were not added to the `path` list, they are output separately, and the number of cities in the path (`len(path)`) is increased by 2 before output.
+
+.Listing 2.33. Program "Roads"
+[source,python]
+----
+# Roads
+import sys
+sys.setrecursionlimit(10000)
+
+FREE = 1
+DONE = 2
+
+def solve() -> None:
+    with open('path.in') as f:
+        data = f.read().split()
+    idx = 0
+    n = int(data[idx]); idx += 1
+    m = int(data[idx]); idx += 1
+
+    g: list[list[int]] = [[] for _ in range(n + 1)]
+    edge_color: list[list[int]] = [[] for _ in range(n + 1)]
+
+    for _ in range(m):
+        x = int(data[idx]); idx += 1
+        y = int(data[idx]); idx += 1
+        g[x].append(y)
+        edge_color[x].append(FREE)
+
+    A = int(data[idx]); idx += 1
+    B = int(data[idx]); idx += 1
+    C = int(data[idx]); idx += 1
+
+    path: list[int] = []
+    lab_c = 0
+
+    def out_res() -> None:
+        with open('path.out', 'w') as f_out:
+            print(len(path) + 2, file=f_out)
+            print(A, file=f_out)
+            for v in path:
+                print(v, file=f_out)
+            print(B, file=f_out)
+
+    def dfs(v: int) -> None:
+        nonlocal lab_c
+        for j in range(len(g[v])):
+            if edge_color[v][j] == FREE:
+                if g[v][j] == B and lab_c == 1:
+                    out_res()
+                    sys.exit()
+                if g[v][j] == C:
+                    lab_c = 1
+----
+
+_continued_
+
+// Page 174
+
+== Listing 2.33 _(continued)_
+
+[source,python]
+----
+                edge_color[v][j] = DONE
+                path.append(g[v][j])
+                dfs(g[v][j])
+                edge_color[v][j] = FREE
+                path.pop()
+                if g[v][j] == C:
+                    lab_c = 0
+
+    dfs(A)
+    with open('path.out', 'w') as f_out:
+        print(-1, file=f_out)
+
+solve()
+----
+
+
+== Problem "Intersections"
+
+National Olympiad in Informatics, 1998.
+
+Given are the Cartesian coordinates of stem:[N] city intersections, numbered from 1 to stem:[N]. Each intersection has a traffic light. Some of the intersections are connected by roads with two-way (right-hand) traffic that cross only at intersections. For each road, the time required to travel along it from one intersection to another is known.
+
+It is necessary to travel from intersection number stem:[A] to intersection number stem:[B] in the minimum time.
+
+The travel time depends on the set of roads traveled and the waiting time at intersections. If you have arrived from intersection stem:[X] at intersection stem:[C] via road stem:[X→C] and want to continue along road stem:[C→Y], then the waiting time at intersection stem:[C] depends on whether you turn left or not. If you turn left, the waiting time equals stem:[D * K], where stem:[D] is the number of roads intersecting at intersection stem:[C], and stem:[K] is some constant. If you do not turn left, the waiting time is zero.
+
+Write a program that determines the fastest route.
+
+The input data is in a text file named `PER.IN` with the following structure:
+
+
+. the first line contains the number stem:[N] (natural, ≤ 1000);
+. the second line contains the number of roads stem:[M] (natural, ≤ 1000);
+. the third line contains the constant stem:[K] (natural number, ≤ 1000);
+. each of the stem:[N] following lines contains a pair of numbers stem:[x] and stem:[y], separated by a space, which are the coordinates of the intersection (integers not exceeding 1000 in absolute value);
+
+// Page 175
+5) each of the M following lines contains 3 numbers p, r, t, separated by a space, where p and r are the numbers of the intersections connected by the road, and t (natural, ≤ 1000) is the travel time along it;
+
+6) the last line contains the numbers of the starting intersection A and the ending intersection B.
+
+The output data must be written to a text file named PER.OUT with the following format:
+
+
+. the first line contains a natural number T — the travel time along the fastest route;
+. each of the following lines contains one number — the number of the next intersection in the route (starting from intersection A and ending with B).
+
+In the solution, Dijkstra's algorithm is not directly applicable, since the optimal solution at the next vertex is not the sum of the optimal solution for the previous vertex and the weight of the current edge. Moreover, the weight of the current edge is not a constant, depending on which turn was made leaving the vertex.
+
+Therefore, it is proposed to solve the problem using depth-first search. Each vertex is allowed to be used as many times as it has edges. Solutions that are worse than the current optimum are pruned.
+
+The solution can be further accelerated if the search starts with right turns (pruning would work more effectively).
+
+[NOTE]
+====
+This is not explicitly stated in the problem text, but the authors of the original test cases for the problem assumed that a 180-degree turn is a left turn (as in the military: a 180-degree turn is over the left shoulder).
+
+====
+
+Let us examine the solution in more detail. We begin with reading the input data:
+
+[source,python]
+----
+with open('PER.in') as f:
+    data = f.read().split()
+idx = 0
+n = int(data[idx]); idx += 1
+m = int(data[idx]); idx += 1
+K = int(data[idx]); idx += 1
+
+cx: list[int] = [0] * (n + 1)  # x-coordinates of intersections
+cy: list[int] = [0] * (n + 1)  # y-coordinates of intersections
+for i in range(1, n + 1):
+    cx[i] = int(data[idx]); idx += 1
+    cy[i] = int(data[idx]); idx += 1
+
+# g[i] = list of (neighbor, travel_time)
+g: list[list[tuple[int, int]]] = [[] for _ in range(n + 1)]
+D: list[int] = [0] * (n + 1)  # number of roads at each intersection
+
+for _ in range(m):
+    p = int(data[idx]); idx += 1
+    r = int(data[idx]); idx += 1
+    t = int(data[idx]); idx += 1
+    g[p].append((r, t)); D[p] += 1
+    g[r].append((p, t)); D[r] += 1
+
+vA = int(data[idx]); idx += 1
+vB = int(data[idx]); idx += 1
+----
+
+Here we introduced:
+
+
+* `g[i]` — list of (neighbor, travel_time) tuples for vertex i;
+* `g[i][j][0]` — the vertex connected to vertex i by arc number j;
+* `g[i][j][1]` — the travel time from vertex i to the vertex connected to it by arc j;
+* `D[i]` — the number of roads intersecting at intersection i (that is, the total number of arcs emanating from and entering vertex i);
+* vA and vB — indicate the origin and destination.
+
+// Page 176
+Since the roads are two-way by the problem conditions, for each introduced road we add two arcs to the graph.
+
+The main algorithm looks as follows:
+
+[source,python]
+----
+FREE = 1
+DONE = 2
+INF = 10**18
+
+edge_color: list[list[int]] = [[] for _ in range(n + 1)]
+time_arr: list[int] = [INF] * (n + 1)
+
+for i in range(1, n + 1):
+    edge_color[i] = [FREE] * len(g[i])  # All arcs are free
+    time_arr[i] = INF  # Route time to i is maximum
+
+opt_t = INF  # Optimal time is maximum
+path: list[int] = [0, vA]  # Add vertex vA to the route
+kv = 1  # Number of vertices in the route = 1
+time_arr[vA] = 0  # Optimal time to vertex vA = 0
+
+dfs(vA)  # Depth-first search from vertex vA
+# ... output the answer ...
+----
+
+The recursive function `dfs(i)` performs the following work:
+
+[source,python]
+----
+def dfs(i: int) -> None:
+    global opt_t, kv, opt_kv, opt_path
+    for j in range(len(g[i])):
+        neighbor, travel = g[i][j][0], g[i][j][1]
+        if neighbor != vB:
+            if edge_color[i][j] == FREE:
+                # ... continue the path with a DFS call
+                pass
+        else:
+            # ... compare the path with the current optimum
+            pass
+----
+
+If the current vertex is the destination (`vB`), we compare the path with the current optimum. Otherwise, if the current arc has not yet been used (`edge_color[i][j] == FREE`), we continue the path with a DFS call. Before entering `dfs`, we mark the arc as used (`edge_color[i][j] = DONE`), and after exiting — as free (`edge_color[i][j] = FREE`).
+
+Continuing the path with a DFS call includes the following statements:
+
+[source,python]
+----
+                kv += 1
+                path.append(neighbor)  # Add the new vertex to the path
+                new_time = time_arr[i] + travel + count_time()  # Compute the new time
+                if new_time < opt_t:  # If the new time is less than optimal
+                                               # then continue, otherwise prune
+                    edge_color[i][j] = DONE  # Mark the edge as used
+                    ret_time = time_arr[neighbor]  # Save the old time
+                    time_arr[neighbor] = new_time  # Set the new time
+                    dfs(neighbor)  # Call search from neighbor
+                    time_arr[neighbor] = ret_time  # Restore the old time
+----
+
+// Page 177
+[source,python]
+----
+                    edge_color[i][j] = FREE  # Mark the edge as free
+                path.pop()  # Remove the vertex from the path
+                kv -= 1
+----
+
+To compute the new time, the function `count_time()` using the current path length `kv` is used here. This function recovers the vertex numbers of the passage through intersection `i2` (from `i1` through `i2` to `i3`):
+
+[source,python]
+----
+def count_time() -> int:
+    if kv == 2:
+        return 0
+    i1 = path[kv - 2]
+    i2 = path[kv - 1]
+    i3 = path[kv]
+    if i3 == i1:
+        return K * D[i2]
+----
+
+Along the way, it is determined that:
+
+
+. if there are only 2 vertices in the path, meaning there was no turn, then this is a step from the starting vertex and `count_time` returns 0.
+. if `i1 == i3`, then this is a 180-degree turn, and the problem authors consider this also a left turn, `count_time` returns `K * D[i2]`, where `K` is the input coefficient, `i2` is the intersection, and `D[i2]` is the number of roads entering this intersection.
+
+Then from the intersection coordinate lists, the coordinates of the current intersections are selected: `(x1, y1)` (from), `(x2, y2)` (through), and `(x3, y3)` (to).
+
+[source,python]
+----
+    x1, y1 = cx[i1], cy[i1]
+    x2, y2 = cx[i2], cy[i2]
+    x3, y3 = cx[i3], cy[i3]
+----
+
+Computing the equation of the line through points `(x1, y1)` and `(x2, y2)`:
+
+[source,python]
+----
+    a_coef = y2 - y1
+    b_coef = x1 - x2
+    c_coef = y1 * (x2 - x1) - x1 * (y2 - y1)
+----
+
+By substituting the coordinates `(x3, y3)` into the line equation stem:[Ax + By + C = 0], constructed from the first two points `(x1, y1)` and `(x2, y2)`, taking into account edge cases where the line is parallel to the coordinate axes, we determine whether the turn was left or right, and accordingly set the value of the function `count_time`.
+
+[source,python]
+----
+    val = a_coef * x3 + b_coef * y3 + c_coef
+    left = (((x2 > x1) and (val < 0)) or
+            ((x2 < x1) and (val > 0)) or
+            ((y2 == y1) and (x1 > x2) and (y3 < y1)) or
+            ((y2 == y1) and (x1 < x2) and (y3 > y1)) or
+            ((x2 == x1) and (y1 > y2) and (x3 > x1)) or
+            ((x2 == x1) and (y1 < y2) and (x3 < x1)))
+    if left:
+        return K * D[i2]
+    else:
+        return 0
+----
+
+Comparing the path with the optimum is done as follows:
+
+[source,python]
+----
+            kv += 1
+            path.append(neighbor)
+            t_val = time_arr[i] + travel + count_time()
+            if t_val < opt_t:
+                opt_t = t_val
+                opt_kv = kv
+                opt_path = path[:]
+            path.pop()
+            kv -= 1
+----
+
+// Page 178
+Thus, the optimal time is stored in the variable `opt_t`, and the optimal path is in the list `opt_path` with `opt_kv` elements. Therefore, the result output looks like this:
+
+[source,python]
+----
+with open('PER.out', 'w') as f_out:
+    print(opt_t, file=f_out)
+    for i in range(1, opt_kv + 1):
+        print(opt_path[i], file=f_out)
+----
+
+The full program text is given in Listing 2.34.
+
+.Listing 2.34. Program "Intersections"
+[source,python]
+----
+# Intersections
+import sys
+sys.setrecursionlimit(100000)
+
+FREE = 1
+DONE = 2
+
+def solve() -> None:
+    with open('PER.in') as f:
+        data = f.read().split()
+    idx = 0
+    n = int(data[idx]); idx += 1
+    m = int(data[idx]); idx += 1
+    K = int(data[idx]); idx += 1
+
+    cx: list[int] = [0] * (n + 1)
+    cy: list[int] = [0] * (n + 1)
+    for i in range(1, n + 1):
+        cx[i] = int(data[idx]); idx += 1
+        cy[i] = int(data[idx]); idx += 1
+
+    # g[i] = list of (neighbor, travel_time)
+    g: list[list[tuple[int, int]]] = [[] for _ in range(n + 1)]
+    D: list[int] = [0] * (n + 1)
+
+    for _ in range(m):
+        p = int(data[idx]); idx += 1
+        r = int(data[idx]); idx += 1
+        t = int(data[idx]); idx += 1
+        g[p].append((r, t)); D[p] += 1
+        g[r].append((p, t)); D[r] += 1
+
+    vA = int(data[idx]); idx += 1
+    vB = int(data[idx]); idx += 1
+
+    edge_color: list[list[int]] = [[] for _ in range(n + 1)]
+    INF = 10**18
+    time_arr: list[int] = [INF] * (n + 1)
+
+    for i in range(1, n + 1):
+        edge_color[i] = [FREE] * len(g[i])
+
+    opt_t = INF
+    opt_kv = 0
+    opt_path: list[int] = []
+    path: list[int] = [0, vA]  # 1-indexed: path[1] = vA
+    kv = 1
+    time_arr[vA] = 0
+
+    def count_time() -> int:
+        if kv == 2:
+            return 0
+        i1 = path[kv - 2]
+        i2 = path[kv - 1]
+        i3 = path[kv]
+        if i3 == i1:
+            return K * D[i2]
+        x1, y1 = cx[i1], cy[i1]
+        x2, y2 = cx[i2], cy[i2]
+        x3, y3 = cx[i3], cy[i3]
+        a_coef = y2 - y1
+        b_coef = x1 - x2
+        c_coef = y1 * (x2 - x1) - x1 * (y2 - y1)
+        val = a_coef * x3 + b_coef * y3 + c_coef
+        left = (((x2 > x1) and (val < 0)) or
+                ((x2 < x1) and (val > 0)) or
+                ((y2 == y1) and (x1 > x2) and (y3 < y1)) or
+                ((y2 == y1) and (x1 < x2) and (y3 > y1)) or
+                ((x2 == x1) and (y1 > y2) and (x3 > x1)) or
+                ((x2 == x1) and (y1 < y2) and (x3 < x1)))
+        if left:
+            return K * D[i2]
+        else:
+            return 0
+----
+
+// Page 179
+[source,python]
+----
+    def dfs(i: int) -> None:
+        nonlocal opt_t, opt_kv, opt_path, kv
+        for j in range(len(g[i])):
+            neighbor, travel = g[i][j]
+            if neighbor != vB:
+                if edge_color[i][j] == FREE:
+                    kv += 1
+                    path.append(neighbor)
+                    new_time = time_arr[i] + travel + count_time()
+                    if new_time < opt_t:
+                        edge_color[i][j] = DONE
+                        ret_time = time_arr[neighbor]
+                        time_arr[neighbor] = new_time
+                        dfs(neighbor)
+                        time_arr[neighbor] = ret_time
+                        edge_color[i][j] = FREE
+                    path.pop()
+                    kv -= 1
+            else:
+                kv += 1
+                path.append(neighbor)
+                t_val = time_arr[i] + travel + count_time()
+                if t_val < opt_t:
+                    opt_t = t_val
+                    opt_kv = kv
+                    opt_path = path[:]
+                path.pop()
+                kv -= 1
+
+    dfs(vA)
+
+    with open('PER.out', 'w') as f_out:
+        print(opt_t, file=f_out)
+        for i in range(1, opt_kv + 1):
+            print(opt_path[i], file=f_out)
+
+solve()
+----
+
+// Page 180
+
+== Problem "Scrooge McDuck"
+
+National programming olympiad, 1995.
+
+Scrooge McDuck decided to build a device for controlling an airplane. As is well known, the position of the control yoke depends on the state of the input sensors, but this dependency is quite complex. His mechanic Gyro G. built a device that computes this function in several stages using intermediate memory and auxiliary functions. To compute each function, it is required that the computed parameters (which are values of previously computed functions) needed for its computation are already stored in memory cells. A function with no parameters can be computed at any time. After a function is computed, the memory cells can be reused (at least for storing the result of the computed function). The function call structure is such that each function is computed no more than once and each parameter (function name) is used no more than once.
+
+Since Scrooge does not want to spend extra money on microchips, he set the task of minimizing the device's memory. Given the function call structure, it is necessary to determine the minimum possible memory size for the device and specify the order in which the functions should be computed.
+
+
+** Line 1: contains the number N — total number of functions;
+** Line 2: contains the name of the function to be computed;
+** Line 3: function name, number of parameters [list of parameter names];
+** ...
+** Line (N + 2): function name, number of parameters [list of parameter names].
+
+** memory size (in cells);
+** name of the 1st function to be computed;
+** name of the 2nd function to be computed;
+** ....
+** name of the function to be computed.
+
+[NOTE]
+====
+*NOTE* +
+
+A function name is a natural number from 1 to N.
+
+====
+
+For example:
+
+
+----
+5
+1
+1 2 2 3
+2 0
+3 2 4 5
+4 0
+5 0
+----
+
+* INPUT.TXT
+
+// Page 181
+
+
+
+----
+OUTPUT.TXT
+4
+5
+3
+2
+1
+----
+
+In short, the following needs to be done in this problem.
+
+
+. Find S — the maximum degree among the vertices that need to be traversed (depth-first search DFS1).
+. The required memory is calculated using the formula MaxS = S + k − 1, where S was found in the previous step (DFS1), k is the maximum number of vertices at the same nesting level with the same degree S. To compute k, a second depth-first search DFS2 is performed.
+. A third depth-first search DFS3 finds and places into the queue V all vertices whose degree equals S.
+. The fourth and final depth-first search traverses the given tree in the order of vertices in the queue V, that is, functions requiring the maximum memory are computed first.
+
+Let us consider the implementation of the algorithm in more detail. We start with reading the input data:
+
+----
+n, fc = map(int, input().split())
+kg: list[int] = [0] * (n + 1)
+g: list[list[int]] = [[] for _ in range(n + 1)]
+for _ in range(n):
+    parts = list(map(int, input().split()))
+    f = parts[0]
+    kg[f] = parts[1]
+    for j in range(kg[f]):
+        g[f].append(parts[2 + j])
+----
+
+The notation used:
+
+
+* n — the initial number of vertices;
+* fc — the number of the function to be computed;
+* kg[i] — the number of parameters for computing function i;
+* g[i][j] — the j-th parameter required for computing function i.
+
+The main program body looks like this:
+
+----
+color = [WHITE] * (n + 1)  # Mark all vertices as free
+dfs1(fc)  # Find S - the maximum degree of vertices
+                                   # used for computing function fc
+max_s = s
+dfs2(fc)  # Compute K - the number of vertices with degree S
+                                   # in the current layer and max_s - the maximum
+                                   # value of S+K-1 across layers
+kv = 0
+dfs3(fc)  # Place into list v all vertices whose degree
+                                   # equals S; the count of such
+                                   # vertices is in the variable kv
+kr = 0
+for i in range(kv):  # Traverse the graph using depth-first search starting
+    dfs4(v[i])  # from vertices with the maximum degree from
+----
+
+// Page 182
+[source,python]
+----
+  # list v. Found vertices are added
+                                   # to list r
+print(max_s)  # Output the number of memory cells
+for i in range(kr):  # Output the order of function computation
+    print(r[i])
+----
+
+The full program text is given in Listing 2.35.
+
+.Listing 2.35. Program "Scrooge McDuck"
+[source,python]
+----
+import sys
+sys.setrecursionlimit(10000)
+
+WHITE = 1
+GRAY = 2
+BLACK = 3
+
+g: list[list[int]] = [[] for _ in range(101)]
+kg: list[int] = [0] * 101
+v: list[int] = [0] * 101
+color: list[int] = [0] * 101
+r: list[int] = [0] * 101
+
+s = 0
+max_s = 0
+kv = 0
+kr = 0
+
+
+def dfs1(u: int) -> None:
+    global s
+    if s < kg[u]:
+        s = kg[u]
+    for i in range(kg[u]):
+        dfs1(g[u][i])
+
+
+def dfs2(u: int) -> None:
+    global max_s
+    k = 0
+    for i in range(kg[u]):
+        if kg[g[u][i]] > s:
+            k += 1
+    if max_s < s + k - 1:
+        max_s = s + k - 1
+    for i in range(kg[u]):
+        dfs2(g[u][i])
+
+
+def dfs3(u: int) -> None:
+    global kv
+    if kg[u] == s:
+        for i in range(kg[u]):
+            dfs3(g[u][i])
+        kv += 1
+        v[kv] = u
+
+
+def dfs4(u: int) -> None:
+    global kr
+    color[u] = GRAY
+    if kg[u] != 0:
+----
+
+// Page 183
+[source,python]
+----
+        for i in range(kg[u]):
+            if color[g[u][i]] != GRAY:
+                dfs4(g[u][i])
+    kr += 1
+    r[kr] = u
+
+
+def main() -> None:
+    global s, max_s, kv, kr
+
+    with open('input.txt', 'r') as fin:
+        data = fin.read().split()
+
+    idx = 0
+    n = int(data[idx]); idx += 1
+    fc = int(data[idx]); idx += 1
+    for _ in range(n):
+        f = int(data[idx]); idx += 1
+        kg[f] = int(data[idx]); idx += 1
+        for j in range(kg[f]):
+            g[f].append(int(data[idx])); idx += 1
+
+    for i in range(1, n + 1):
+        color[i] = WHITE
+    dfs1(fc)
+    max_s = s
+    dfs2(fc)
+    kv = 0
+    dfs3(fc)
+    kr = 0
+    for i in range(1, kv + 1):
+        dfs4(v[i])
+
+    with open('output.txt', 'w') as fout:
+        fout.write(f"{max_s}\n")
+        for i in range(1, kr + 1):
+            fout.write(f"{r[i]}\n")
+
+
+main()
+----
+
+
+== Strongly Connected Components and Dominant Sets
+
+A subgraph of a graph is called its _strongly connected component_ if every vertex of the subgraph is reachable from any other vertex of the subgraph.
+
+A _dominant set_ is a minimal set of vertices of a graph from which all vertices of the graph are reachable.
+
+Algorithms for constructing strongly connected components and dominant sets of a graph are considered in the examples that follow.
+
+
+== Problem "Cards"
+
+National programming olympiad, 1994.
+
+There are stem:[N] cards. On each of them, its unique number — a number from 1 to stem:[N] — is written in black ink. Also, on each card, another integer from 1 to stem:[N] is written in red ink (several cards may be marked with the same "red" number).
+
+It is necessary to select from the given stem:[N] cards the maximum number of cards such that the sets of "red" and "black" numbers on them coincide.
+
+[EXAMPLE]
+====
+Suppose stem:[N] = 5, and these 5 cards are marked with "black" numbers 1, 2, 3, 4, 5 and, respectively, "red" numbers 3, 3, 2, 4, 2. Then the "correct" cards are those with "black" numbers 2, 3, 4, since the set of "red" numbers in this example is exactly 2, 3, 4.
+
+====
+
+// Page 184
+
+
+** `N (N ≤ 50)`;
+** `"black"_number_1 "red"_number_1`;
+** ...;
+** `"black"_number_N "red"_number_N`.
+
+** `S` (number of elements in the selected subset);
+** `a1` ("black" numbers of the selected cards);
+** ...;
+** `aS`.
+
+
+----
+6
+1 2
+2 3
+3 4
+4 5
+5 1
+6 6
+----
+
+* Sample input:
+----
+6
+1
+2
+3
+4
+5
+6
+----
+
+* Sample output:
+
+In fact, the problem requires finding all strongly connected components of the directed graph represented by the cards and adding to them the cards on which the same number is written in both red and black.
+
+Let us describe the solution in more detail. We start with the body of the main program:
+
+[source,python]
+----
+n = int(input())  # Read the number of cards
+m = 0  # Number of cards in the result
+for i in range(1, n + 1):  # For all cards
+    u, v = map(int, input().split())  # Read the card
+    kg[u] += 1  # Update the graph with it
+    g[u].append(v)
+    if u == v:  # If the red number equals the black one
+        m += 1  # add the card to the result
+        t[m] = u
+build_dominators()  # Build the set of dominators
+reverse_graph()  # Transpose the graph
+build_dominators2()  # Build the set of dominators
+                                       # for the transposed graph, simultaneously
+                                       # obtaining all strongly connected components
+----
+
+Let us consider the `build_dominators` function:
+
+[source,python]
+----
+def build_dominators() -> None:
+----
+
+// Page 185
+[source,python]
+----
+    global time_counter
+    time_counter = 0  # Vertex processing time = 0
+    for i in range(1, n + 1):  # For each vertex i, mark
+        color[i] = WHITE  # Vertex is free
+        dom[i] = WHITE  # No dominators
+        cur_c[i] = WHITE  # Free at the current step
+        f[i] = 0  # Processing completion time is 0
+    for v in range(1, n + 1):  # For all vertices
+        if color[v] == WHITE:  # If vertex v is free
+            dfs(v)  # Depth-first search from vertex v
+            add_dominator(v)  # Add the found dominator
+----
+
+Thus, at this stage of processing graph vertices, we have three sets:
+
+
+* `dom` — dominators of the graph found so far;
+* `color` — all processed vertices;
+* `cur_c` — vertices processed during the depth-first search from the current base vertex v.
+
+The recursive depth-first search function for this problem looks like this:
+
+[source,python]
+----
+def dfs(i: int) -> None:
+    global time_counter
+    color[i] = GRAY  # Vertex i is processed overall
+    cur_c[i] = GRAY  # Vertex i is processed at the current step
+    time_counter += 1  # Increment vertex processing time
+    for j in range(kg[i]):  # While the vertex has successors
+        if cur_c[g[i][j]] == WHITE:  # If the successor has not been processed
+                                              # at the current step
+            dfs(g[i][j])  # Launch depth-first search from
+                                              # the successor
+    time_counter += 1  # Increment vertex processing time
+    if f[i] == 0:  # If vertex i has not been assigned a time
+        f[i] = time_counter  # of completion — assign it
+----
+
+The `add_dominator(v)` function, also called from `build_dominators`, adds vertex v to the list of dominators as follows: all vertices reached from the current one (`cur_c[i] != WHITE`) are removed from the dominators, and the current vertex is added to the list of dominators (`dom[dom_v] = GRAY`).
+
+[source,python]
+----
+def add_dominator(dom_v: int) -> None:
+    for i in range(1, n + 1):  # For all vertices
+        if cur_c[i] != WHITE:  # If it is reached from the current one
+            dom[i] = WHITE  # remove it from the dominators
+    dom[dom_v] = GRAY  # Add the current one to the dominator list
+    for i in range(1, n + 1):  # For all vertices, set the mark
+        cur_c[i] = WHITE  # not reached from the current one
+----
+
+// Page 186
+The next step after building the dominators of the original graph is _transposing the graph_ (in other words — reversing the direction of arcs). This is done using the reverse_graph function. The reverse_graph function builds graph b[1..n], kb[1..n] from the original graph g[1..n], kg[1..n]:
+
+[source,python]
+----
+def reverse_graph() -> None:
+    for i in range(1, n + 1):
+        kb[i] = 0  # Zero out the arc counts from vertex i
+    for i in range(1, n + 1):
+        for j in range(kg[i]):
+            kb[g[i][j]] += 1  # Increment the number of
+                                      # arcs from vertex i
+            b[g[i][j]].append(i)  # Add the reverse arc to the graph
+----
+
+The build_dominators2 function builds the set of dominators on the transposed graph, simultaneously forming the strongly connected components (SCCs) of the original graph:
+
+[source,python]
+----
+def build_dominators2() -> None:
+    global time_counter, m
+    time_counter = 0
+    for i in range(1, n + 1):  # For all vertices
+        color[i] = WHITE  # Free overall
+        cur_c[i] = WHITE  # Free in the current cycle
+        kart[i] = WHITE  # Not part of an SCC
+    sort_f()  # Sort in descending order of completion time
+                                      # of vertex processing during
+                                      # construction of the dominator set of the original
+                                      # graph — result q[1..n]
+    for v in range(1, n + 1):  # In descending order of processing times
+        if color[q[v]] == WHITE:  # If the vertex is free
+            dfs2(q[v])  # Build the dominator
+            add_dominator2(q[v])  # Add the dominator
+    for i in range(1, n + 1):  # For all vertices
+        if kart[i] != WHITE:  # If it is part of an SCC
+            m += 1  # add it to the result
+            t[m] = i
+    sort_t()  # Sort the result set
+    print(m)  # output it
+    for i in range(1, m + 1):
+        print(t[i])
+----
+
+The dfs2 depth-first search function on the transposed graph looks as follows:
+
+[source,python]
+----
+def dfs2(i: int) -> None:
+    color[i] = GRAY
+    cur_c[i] = GRAY
+    for j in range(kb[i]):
+----
+
+// Page 187
+[source,python]
+----
+        if color[b[i][j]] == WHITE:
+            dfs2(b[i][j])
+----
+
+The `add_dominator2` function, which ensures correct construction of dominators of the transposed graph and strongly connected components of the original (and transposed) graph, is as follows:
+
+[source,python]
+----
+def add_dominator2(dom1: int) -> None:
+    ks = 0  # Number of vertices in the current SCC
+    for i in range(1, n + 1):  # For all vertices
+        if cur_c[i] != WHITE:  # If the vertex is reached
+            ks += 1  # increment the vertex count in the current SCC
+    if ks > 1:  # If the current SCC has more
+                                      # than one vertex
+        for i in range(1, n + 1):  # add them all to kart
+            if cur_c[i] != WHITE:
+                kart[i] = GRAY
+    for i in range(1, n + 1):  # Make all vertices
+        cur_c[i] = WHITE  # free for the new step
+----
+
+The full program text solving the given problem is provided in Listing 2.36.
+
+.Listing 2.36. Program "Cards"
+[source,python]
+----
+import sys
+sys.setrecursionlimit(10000)
+
+WHITE = 1
+GRAY = 2
+
+g: list[list[int]] = [[] for _ in range(101)]
+b: list[list[int]] = [[] for _ in range(101)]
+color: list[int] = [0] * 101
+kg: list[int] = [0] * 101
+kb: list[int] = [0] * 101
+dom: list[int] = [0] * 101
+cur_c: list[int] = [0] * 101
+kart: list[int] = [0] * 101
+d: list[int] = [0] * 101
+f: list[int] = [0] * 101
+t: list[int] = [0] * 101
+q: list[int] = [0] * 101
+n = 0
+time_counter = 0
+m = 0
+
+
+def max2(a: int, b: int) -> int:
+    return a if a > b else b
+
+
+def reverse_graph() -> None:
+    for i in range(1, n + 1):
+        kb[i] = 0
+    for i in range(1, n + 1):
+        for j in range(kg[i]):
+            kb[g[i][j]] += 1
+            b[g[i][j]].append(i)
+
+
+def add_dominator(dom1: int) -> None:
+    for i in range(1, n + 1):
+        if cur_c[i] != WHITE:
+            dom[i] = WHITE
+    dom[dom1] = GRAY
+----
+
+_continued ⇨_
+
+// Page 188
+[source,python]
+----
+    for i in range(1, n + 1):
+        cur_c[i] = WHITE
+
+
+def dfs(i: int) -> None:
+    global time_counter
+    color[i] = GRAY
+    cur_c[i] = GRAY
+    time_counter += 1
+    for j in range(kg[i]):
+        if cur_c[g[i][j]] == WHITE:
+            dfs(g[i][j])
+    time_counter += 1
+    if f[i] == 0:
+        f[i] = time_counter
+
+
+def build_dominators() -> None:
+    global time_counter
+    time_counter = 0
+    for i in range(1, n + 1):
+        color[i] = WHITE
+        dom[i] = WHITE
+        cur_c[i] = WHITE
+        f[i] = 0
+    for v in range(1, n + 1):
+        if color[v] == WHITE:
+            dfs(v)
+            add_dominator(v)
+
+
+def sort_f() -> None:
+    for i in range(1, n + 1):
+        q[i] = i
+    for i in range(1, n):
+        max_d = f[i]
+        k = i
+        for j in range(i + 1, n + 1):
+            if f[j] > max_d:
+                max_d = f[j]
+                k = j
+        f[k] = f[i]
+        f[i] = max_d
+        q[k], q[i] = q[i], q[k]
+
+
+def sort_t() -> None:
+    for i in range(1, m):
+        max_d = t[i]
+        k = i
+        for j in range(i + 1, m + 1):
+            if t[j] > max_d:
+                max_d = t[j]
+                k = j
+        t[k] = t[i]
+        t[i] = max_d
+
+
+def dfs2(i: int) -> None:
+    color[i] = GRAY
+    cur_c[i] = GRAY
+    for j in range(kb[i]):
+----
+
+// Page 189
+[source,python]
+----
+        if color[b[i][j]] == WHITE:
+            dfs2(b[i][j])
+
+
+def add_dominator2(domi: int) -> None:
+    ks = 0
+    for i in range(1, n + 1):
+        if cur_c[i] != WHITE:
+            ks += 1
+    if ks > 1:
+        for i in range(1, n + 1):
+            if cur_c[i] != WHITE:
+                kart[i] = GRAY
+    for i in range(1, n + 1):
+        cur_c[i] = WHITE
+
+
+def build_dominators2() -> None:
+    global time_counter, m
+    time_counter = 0
+    for i in range(1, n + 1):
+        color[i] = WHITE
+        cur_c[i] = WHITE
+        kart[i] = WHITE
+    sort_f()
+    for v in range(1, n + 1):
+        if color[q[v]] == WHITE:
+            dfs2(q[v])
+            add_dominator2(q[v])
+    for i in range(1, n + 1):
+        if kart[i] != WHITE:
+            m += 1
+            t[m] = i
+    sort_t()
+    print(m)
+    for i in range(1, m + 1):
+        print(t[i])
+
+
+def main() -> None:
+    global n, m
+
+    with open('input.txt', 'r') as fin:
+        lines = fin.read().split('\n')
+
+    n = int(lines[0])
+    m = 0
+    for i in range(1, n + 1):
+        u, v = map(int, lines[i].split())
+        kg[u] += 1
+        g[u].append(v)
+        if u == v:
+            m += 1
+            t[m] = u
+
+    build_dominators()
+    reverse_graph()
+
+    with open('output.txt', 'w') as fout:
+        import sys
+        sys.stdout = fout
+        build_dominators2()
+        sys.stdout = sys.__stdout__
+
+
+main()
+----
+
+
+== Problem "School Network"
+
+Hungary, IOI'96 — International Olympiad in Informatics.
+
+Some schools are connected by a computer network. Agreements have been made between the schools: each school has a list of recipient schools to which it sends software whenever it receives new free software
+
+// Page 190
+(from outside the network or from another school). Note that if school _B_ is on the recipient list of school _A_, then school _A_ may or may not be on the recipient list of school _B_.
+
+Write a program that determines the minimum number of schools to which a copy of new software must be delivered so that it spreads to all schools in the network according to the agreements (subtask _A_).
+
+In addition, it is necessary to ensure the ability to distribute new software from any school to all other schools. To do this, extend the recipient lists of some schools by adding new schools to them. Find the minimum total number of list extensions at which software from any school would reach all other schools (subtask _B_). One extension means adding one new recipient school to the recipient list of one school.
+
+The first line of the input file INPUT.TXT contains an integer N — the number of schools in the network (2 ≤ N ≤ 100). Each of the following N lines specifies a recipient list. Line number 1 + i contains the recipient numbers of the i-th school. Each such list ends with a zero. An empty list contains only 0.
+
+The program must write 2 lines to the output file OUTPUT.TXT: the first line contains the solution to subtask _A_ (a positive integer), and the second line contains the solution to subtask _B_.
+
+The following can be given as examples of input and output files:
+
+□ INPUT.TXT
+
+----
+5
+2 4 3 0
+4 5 0
+0
+0
+1 0
+----
+
+□ OUTPUT.TXT
+
+----
+1
+2
+----
+
+Subtask _A_ requires finding the dominant set, that is, the minimum set of vertices of the original graph from which there are "chains" to all other vertices of the graph.
+
+Using depth-first search, while there are free (not recolored from white to gray) vertices, we find all vertices reachable from the given free vertex. From the set of dominants, we remove all vertices reached at the current step and add the original free vertex to the set of dominants.
+
+Subtask _B_ requires finding the number of edges that need to be added so that the original directed graph becomes strongly connected. The transposed graph is built from the original graph. For the new (transposed) graph, the dominant set is built again.
+
+// Page 191
+
+
+
+If both the first and the second dominant sets consist of the same single element — vertex 1, then the graph was already strongly connected and no edges need to be added. In any other case, the maximum of the sizes of the two constructed dominant sets needs to be added.
+
+
+=== NOTE
+
+[NOTE]
+====
+Since an almost identical problem is fully considered in the previous section, a complete description of the solution is not provided here.
+
+====
+
+An alternative solution to this problem can use the construction of the reachability matrix using Floyd's method. Then all vertices are divided into groups:
+
+
+. sources (they have no incoming arcs);
+. sinks (they have no outgoing arcs);
+. intermediate (they have both incoming and outgoing arcs).
+
+The answer to subtask _A_ is the number of sources. In subtask _B_, if there are no sources or sinks, then the graph is an SCC and no edges need to be added. Otherwise, we select the maximum of the number of sources and sinks — this will be the number of edges that need to be added.
+
+
+=== NOTE
+
+[NOTE]
+====
+In subtask B, we add connections between sources and sinks, as a result of which the graph becomes a strongly connected component.
+
+====
+
+
+=== Problem "Winnie-the-Pooh and Piglet"
+
+National school olympiad, 1995.
+
+Winnie-the-Pooh and Piglet were hired to protect a computer network from hackers who were extracting secret information from the computers. Winnie-the-Pooh and Piglet's computer network consisted of interconnected mainframe computers, each of which had several terminals connected to it. Connecting to one of the mainframes allowed access to the information stored in that computer's memory, as well as all the information accessible to other computers to which that one could send requests. Hackers had attacked similar computer networks before, and their tactics were known. Therefore, Winnie-the-Pooh and Piglet developed a special program that helped take measures against the planned attack.
+
+The hackers' tactics are as follows: during attacks, they always gain access to information from all computers in the network. They achieve this by capturing certain computers in the network so that they can request information from the remaining ones. There are many possible capture strategies. For example, capturing all computers. But hackers always choose the option in which the total number of terminals of the captured computers is minimized.
+
+
+=== NOTE
+
+[NOTE]
+====
+In Winnie-the-Pooh and Piglet's network, no two computers have the same number of terminals.
+
+====
+
+// Page 192
+
+194
+
+You need to write a program whose input is a description of the network and whose output is a list of computer numbers that could be chosen by the hackers for capturing the network according to their tactics. Input is from a file named INPUT.TXT. Input from the keyboard is also possible.
+
+
+** N — number of computers in the network;
+** T[1] — number of terminals of the first computer;
+** T[2] — number of terminals of the second computer;
+** ...;
+** T[N] — number of terminals of the N-th computer;
+** A[1] B[1] — request rights;
+** A[2] B[2];
+** ...;
+** A[K] B[K];
+** 0 0.
+A[i] and B[i] are computer numbers; each pair A[i] B[i] means that computer number A[i] has the right to request information from computer number B[i] (A[i] is not equal to B[i]). The last line (0 0) indicates the end of the request rights list.
+
+The numbers N and T[i] are natural; T[i] ≤ 1000, N ≤ 50, K ≤ 2450.
+
+
+** C[1] C[2] ... C[M] — numbers of captured computers;
+** M — number of captured computers.
+
+For example:
+
+
+----
+5
+100
+2
+1
+3
+10
+1 3
+3 2
+4 3
+4 5
+5 4
+0 0
+----
+
+* INPUT.TXT
+----
+1 4
+2
+----
+
+* OUTPUT.TXT
+
+Using depth-first search, we find the set of dominators of the network (graph sources). However, for the optimal selection of machines by the number of terminals, it is necessary to choose the machine with the fewest terminals in each strongly connected component. To do this, we invert the graph (reverse the direction of all arcs of the gra-
+
+// Page 193
+
+== Breadth-First Search
+
+For many graph problems whose solutions involve enumerating all possible paths along edges (vertices), a method called "breadth-first search" can be applied. Breadth-first search implies an order of enumeration in which first all paths of two vertices (starting from the given current one) are considered, then all paths of three vertices, four, and so on. As a rule, a queue is used to organize breadth-first search.
+
+
+== Problem "Street Race"
+
+The Netherlands, IOI'95 — International Olympiad in Informatics.
+
+----
+
+        1       4       7
+       / \     / \     / \
+      /   \   /   \   /   \
+     /     \ /     \ /     \
+    0       3       6       9
+     \     / \     / \     /
+      \   /   \   /   \   /
+       \ /     \ /     \ /
+        2       5   ← 8
+----
+
+The figure shows an example of a street plan for a race. You see points labeled with numbers from 0 to stem:[N] (where stem:[N = 9]), as well as arrows connecting them. Point 0 is the start, and point stem:[N] is the finish. The arrows represent one-way streets. Race participants move from point to point along the streets only in the direction of the arrows. At each point, a participant can choose any of the outgoing arrows.
+
+We call a street plan _good_ if it has the following properties:
+
+
+. every point in the plan can be reached from the start;
+. the finish can be reached from any point in the plan;
+. the finish has no outgoing arrows.
+
+To reach the finish, a participant does not have to pass through all points. However, some points cannot be bypassed. We call them _unavoidable_. In the example,
+
+// Page 194
+
+196
+
+such points are 0, 3, 6, 9. For a given good plan, your program must determine the set of unavoidable points (excluding start and finish) that all participants must visit (subtask _A_).
+
+Suppose the race is to be held over two consecutive days. For this purpose, the plan must be split into two good plans: one for each day. On the first day, the start is point 0 and the finish is some splitting point. On the second day, the start is at this splitting point and the finish is at point _N_. For a given good plan, your program must determine the set of all possible splitting points (subtask _B_).
+
+Point _S_ is a splitting point for a good plan _C_ if _S_ differs from the start and finish of _C_, and the plan is split by it into two good plans with no common arrows and with a single common point — _S_. In the example, the splitting point is point 3.
+
+The input file INPUT.TXT describes a good plan containing no more than 50 points and no more than 100 arrows. The file has _N_ + 1 lines. The first _N_ lines contain the endpoints of arrows originating from points 0 through _N_ − 1, respectively. Each of these lines ends with the number −2. The last line contains the number −1.
+
+Your program must write two lines to the output file OUTPUT.TXT. The first line must contain the number of unavoidable points in the given plan and the numbers of these points in any order (subtask _A_). The second line must contain the number of splitting points in the given plan and the numbers of these points in any order (subtask _B_).
+
+The input and output data can be, for example, as follows:
+
+----
+□ INPUT.TXT
+  1 2 -2
+  3 -2
+  3 -2
+  5 4 -2
+  6 4 -2
+  6 -2
+  7 8 -2
+  9 -2
+  5 9 -2
+  -1
+
+□ OUTPUT.TXT
+  2 3 6
+  1 3
+----
+
+To solve subtask _A_, we need to find all unavoidable points. This is done using _breadth-first search_: if after taking a vertex from the queue it becomes empty, then that vertex is unavoidable.
+
+To solve subtask _B_, we need to check each unavoidable point to determine whether it is a splitting point. To do this, we remove this point from the graph and use breadth-first search to build two sets: _reachable_ points from the start and _unreachable_ points from the start. If there exists at least one edge from an unreachable point to a reachable one, then the current unavoidable point is not a possible splitting point (by the definition of a splitting point).
+
+// Page 195
+
+
+
+Let us consider the algorithm for solving the problem in more detail. We start with the main program body:
+
+----
+input_data()  # Read input data
+bfs()  # Breadth-first search — find unavoidable points
+out_sub_a()  # Output the answer for subtask A
+for k in range(1, sub_a + 1):  # For each unavoidable point
+    del_arcs(duty[k])  # remove the unavoidable point
+    bfs()  # Breadth-first search —
+                                        # Build sets of reachable color[i]==1
+                                        # and unreachable color[i]==0 vertices
+    ret_arcs(duty[k])  # Return the unavoidable point to the graph
+    for i in range(n):  # for all vertices
+        j = 0  # j — number of arc originating from the vertex
+        while a[i][j] >= 0:  # while the arc exists
+            if (color[i] == WHITE and  # If the source vertex is reachable
+                color[a[i][j]] != WHITE):  # and the arc endpoint is unreachable
+                duty[k] = 0  # This is not a splitting point
+                break  # Proceed to check the next
+                                        # unavoidable point
+            j += 1  # Take the next arc
+out_sub_b()  # Output the answer for subtask B
+----
+
+The input data reading function:
+
+----
+def input_data() -> None:
+    global n
+    i = 0
+    j = 0
+    a[0][0] = int(tokens[0])  # Start reading from vertex 0
+    pos = 1
+    while a[i][j] != -1:  # While vertex processing is not finished
+        while a[i][j] != -2:  # While arc processing is not finished
+            j += 1  # Increment the arc number
+            a[i][j] = int(tokens[pos])  # Read the arc
+            pos += 1
+        if j > 1:  # If there is more than one arc,
+            sort_arcs(i, j)  # sort them in ascending order
+                                        # of the endpoint number
+        i += 1  # Proceed to reading the next line
+        j = 0
+        a[i][j] = int(tokens[pos])  # Read the first element of the line
+        pos += 1
+    n = i  # Store the number of the last vertex in n
+----
+
+Breadth-first search is performed using the bfs (Breadth-First Search) function.
+
+----
+def bfs() -> None:
+    global sub_a, beg_q, end_q
+    for i in range(n + 1):
+        color[i] = WHITE  # All vertices are free
+    color[0] = GRAY  # The starting vertex is processed
+    sub_a = 0  # Number of unavoidable vertices = 0
+----
+
+// Page 196
+[source,python]
+----
+    beg_q = 0  # Beginning of the queue
+    end_q = -1  # Queue is empty
+    put(0)  # Place the starting vertex in the queue
+    while beg_q <= end_q:  # While the queue is not empty
+        i = get()  # take vertex i from the queue
+        if beg_q > end_q:  # If the queue remained empty
+            sub_a += 1  # increment the count of
+                                        # unavoidable vertices
+            color[i] = COL_SUB_A  # Mark the unavoidable vertex
+        j = 0  # arc number from vertex i
+        while a[i][j] >= 0:  # while arcs are not exhausted
+            if color[a[i][j]] == WHITE: # If vertex a[i][j] is free
+                put(a[i][j])  # put it in the queue
+                color[a[i][j]] = GRAY  # mark vertex a[i][j]
+                                        # as used
+            j += 1  # take the next arc
+----
+
+Output of the answer for subtask A and accumulation of unavoidable points in the `duty` list is done as follows:
+
+[source,python]
+----
+def out_sub_a() -> None:
+    global sub_a
+    sub_a -= 2  # The start and end points are NOT
+    print(sub_a, end='')  # considered unavoidable points
+    j = 0  # j — number of unavoidable points
+    for i in range(1, n):  # for all vertices
+        if color[i] == COL_SUB_A:  # If it is unavoidable
+            print(f' {i}', end='')  # Output it
+            j += 1  # Increment the count of unavoidable vertices
+            duty[j] = i  # Remember the unavoidable vertex number
+    print()
+----
+
+The full program text is in Listing 2.37.
+
+.Listing 2.37. Program "Street Race"
+[source,python]
+----
+import sys
+
+WHITE = 1
+GRAY = 2
+COL_SUB_A = 4
+MAXINT = 10**9
+
+a: list[list[int]] = [[0] * 102 for _ in range(102)]
+color: list[int] = [0] * 101
+queue: list[int] = [0] * 101
+duty: list[int] = [0] * 101
+----
+
+// Page 197
+[source,python]
+----
+
+n = 0
+sub_a = 0
+sub_b = 0
+beg_q = 0
+end_q = 0
+
+
+def put(x: int) -> None:
+    global end_q
+    end_q += 1
+    queue[end_q] = x
+
+
+def get() -> int:
+    global beg_q
+    x = queue[beg_q]
+    beg_q += 1
+    return x
+
+
+def sort_arcs(row: int, count: int) -> None:
+    for m in range(count - 1):
+        min_val = a[row][m]
+        rmin = m
+        for k in range(m + 1, count):
+            if a[row][k] < min_val:
+                min_val = a[row][k]
+                rmin = k
+        a[row][rmin] = a[row][m]
+        a[row][m] = min_val
+
+
+def input_data() -> None:
+    global n
+    with open('input.txt', 'r') as fin:
+        tokens = fin.read().split()
+    pos = 0
+    i = 0
+    j = 0
+    a[0][0] = int(tokens[pos]); pos += 1
+    while a[i][j] != -1:
+        while a[i][j] != -2:
+            j += 1
+            a[i][j] = int(tokens[pos]); pos += 1
+        if j > 1:
+            sort_arcs(i, j)
+        i += 1
+        j = 0
+        a[i][j] = int(tokens[pos]); pos += 1
+    n = i
+
+
+def out_sub_a() -> None:
+    global sub_a
+    sub_a -= 2
+    print(sub_a, end='')
+    duty[0] = 0
+    j = 0
+    for i in range(1, n):
+        if color[i] == COL_SUB_A:
+            print(f' {i}', end='')
+            j += 1
+            duty[j] = i
+    print()
+
+
+def bfs() -> None:
+    global sub_a, beg_q, end_q
+    for i in range(n + 1):
+        color[i] = WHITE
+        queue[i] = 0
+    color[0] = GRAY
+    sub_a = 0
+    beg_q = 0
+    end_q = -1
+    put(0)
+    while beg_q <= end_q:
+        i = get()
+        if beg_q > end_q:
+            sub_a += 1
+            color[i] = COL_SUB_A
+        j = 0
+----
+
+_continued ⇨_
+
+// Page 198
+.Listing 2.37 (continued)
+[source,python]
+----
+        while a[i][j] >= 0:
+            if color[a[i][j]] == WHITE:
+                put(a[i][j])
+                color[a[i][j]] = GRAY
+            j += 1
+
+
+def out_sub_b() -> None:
+    sub_b = 0
+    for i in range(1, sub_a + 1):
+        if duty[i] >= 0:
+            sub_b += 1
+    print(sub_b, end='')
+    for i in range(1, sub_a + 1):
+        if duty[i] >= 0:
+            print(f' {duty[i]}', end='')
+    print()
+
+
+def del_arcs(k: int) -> None:
+    for j in range(n, 0, -1):
+        a[k][j + 1] = a[k][j]
+    a[k][0] = -2
+    for i in range(n):
+        j = 0
+        while a[i][j] >= 0:
+            if a[i][j] == k:
+                a[i][j] = MAXINT
+            j += 1
+
+
+def ret_arcs(k: int) -> None:
+    for i in range(n):
+        j = 0
+        while a[i][j] >= 0:
+            if a[i][j] == MAXINT:
+                a[i][j] = k
+            j += 1
+    for j in range(n):
+        a[k][j] = a[k][j + 1]
+
+
+def main() -> None:
+    global sub_a
+
+    input_data()
+    bfs()  # Breadth-first search — find unavoidable points
+    out_sub_a()
+----
+
+// Page 199
+[source,python]
+----
+    for k in range(1, sub_a + 1):
+        del_arcs(duty[k])
+        bfs()
+        ret_arcs(duty[k])
+        for i in range(n):
+            j = 0
+            while a[i][j] != 0:
+                if (color[j] == WHITE and
+                        color[a[i][j]] != WHITE):
+                    duty[k] = 0
+                    break
+                j += 1
+    out_sub_b()
+
+
+main()
+----
+
+
+== On the Dimensions of Lists Used in Problems
+
+An attentive reader has noticed that in some cases, lists are declared with smaller dimensions than actually required by the problem conditions. This is done intentionally for the following reasons.
+
+
+. In modern competitive programming, Python 3 is widely used, and its dynamic lists do not have fixed size limits like statically declared arrays. However, for clarity we often pre-allocate lists of a specific size to mirror the original algorithm structure.
+. The main purpose of the material is to demonstrate the proposed basic algorithms for solving graph problems, and we did not want to complicate the material, thereby obscuring the essence of the basic algorithms.
+
+
+== Overview of the Presented Theoretical Material
+
+The purpose of this section is to briefly list the theoretical knowledge for solving graph problems. The reader can use this list for self-assessment of how successfully the material has been mastered. If you understand what lies behind the given name and know how to perform the named task — then the goals set by the author (and by you) have been achieved.
+
+Here is the list of self-assessment questions.
+
+
+. Reducing problems to graphs.
+. Floyd's method. Used for finding the shortest distances between all pairs of graph vertices (at the same time, the shortest paths themselves from each vertex to every other one can also be constructed).
+. Constructing the reachability matrix of a graph.
+. Constructing the set of sources and the set of sinks (a source is a vertex with no incoming arcs, a sink is a vertex with no outgoing arcs).
+
+// Page 200
+
+. Dijkstra's method. Used for finding the shortest distances from one vertex to all others and constructing optimal routes from one vertex to all others.
+. Depth-first search. Used for solving arbitrary graph problems that require the corresponding order of traversal ("in depth") of the graph.
+. By coloring traversed vertices and (or) arcs, one can control the order and methods of traversal (for example, single or multiple use of arcs and vertices).
+. Constructing the set of sources and sinks (as sources on the transposed graph).
+. Constructing the strongly connected components of a graph. A strongly connected component of a graph is a set of vertices, each of which is reachable from all other vertices.
+. Breadth-first search. Used for solving arbitrary graph problems that require the corresponding order of traversal ("in breadth") of the graph. By coloring traversed vertices and (or) arcs, one can control the order and methods of traversal (for example, single or multiple use of arcs and vertices).
+
+

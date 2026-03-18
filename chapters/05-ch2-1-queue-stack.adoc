@@ -1,0 +1,1103 @@
+== CHAPTER 2 Fundamentals of Algorithm Design
+
+The first chapter provided the thoughtful reader with a "quick immersion" into the Python programming language, the tools for writing and debugging Python programs. It also provided information about basic introductory algorithms on one-dimensional and two-dimensional lists, for example: summing elements; counting and searching for elements that possess a given property; finding maximum and minimum elements. Several algorithm development methodologies were also presented. As was mentioned earlier, theoretically this is sufficient to write a program for solving any problem in the Python programming language. In practice, however, it is more reasonable to master not only the methods for developing new algorithms, but also the algorithms themselves that have already been developed for a wide class of problems. Such algorithms enrich the program developer's "arsenal." Applying known algorithms, their modifications, and combinations significantly reduces the time for solving problems, developing, and debugging programs.
+
+
+== 2.1. Queue and Stack
+
+In this section, the properties of two data structures will be examined in detail: the _queue_ and the _stack_. The essence of these structures becomes clearer if we refer to their English designations — FIFO and LIFO respectively:
+
+
+* FIFO (First In First Out) — "first in — first out";
+* LIFO (Last In First Out) — "last in — first out."
+
+
+=== Physical Examples of Stack and Queue
+
+Solving a large number of both competition and practical programming problems requires the use of a _queue_ or a _stack_. First, let us consider some physical analogies of the stack and queue.
+
+Suppose heavy concrete slabs are delivered to a construction site, and workers stack them one on top of another. Then we can say that this stack of slabs represents a _stack_: the last slab placed on the pile will be the first one to be taken from it.
+
+// Page 69
+Another example of a _stack_ is a magazine of cartridges, sealed at the back end. The last cartridge pushed into the magazine will be the first to come out when rounds are fired.
+
+An illustrative example of a _queue_ is the line at a store checkout, where the cashier serves people from the front of the line, and new customers join at the end of the line.
+
+Another example of a _queue_ can be imagined by assuming that the construction workers do not stack slabs one on top of another, but place them side by side. Then one crew takes slabs from the front of the queue, while another crew adds slabs to the end.
+
+
+== Representing the Stack in a Program
+
+Both the queue and the stack can be represented and implemented in a program in various ways, but we will focus on the simplest — representing the queue and stack using a list of elements.
+
+Obviously, for a stack, in Python the simplest approach is to use a regular `list`. At the beginning of the program, we create an empty list:
+
+[source,python]
+----
+stack: list[int] = []
+----
+
+And this means that the stack is currently empty.
+
+_Push element_ `x` _onto the stack_ — means performing one action:
+
+
+[source,python]
+----
+stack.append(x)
+----
+
+. Append element `x` to the end of the list:
+
+_Pop an element from the stack into variable_ `y` — means performing one action:
+
+
+[source,python]
+----
+y = stack.pop()
+----
+
+. Take and remove the last element from the list:
+
+To understand how this works internally, let us also look at the manual array-based approach (as was done historically). We use a list and a `top` variable:
+
+
+* `top += 1` — equivalent to incrementing the stack pointer;
+* `top -= 1` — equivalent to decrementing the stack pointer.
+
+Usually, for greater clarity and readability of programs, the stack operations are separated into special functions. Here is the manual approach for learning purposes, followed by the Pythonic approach:
+
+*Manual approach (for learning):*
+
+[source,python]
+----
+# Stack for up to 80 characters (manual approach)
+stack: list[str] = [''] * 80
+top: int = 0
+
+def put(c: str) -> None:  # Push a character onto the stack
+    global top
+    top += 1  # Update the top of the stack
+    stack[top - 1] = c  # Place the character in the stack
+----
+
+// Page 70
+[source,python]
+----
+def get() -> tuple[str, bool]:  # Pop from the stack
+    stack_empty = (top == 0)  # Is the stack empty?
+    if not stack_empty:
+        return stack[top - 1], False  # If not, take the character from the stack
+    return '', True
+
+def delete() -> None:  # Delete a character from the stack
+    global top
+    top -= 1  # Decrement the top of the stack by 1
+----
+
+*Pythonic approach (recommended):*
+
+[source,python]
+----
+# Stack for characters (Pythonic approach)
+stack: list[str] = []
+
+def put(c: str) -> None:  # Push a character onto the stack
+    stack.append(c)
+
+def get() -> tuple[str, bool]:  # Pop from the stack
+    if len(stack) == 0:  # Is the stack empty?
+        return '', True
+    return stack[-1], False  # Return top without removing
+
+def delete() -> None:  # Delete a character from the stack
+    stack.pop()
+----
+
+The size of the list for the stack is determined by the maximum number of elements expected to be placed in the stack and the type of elements stored in the stack. In Python, lists grow dynamically, so you do not need to pre-allocate a fixed size.
+
+It is clear that the elements of a stack can be not only characters. You can create stacks of words, points, segments, triangles, etc. in a program, using Python's facilities for defining classes. You can also have tuples of numbers as stack elements.
+
+
+== Representing the Queue in a Program
+
+A queue, just like a stack, can be represented in a program by a list of elements. However, unlike a stack, working with a queue requires two additional variables — pointers to the beginning and end of the queue. Let us call them for definiteness:
+
+
+* `que_begin` — beginning of the queue;
+* `que_end` — end of the queue.
+
+At the beginning of the program, the queue beginning is set to 0 and the end to -1 (using 0-based indexing), for example, with the following statements:
+
+[source,python]
+----
+que_begin = 0
+que_end = -1
+----
+
+Then, to enqueue a triple of numbers (x, y, z) into queue `que` (at its end), the following actions must be performed:
+
+[source,python]
+----
+que_end += 1  # Increment the variable - end of queue
+que[que_end] = (x, y, z)  # Enqueue the triple of numbers x y z
+----
+
+To dequeue a triple of numbers from the queue into variables x, y, and z (from the beginning of the queue, naturally), the following must be done:
+
+[source,python]
+----
+x, y, z = que[que_begin]  # Take the triple of numbers
+que_begin += 1  # Increment the beginning pointer
+----
+
+The attentive reader has noticed that in this case a list of tuples is used for working with the queue. Each tuple stores the numbers belonging to a sin-
+
+// Page 71
+gle element in the queue. In our case there are 3 such numbers.
+
+Just as with stack operations, queue operations are usually placed in separate functions, for example:
+
+[source,python]
+----
+def put(x: int, y: int, step_number: int) -> None:  # Enqueue
+    global que_end
+    que_end += 1  # Increment count
+    que[que_end] = (x, y, step_number)  # x coordinate, y coordinate, move number
+
+def get() -> tuple[int, int, int]:  # Dequeue
+    global que_begin
+    x, y, step_number = que[que_begin]  # x coordinate, y coordinate, move number
+    que_begin += 1  # Update beginning
+    return x, y, step_number
+----
+
+*Pythonic approach:* In Python, the best way to implement a queue is to use `collections.deque`, which provides O(1) append and popleft operations:
+
+[source,python]
+----
+from collections import deque
+
+que: deque[tuple[int, int, int]] = deque()
+
+def put(x: int, y: int, step_number: int) -> None:
+    que.append((x, y, step_number))
+
+def get() -> tuple[int, int, int]:
+    return que.popleft()
+----
+
+
+== Problem-Solving Examples
+
+In this section, examples of solving several problems using queues and stacks are provided. Those who are using this material for self-study of programming are recommended, after reading the problem statement, to first try to solve it on their own, _without reading_ the material presented further in this section. If you succeed, then perhaps there is no need to spend time on further reading.
+
+
+=== The Knight's Move Problem
+
+Given the designations of two squares on a chessboard (for example, A5 and C2). Find the minimum number of moves a chess knight needs to get from the first square to the second.
+
+_Solution idea:_ a queue of possible knight moves is introduced.
+
+First, we enqueue all board squares reachable in one move. Then, using the elements already in the queue, we extend the queue with squares that can be reached in exactly 2 moves, and so on.
+
+Obviously, each time we enqueue a square, it is useful to check whether it is the target square. If so, we already know how many moves it takes the knight to get there. The queue mechanism ensures that this will be the minimum number of moves.
+
+A more rigorous algorithm for the solution is presented below:
+
+[source,pseudocode]
+----
+Place the knight's initial square in the queue
+While (not found)
+  Dequeue the first element - square X,Y
+  Squares reachable from X,Y by a knight's move,
+    if not the target and not yet marked,
+    are enqueued and marked
+    (if the enqueued square is the target - STOP).
+----
+
+// Page 72
+The main part of the program solving this problem looks as follows:
+
+[source,python]
+----
+start_process()  # Start processing
+step_number = 0  # Number of steps - 0
+found = (sx == ex) and (sy == ey)  # Completion flag
+while not found:  # While not found
+    x, y, step_number = get()  # Get coordinate and step number
+    step_number += 1  # Increment step number
+    found = put_all(x, y, step_number) # Enqueue all possible moves
+                                       # If the target square is among them,
+                                       # found == True
+print(step_number)  # Output step number
+----
+
+Analysis of the main program text shows that it uses three subprograms:
+
+
+* `start_process` — for inputting the initial data and converting them to numeric form;
+* `get` — for dequeuing elements from the queue; the queue stores the numeric coordinates of the chessboard square and the number of the minimum move by which it can be reached;
+* `put_all` — for enqueuing all squares reachable by a knight's move from the current one. If one of these squares is reachable in the minimum number of moves, then the function returns `True`.
+
+The full text of the self-documented program (`knight.py`) for solving this problem is given in Listing 2.1.
+
+.Listing 2.1. Program text for solving the Knight's Move problem
+[source,python]
+----
+# Program knight1
+from collections import deque
+
+que: deque[tuple[int, int, int]] = deque()  # Queue of moves
+marked: list[list[bool]] = [[False] * 8 for _ in range(8)]  # Marks on the board
+sx: int = 0; sy: int = 0  # Starting position (as numbers)
+ex: int = 0; ey: int = 0  # Ending position (as numbers)
+
+def convert(cell: str) -> tuple[int, int]:  # Convert position
+                                            # of the knight from
+                                            # string representation to numeric
+    x = ord(cell[0]) - 96  # Instead of a-h -> 1-8
+    y = int(cell[1])  # Instead of '1'-'8' -> 1-8
+    return x, y
+
+def put(x: int, y: int, step_number: int) -> None:  # Enqueue
+    que.append((x, y, step_number))  # Enqueue coordinates and move number
+    marked[x - 1][y - 1] = True  # Mark as used
+----
+
+// Page 73
+[source,python]
+----
+def get() -> tuple[int, int, int]:  # Dequeue
+    x, y, step_number = que.popleft()  # X, Y coordinate, move number
+    return x, y, step_number
+
+def start_process() -> None:
+    global sx, sy, ex, ey, marked
+    start_cell = input()  # Read starting position
+    end_cell = input()  # Read ending position
+    sx, sy = convert(start_cell)  # Convert to numbers
+    ex, ey = convert(end_cell)  # Convert to numbers
+    marked = [[False] * 8 for _ in range(8)]  # All squares are unmarked
+    put(sx, sy, 0)  # Enqueue starting position
+
+def put_all(x: int, y: int, step_number: int) -> bool:
+                                            # Enqueue
+                                            # all currently possible moves
+    # Possible knight moves
+    steps = [( 1,-2),( 1, 2),  # Array of constants
+             (-1,-2),(-1, 2),
+             ( 2,-1),( 2, 1),
+             (-2,-1),(-2, 1)]
+    found = False  # Found target square
+    i = 0  # Possible move number
+    while not found and i < 8:  # While not found and move exists
+        dx, dy = steps[i]  # Make the next move
+        current_x = x + dx  # X of current move
+        current_y = y + dy  # Y of current move
+        found = (ex == current_x) and (ey == current_y)  # Is this the target square?
+        if (not found and  # If not and
+            0 < current_x < 9 and  # X is on the board and
+            0 < current_y < 9 and  # Y is on the board and
+            not marked[current_x - 1][current_y - 1]):  # square(X,Y) is not marked
+            put(current_x, current_y, step_number)  # enqueue and mark
+        i += 1
+    return found
+----
+
+_continued ..._
+
+// Page 74
+
+=== Listing 2.1 _(continued)_
+
+[source,python]
+----
+start_process()  # Start processing
+step_number = 0  # Number of steps - 0
+found = (sx == ex) and (sy == ey)  # Completion flag
+while not found:  # While not found
+    x, y, step_number = get()  # Get coordinates and step number
+    step_number += 1  # Increment step number
+    found = put_all(x, y, step_number)  # Enqueue all possible moves
+                                            # If the target square is
+                                            # among them, found == True
+print(step_number)  # Output step number
+----
+
+
+== The Cutting Pieces Problem
+
+From a sheet of graph paper of size 8 x 8 cells, some cells have been removed. Into how many pieces will the remaining part of the sheet fall apart?
+
+[EXAMPLE]
+====
+If all cells of one color are removed from a chessboard, the remaining part will fall apart into 32 pieces.
+
+====
+
+_Idea:_ a queue of cells adjacent to the current one is introduced. That is:
+
+
+. find the first uncut cell and place it in the queue;
+. as long as the queue is not empty, dequeue the first element and add to the queue all cells adjacent to the current one;
+. when the queue becomes empty, this will mean that the first piece is finished; we must again find the first uncut cell (without using cells from the first piece) and continue the process until all cells are exhausted.
+
+A more rigorous presentation of the algorithm looks as follows:
+
+[source,pseudocode]
+----
+Piece number = 0
+While there is an unmarked cell
+  place it in the queue and mark it
+  Inc(Piece number)
+  While the queue is not empty
+    Dequeue a cell
+    All cells adjacent to it and unmarked
+    are enqueued and marked.
+----
+
+Let us present the text of the main program solving this problem:
+
+[source,python]
+----
+start_process()  # Start processing
+step_number = 0  # Piece number = 0
+result = find_unmarked()
+while result is not None:  # While there is an unmarked x,y
+    x, y = result
+    put(x, y)  # Place it in the queue and mark
+    step_number += 1  # Increment piece number by 1
+    while len(que) > 0:  # While the queue is not empty
+        x, y = get()  # Dequeue x,y
+        put_all(x, y)  # Enqueue all possible moves
+    result = find_unmarked()
+print(step_number)  # Output step number
+----
+
+// Page 75
+Analysis of the main program shows that it uses the following subprograms and functions:
+
+
+* `start_process` — for inputting the initial data and marking the cut-out cells;
+* `find_unmarked()` — for determining whether there are uncut and unmarked cells and, if there are, returning their coordinates;
+* `get()` — for dequeuing elements from the queue;
+* `put_all` — for enqueuing all cells adjacent by sides to the current one.
+
+The full text of the self-documented program for solving this problem (cell.py) is given in Listing 2.2.
+
+.Listing 2.2.
+Program text for solving the Cutting Pieces problem
+
+[source,python]
+----
+# Program cell1
+from collections import deque
+
+que: deque[tuple[int, int]] = deque()  # Queue of moves
+marked: list[list[bool]] = [[False] * 8 for _ in range(8)]  # Marks on the board
+
+def put(x: int, y: int) -> None:  # Enqueue
+    que.append((x, y))  # Enqueue coordinates
+    marked[x][y] = True  # Mark as used
+
+def get() -> tuple[int, int]:  # Dequeue
+    x, y = que.popleft()  # X, Y coordinate
+    return x, y
+
+def start_process() -> None:
+    global marked
+    marked = [[False] * 8 for _ in range(8)]  # All squares are unmarked
+    n = int(input())
+    for _ in range(n):
+        x, y = map(int, input().split())
+----
+
+_continued ..._
+
+// Page 76
+
+=== Listing 2.2 (continued)
+
+[source,python]
+----
+        marked[x][y] = True
+    # Queue is initially empty (deque starts empty)
+
+def find_unmarked() -> tuple[int, int] | None:
+    for i in range(8):
+        for j in range(8):
+            if not marked[i][j]:
+                return i, j
+    return None
+
+def put_all(x: int, y: int) -> None:  # Enqueue
+                                                  # all currently possible moves
+    # Possible moves (up, down, left, right)
+    steps = [(0, -1), (0, 1), (-1, 0), (1, 0)]  # Array of constants
+    for dx, dy in steps:
+        current_x = x + dx  # X of current move
+        current_y = y + dy  # Y of current move
+        if (0 <= current_x < 8 and  # X is on the board and
+            0 <= current_y < 8 and  # Y is on the board and
+            not marked[current_x][current_y]):  # square(X,Y) is not marked
+            put(current_x, current_y)  # enqueue
+
+start_process()  # Start processing
+step_number = 0  # Piece number = 0
+result = find_unmarked()
+while result is not None:  # While there is an unmarked x,y
+    x, y = result
+    put(x, y)  # Place it in the queue and mark
+    step_number += 1  # Increment piece number by 1
+    while len(que) > 0:  # While the queue is not empty
+        x, y = get()  # Dequeue x,y
+        put_all(x, y)  # Enqueue all possible moves
+    result = find_unmarked()
+print(step_number)  # Output step number
+----
+
+
+== The Brackets Problem
+
+Given a finite sequence consisting of opening and closing brackets of various given types. Determine whether it is possible to add digits
+
+// Page 77
+and arithmetic operation signs to it so that a valid arithmetic expression is obtained.
+
+[EXAMPLE]
+====
+`(([()()])` — such a sequence will satisfy the problem condition, while this one — `([)]` — will not.
+
+====
+
+_Idea:_ a stack of opening brackets is introduced.
+
+The input string, by the problem conditions, contains only opening and closing brackets, and it is processed character by character. The algorithm can be written as follows:
+
+[source,pseudocode]
+----
+If the input character is an opening bracket, push it onto the stack
+If the input character is a closing bracket, perform
+    additional analysis:
+    if the stack contains a matching opening bracket,
+        the brackets are paired, remove the top bracket from the stack
+        and continue the process
+    if the stack has no elements at all or
+        the bracket is not matching, then error - and stop
+If we have reached the end of the string, analyze the stack
+If it is not empty - error, otherwise - the string is correct.
+----
+
+A more rigorous representation of the proposed algorithm:
+
+[source,pseudocode]
+----
+While (characters are not exhausted and no error)
+    IF the bracket is opening
+        THEN push it onto the stack
+    ELSE
+        IF the stack is not empty
+            THEN
+                IF the bracket is paired
+                    THEN remove it from the stack
+                    ELSE error
+                ELSE error
+        IF error or the stack is not empty
+            THEN output ('Error')
+            ELSE output ('Correct')
+----
+
+Let us look at the main program text for solving this problem:
+
+[source,python]
+----
+start_process()
+i = 0
+while i < len(s) and not error:  # While the string is not exhausted and no
+                                        # error
+    c = s[i]  # take the next character
+    if c in ('(', '{', '['):  # If it is an opening bracket
+        put(c)  # then push it onto the stack
+    else:  # otherwise
+        x, stack_empty = get()  # try to take a character from the stack
+        if not stack_empty:  # If successful - stack is not empty
+                                        # then
+            if ((x == '(' and c == ')') or  # If the bracket is paired
+                (x == '{' and c == '}') or
+                (x == '[' and c == ']')):
+----
+
+// Page 78
+[source,python]
+----
+                delete()  # remove the closing bracket from the stack
+            else:
+                error = True  # Bracket is not paired - error
+        else:
+            error = True  # Stack is empty - error
+    i += 1  # Take the next character
+
+x, stack_empty = get()  # Check if the stack is empty
+if error or not stack_empty:  # If error or the stack is not empty
+    print('Error')
+else:
+    print('Correct')
+----
+
+The main program uses the following functions:
+
+
+* `start_process` — for inputting the string with brackets, determining its length, and initializing the stack;
+* `put(c)` — for pushing a character onto the stack;
+* `get()` — for peeking at the top character of the stack, returning a tuple of the character and a boolean indicating whether the stack is empty;
+* `delete` — for deleting a character from the stack.
+
+The full program text solving this problem (stack.py) is given in Listing 2.3.
+
+.Listing 2.3. Program text solving the Brackets problem
+[source,python]
+----
+# Program stek1
+
+# Manual stack implementation (for learning)
+stack: list[str] = []  # Stack for characters
+
+def start_process() -> tuple[str, int]:
+    s = input()  # Read the string
+    return s, len(s)  # Return the string and its length
+
+def put(c: str) -> None:  # Push a character onto the stack
+    stack.append(c)  # Place the character in the stack
+
+def get() -> tuple[str, bool]:  # Pop from the stack
+    stack_empty = len(stack) == 0  # Is the stack empty?
+    if not stack_empty:
+        return stack[-1], False  # If not, take the character from
+                                           # the stack
+    return '', True
+
+def delete() -> None:  # Delete a character from the stack
+    stack.pop()  # Remove the top element
+----
+
+// Page 79
+[source,python]
+----
+s, l = start_process()
+error = False
+i = 0
+while i < l and not error:  # While the string is not exhausted and no error
+    c = s[i]  # take the next character
+    if c in ('[', '(', '{'):  # If it is an opening bracket
+        put(c)  # then push it onto the stack
+    else:  # otherwise
+        x, stack_empty = get()  # try to take a character from the stack
+        if not stack_empty:  # if successful - stack is not empty
+                                          # then
+            if ((x == '(' and c == ')') or  # if the bracket is paired
+                (x == '[' and c == ']') or
+                (x == '{' and c == '}')):
+                delete()  # remove the closing bracket from the stack
+            else:
+                error = True  # Bracket is not paired - error
+        else:
+            error = True  # Stack is empty - error
+    i += 1  # take the next character
+
+x, stack_empty = get()  # Check if the stack is empty
+if error or not stack_empty:  # If error or the stack is not empty
+    print('Error')
+else:
+    print('Correct')
+----
+
+*Note:* In competitive programming, the Pythonic way to solve the brackets problem is even simpler using a plain list as a stack:
+
+[source,python]
+----
+s = input()
+stack: list[str] = []
+matching = {')': '(', ']': '[', '}': '{'}
+error = False
+for c in s:
+    if c in '([{':
+        stack.append(c)
+    elif c in ')]}':
+        if not stack or stack[-1] != matching[c]:
+            error = True
+            break
+        stack.pop()
+if error or stack:
+    print('Error')
+else:
+    print('Correct')
+----
+
+
+== Additional Programming Techniques
+
+Those who have read the full program texts may have questions about the techniques used in them. In addition, the author would like to draw the readers' attention to several additional programming techniques applied in solving the indicated problems. This section is devoted to examining these techniques.
+
+
+=== Converting Characters to Numbers
+
+Let us return to the chess knight problem.
+
+[source,python]
+----
+def convert(cell: str) -> tuple[int, int]:  # Convert position
+                                              # of the knight from string
+                                              # representation to numeric
+    x = ord(cell[0]) - 96  # Instead of a-h -> 1-8
+    y = int(cell[1])  # Instead of '1'-'8' -> 1-8
+    return x, y
+----
+
+So, in this problem, 2 characters are given as input designating the position of the knight's initial square (and 2 characters for designating the knight's target square). In the pro-
+
+// Page 80
+gram it is more convenient for us to convert these 2 characters into 2 numbers, replacing the letters from _a_ to _h_ with the digits from 1 to 8 and the characters from 1 to 8 with the corresponding numbers.
+
+Let us start with the letters. It is known that each letter has its own ASCII code (a number from 0 to 255). At the same time, Latin letters have codes in ascending order. That is, the character _b_ has a code 1 greater than the character _a_, the character _c_ has a code 1 greater than the character _b_, and so on. The function `ord(c)` returns as its result the code corresponding to the character _c_. For example, `ord('a')` equals 97.
+
+Thus, to obtain the corresponding number from 1 to 8 instead of a Latin character from the range _a-h_, it is sufficient to subtract 96 from the code of that character, which is exactly what is done in the program fragment shown above.
+
+To replace a digit character with the corresponding number, we use the `int()` function, which converts a string to an integer.
+
+
+== Initialization of a Constant List
+
+It is known that in general a knight has 8 different moves, defined by the corresponding combinations of pairs from the numbers 1, 2, -1, -2. The program reads better if we use in this case the initialization of a constant list defining the knight's allowed moves.
+
+[source,python]
+----
+def put_all(x: int, y: int, step_number: int) -> bool:
+                                        # Enqueue
+                                        # all currently possible moves
+    # Possible knight moves
+    steps = [( 1,-2), ( 1, 2),  # List of move offsets
+             (-1,-2), (-1, 2),
+             ( 2,-1), ( 2, 1),
+             (-2,-1), (-2, 1)]
+    found = False  # Found target square
+    i = 0  # Possible move number
+    while not found and i < 8:  # While not found and move exists
+                                        # Make the next move
+        dx, dy = steps[i]
+        current_x = x + dx  # X of current move
+        current_y = y + dy  # Y of current move
+        found = (ex == current_x) and (ey == current_y)  # Is this the target square?
+        if (not found and  # If not and
+            0 < current_x < 9 and  # X is on the board and
+            0 < current_y < 9 and  # Y is on the board and
+            not marked[current_x - 1][current_y - 1]):  # square (X,Y) is not
+                                        # marked
+            put(current_x, current_y, step_number)  # enqueue
+                                        # and mark
+        i += 1
+    return found
+----
+
+For the paper cutting problem, the allowed "moves" when enqueuing a cell are somewhat different, but this is actually reflected only in the constant list:
+
+// Page 81
+[source,python]
+----
+def put_all(x: int, y: int) -> None:  # Enqueue
+                                                # all currently possible moves
+    # Possible moves (up, down, left, right)
+    steps = [(0, -1), (0, 1), (-1, 0), (1, 0)] # List of move offsets
+    for dx, dy in steps:
+        current_x = x + dx  # X of current move
+        current_y = y + dy  # Y of current move
+        if (0 <= current_x < 8 and  # X is on the board and
+            0 <= current_y < 8 and  # Y is on the board and
+            not marked[current_x][current_y]): # square(X,Y) is not marked
+            put(current_x, current_y)  # enqueue
+----
+
+
+== Global Variables, Local Variables, and Parameters
+
+Incorrect distribution of variables in a program among these types leads to an increase in the number of potential errors in the program and, consequently, to a prolonged debugging process.
+
+If a variable is declared _inside_ a function — this means that it is _local_. That is, no changes to this variable inside the given function _in any way_ affect variables with the same name in other functions and in the main program. For example, in the `put_all` function shown above, the variables `dx`, `dy`, `current_x`, and `current_y` are _local_.
+
+If a variable is declared at the module level (outside the body of any function), then it is _global_, and any function that declares it with the `global` keyword can modify it. In Python, if you need to modify a global variable inside a function, you must use the `global` statement. Without it, assigning to a variable inside a function creates a new local variable.
+
+And finally, _parameters_ are variables that are declared directly in the function definition, such as `x`, `y`, and `step_number`. In Python, all parameters are passed by reference to the object. For immutable types (like integers and strings), any modifications create a new local value without affecting the caller. For mutable types (like lists and objects), modifications to the object itself are visible to the caller.
+
+What considerations should guide the distribution of variables among these types?
+
+// Page 82
+
+== Using Boolean Variables and Lists
+
+Proper use of Boolean variables and lists reduces program size and improves its clarity, which ultimately shortens the debugging time.
+
+Many beginning programmers often use variables and lists with values 0 and 1 instead of Boolean values `False` and `True`.
+
+Let us give several examples of using Boolean variables and lists in the described programs:
+
+
+* `knight.py` (knight problem).
+
+[source,python]
+----
+found = (sx == ex) and (sy == ey)  # Completion flag
+----
+
+Here the variable `found` receives the value `True` if both equalities hold simultaneously stem:[(sx == ex)] and stem:[(sy == ey)]. That is, if the target square has been found during the search.
+
+[source,python]
+----
+while not found:  # While not found
+    # While not found - do
+----
+
+
+* `cell.py` (the cutting into pieces problem, see Listing 2.2).
+
+[source,python]
+----
+def find_unmarked() -> tuple[int, int] | None:
+    for i in range(8):
+        for j in range(8):
+            if not marked[i][j]:
+                return i, j
+    return None
+----
+
+Here `find_unmarked` is a function that returns a tuple of coordinates if there are still unmarked squares on the board, or `None` if there are none. The coordinates of the first free square found are returned directly. Only if there are _no_ unmarked squares left on the board does the function return `None`.
+
+// Page 83
+Here, the use of early `return` for non-standard exit from a function is also illustrative.
+
+stack.py (the brackets problem, see Listing 2.3)
+
+[source,python]
+----
+def get() -> tuple[str, bool]:  # Pop from the stack
+    stack_empty = len(stack) == 0  # Is the stack empty?
+    if not stack_empty:
+        return stack[-1], False  # If not, take
+                                           # character from the stack
+    return '', True
+----
+
+The boolean value `stack_empty` is `True` if the stack is empty (length is 0), and `False` otherwise. This value is used for correct popping from the stack, and it is also returned to the calling program.
+
+[source,python]
+----
+if error or not stack_empty:  # If error or the stack is not empty
+    print('Error')
+else:
+    print('Correct')
+----
+
+This fragment requires no explanation, unlike the case where some numbers would be compared.
+
+
+== Small-Scale Test Automation
+
+So, you have developed an algorithm, written a program, and it already produces correct answers on several tests you have prepared. If tests still appear on which it stops working correctly, then you will need to make changes to the program, achieving its correct operation on those tests as well. But after changing the code, you need to recheck everything again!
+
+The following approach is suggested: immediately after you have written the program and begun testing it (or even better — _before that_), compose tests and place them in files 1.in, 2.in, 3.in, etc., 1.out, 2.out, 3.out, etc. The *.in files should contain what needs to be input to the program for the test with the corresponding number, and the *.out files should contain the data that the program should output in case of correct operation.
+
+After that, you compose a test script. In Python, you can create a simple test runner:
+
+1. test_all.sh (or test_all.bat on Windows).
+
+----
+#!/bin/bash
+for i in 1 2 3 4 5 6 7 8 9; do
+    python3 program.py < "$i.in" > output.txt
+    if diff -q output.txt "$i.out" > /dev/null 2>&1; then
+        echo "Test $i: PASSED"
+    else
+        echo "Test $i: FAILED"
+        diff output.txt "$i.out"
+    fi
+done
+----
+
+This script cyclically launches the program for all test numbers, feeding the prepared test as input and comparing the output with the reference answers.
+
+Alternatively, you can use Python's built-in testing tools. A simple approach using Python:
+
+// Page 84
+----
+import subprocess
+for i in range(1, 10):
+    with open(f'{i}.in') as fin:
+        result = subprocess.run(['python3', 'program.py'],
+                                stdin=fin, capture_output=True, text=True)
+    with open(f'{i}.out') as fout:
+        expected = fout.read().strip()
+    actual = result.stdout.strip()
+    if actual == expected:
+        print(f'Test {i}: PASSED')
+    else:
+        print(f'Test {i}: FAILED')
+        print(f'  Expected: {expected}')
+        print(f'  Got:      {actual}')
+----
+
+By running this script, you can at any time, after the next batch of changes, verify that the program works on _all_ the tests you have prepared, or quickly discover those on which it does _not yet_ or _no longer_ works. If your program is supposed to read data from one file (for example, file.in) and write to another (for example, file.out), then you can slightly modify the test script accordingly.
+
+
+== Memory Management in Python
+
+In Python, memory management is handled automatically. Unlike lower-level languages, you do not need to manually allocate and free memory. Python uses a system called _garbage collection_ — when no variable references an object any longer, Python automatically frees the memory that object was using.
+
+Every value in Python is an object, and every variable is a _reference_ (essentially a pointer) to an object. When you write `x = [1, 2, 3]`, Python allocates memory for a list object and stores a reference to it in `x`. When `x` goes out of scope or is reassigned, the list object becomes eligible for garbage collection if nothing else refers to it.
+
+This means you can focus on your algorithm rather than worrying about memory allocation and deallocation. Lists, dictionaries, and other data structures in Python grow and shrink dynamically as needed.
+
+Let us return to the problem statement from one of the previously solved problems. From a sheet of graph paper of size 8 x 8 cells, some cells have been removed. Into how many pieces will the remaining part of the sheet fall apart?
+
+It was proposed to solve this problem using a queue. Two data structures were used to store data in this problem:
+
+[source,python]
+----
+que: deque[tuple[int, int]] = deque()  # Queue of moves
+marked: list[list[bool]] = [[False] * 8 for _ in range(8)]  # Marks on the board
+----
+
+The `marked` list has dimensions 8x8 because by the problem conditions the board size is 8x8. The `que` deque stores tuples of two numbers — x and y — coordinates of the cell we enqueued.
+
+Now suppose the problem is made more complex as follows: from a sheet of graph paper of size stem:[N x M] cells (stem:[N >= 1], stem:[M <= 150]), stem:[K] cells have been arbitrarily removed (stem:[1 <= K <= 22,500]). Into how many pieces will the remaining part of the sheet fall apart?
+
+In Python, we simply adjust the list sizes dynamically — no special memory management needed:
+
+[source,python]
+----
+que: deque[tuple[int, int]] = deque()  # Queue of moves
+marked: list[list[bool]] = [[False] * m for _ in range(n)]  # Marks on the board
+----
+
+Python lists can grow as large as available memory allows. There is no artificial 64 KB limit as existed in older languages. If you need even larger data structures, Python handles them seamlessly.
+
+// Page 85
+Python's memory model is based on objects and references. Every variable holds a reference to an object. A _reference_ is essentially an internal pointer to the object in memory.
+
+Python manages memory automatically using reference counting and a cyclic garbage collector. When no references point to an object, the memory is freed automatically. You never need to manually allocate or free memory.
+
+Now let us learn to use Python's data structures in our programs.
+
+Let us begin with an example. Let us recall the problem statement from one of the previously solved problems. From a sheet of graph paper of size 8 x 8 cells, some cells have been removed. Into how many pieces will the remaining part of the sheet fall apart?
+
+It was proposed to solve this problem using a queue. In Python, we can simply use a `deque` and a 2D list:
+
+[source,python]
+----
+from collections import deque
+
+que: deque[tuple[int, int]] = deque()  # Queue of moves
+marked: list[list[bool]] = [[False] * 8 for _ in range(8)]  # Marks on the board
+----
+
+The `marked` list has dimensions 8x8 because by the problem conditions the board size is 8x8. The `que` deque stores tuples of (x, y) coordinates.
+
+For the larger version of the problem (N x M grid), we simply create lists of the needed size:
+
+[source,python]
+----
+que: deque[tuple[int, int]] = deque()  # Queue of moves
+marked: list[list[bool]] = [[False] * m for _ in range(n)]  # Marks on the board
+----
+
+The algorithm for solving the problem of cutting cells from a sheet of paper of size stem:[N x M] can be written as follows.
+
+*Idea:* a _queue_ of cells adjacent to the current one.
+
+[source,pseudocode]
+----
+Piece number = 0
+While there is an unmarked cell
+  place it in the queue and mark it
+  Inc(Piece number)
+  While the queue is not empty
+    Dequeue a cell
+    All cells adjacent to it and unmarked
+    are enqueued and marked
+----
+
+The text of the corresponding program is given in Listing 2.4.
+
+.Listing 2.4. Program text solving the cell cutting problem
+[source,python]
+----
+from collections import deque
+
+que: deque[tuple[int, int]] = deque()  # Queue of moves
+marked: list[list[bool]] = []  # Marks on the board
+n: int = 0
+m: int = 0
+
+def put(x: int, y: int) -> None:  # Enqueue
+    que.append((x, y))  # Enqueue coordinates
+----
+
+// Page 86
+[source,python]
+----
+    marked[x][y] = True  # Mark as used
+
+def get() -> tuple[int, int]:  # Dequeue
+    x, y = que.popleft()  # X, Y coordinate
+    return x, y
+
+def start_process() -> None:
+    global n, m, marked
+    n, m = map(int, input().split())  # Read field dimensions
+    marked = [[False] * m for _ in range(n)]  # All cells are unmarked
+    k = int(input())  # Number of cut cells
+    for _ in range(k):
+        x, y = map(int, input().split())  # Read cut cell
+        marked[x][y] = True  # Mark it
+
+def find_unmarked() -> tuple[int, int] | None:
+    for i in range(n):
+        for j in range(m):
+            if not marked[i][j]:
+                return i, j
+    return None
+
+def put_all(x: int, y: int) -> None:  # Enqueue
+                                                            # all currently possible moves
+    # Possible moves (up, down, left, right)
+    steps = [(0, -1), (0, 1), (-1, 0), (1, 0)]
+    for dx, dy in steps:
+        current_x = x + dx  # X of current move
+        current_y = y + dy  # Y of current move
+        if (0 <= current_x < n and  # X is on the board and
+            0 <= current_y < m and  # Y is on the board and
+            not marked[current_x][current_y]):  # square(X,Y) is not marked
+            put(current_x, current_y)  # Enqueue and mark
+----
+
+// Page 87
+[source,python]
+----
+start_process()  # Start processing
+step_number = 0  # Piece number = 0
+result = find_unmarked()
+while result is not None:  # While there is an unmarked x,y
+    x, y = result
+    put(x, y)  # Place it in the queue and mark
+    step_number += 1  # Increment piece number by 1
+    while len(que) > 0:  # While the queue is not empty
+        x, y = get()  # Dequeue x,y
+        put_all(x, y)  # Enqueue all possible moves
+    result = find_unmarked()
+print(step_number)  # Output step number
+----
+
+[NOTE]
+====
+In Python, there is no need to distinguish between "static" and "dynamic" arrays as in older languages. Python lists grow dynamically, and memory is managed automatically by the garbage collector. You can simply create lists of whatever size you need.
+
+====
+
+For competitive programming, Python provides simple and powerful tools for memory management. Unlike older languages where you needed to worry about memory allocation limits, Python lets you focus on the algorithm itself.
+
+If you ever need to check memory usage of your program (for example, to stay within the memory limits of a competitive programming judge), you can use the `sys.getsizeof()` function or the `tracemalloc` module:
+
+[source,python]
+----
+import sys
+import tracemalloc
+
+tracemalloc.start()
+
+# ... your algorithm here ...
+
+current, peak = tracemalloc.get_traced_memory()
+print(f"Current memory: {current / 1024:.1f} KB")
+print(f"Peak memory: {peak / 1024:.1f} KB")
+tracemalloc.stop()
+----
+
+This helps the programmer track memory usage at different processing stages of the program.
+
+// Page 88
+In practice, Python programs rarely run into memory issues for typical competitive programming problems, as modern systems provide ample memory. The main concern is usually execution speed rather than memory.
+
+For very large data, Python also provides specialized modules:
+
+
+* `array` module — provides compact arrays of numeric values (similar to C arrays), using less memory than regular lists;
+* `numpy` — provides efficient multidimensional arrays for numerical computing (though not always available in competitive programming judges).
+
+For example, if you need a very large boolean grid:
+
+[source,python]
+----
+from array import array
+
+# Using array module for compact storage
+# 'b' means signed byte - uses 1 byte per element
+marked = array('b', [0] * (n * m))
+
+# Access element at row i, column j:
+# marked[i * m + j]
+----
+
+However, for most competitive programming problems, regular Python lists are perfectly adequate.
+
+
+== Working with Objects and Classes
+
+Now let us give an example of using classes for storing structured data (in this example, for the coordinates of a point). We declare a new class that stores information about a point's coordinates:
+
+[source,python]
+----
+from dataclasses import dataclass
+
+@dataclass
+class Point:
+    x: float = 0.0  # Type POINT - X and Y coordinates
+    y: float = 0.0
+----
+
+We create a variable of type Point:
+
+[source,python]
+----
+pp = Point()  # Create a Point object
+                                 # Python automatically allocates memory
+----
+
+When accessing object attributes, we work as follows:
+
+[source,python]
+----
+pp.x = 1.4  # Set the point's coordinates
+pp.y = pp.x + 0.5
+----
+
+When we are done with an object, we simply stop referencing it — Python's garbage collector handles the rest:
+
+[source,python]
+----
+pp = None  # Remove reference; garbage collector
+           # will free the memory when appropriate
+----
+
+It is also worth mentioning Python's string handling. Python strings can be of arbitrary length (limited only by available memory). Unlike older languages with a 255-character limit, Python strings can hold millions of characters. Python strings are immutable — operations like concatenation create new string objects. For efficient string building, use `str.join()` or `io.StringIO`.
+
+Python provides a rich set of string methods. For example:
+
+
+* string creation — `s = "abcdef"`
+* string concatenation — `s = s1 + s2`
+* string slicing — `s[1:4]`
+* string search — `s.find("cd")`
+* string comparison — `s1 == s2`
+
+There are also functions such as string splitting, case conversion, replacement, and others. For complete information about the func-
+
+// Page 91
+

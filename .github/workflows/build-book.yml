@@ -1,0 +1,60 @@
+name: Build and Deploy Book
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build HTML and PDF
+        run: |
+          docker run --rm -v "${{ github.workspace }}:/documents" asciidoctor/docker-asciidoctor sh -c '
+            asciidoctor -o build/index.html book.adoc &&
+            asciidoctor-pdf -o build/book.pdf book.adoc
+          '
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v5
+        with:
+          name: book
+          path: build/
+
+      - name: Setup Pages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: build/
+
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

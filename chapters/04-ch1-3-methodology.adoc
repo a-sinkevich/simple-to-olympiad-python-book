@@ -1,0 +1,664 @@
+== 1.3. Program development methodology
+
+This section is aimed at readers who have some programming skills in Python and is intended to help develop a proper programming style that ensures productive programming and effective support of the long lifecycle of the programs being developed. Furthermore, the program development method presented in this section will provide a natural transition for learners to object-oriented programming in the future.
+
+
+=== General information
+
+So, the main paradigms of program development in the proposed method are as follows.
+
+
+. Create a complete set of tests for the problem being solved.
+. Introduce data types that correspond to the essence of the problem.
+. Introduce operations on the introduced data types that should also correspond to the essence of the problem. Implement these operations as functions.
+. Develop the program "top-down", deferring the clarification of details that are insignificant at the current level of program development.
++
+// Page 56
+. When writing the actual program text, ensure maximum readability by using adequate names for variables, lists, and functions, as well as reasonably commenting the program text at the input stage (before debugging begins).
+
+It should be noted that Python supports defining custom data types through classes and dataclasses. Therefore, introducing data types that correspond to the essence of the problem not only improves the clarity and readability of the program, reduces its text, and accordingly decreases the number of logical errors in the program, but also makes the code more maintainable and testable.
+
+This development ideology assumes that the programmer defines new data types (using classes or dataclasses), creates instances of those types, develops functions for processing these instances (introduces allowed operations on the data), constructs the data processing algorithm based on the developed functions, and uses Python's type hints to document the expected types.
+
+The proposed program development method will be further illustrated by solving two problems.
+
+
+== Example of solving the line search problem
+
+From a given set of points on a plane, select two distinct points such that the number of points lying on opposite sides of the line passing through these two points differs by the least amount.
+
+1. Create a complete set of tests for the problem being solved.
+
+*Table 1.18.* Test examples
+
+
+[cols="1|1", options="header"]
+|===
+| Input data | Answer
+
+| 1 point | Any line passing through it
+| 2 identical points | Any line passing through them
+| 2 distinct points | The line passing through them
+| A set of points, only 2 on the target line, +
+difference = 0 | The target line (i.e., such a line that the numbers of points lying on opposite sides of it differ by the least amount)
+| A set of points, 5 points on the target line, +
+difference = 0 | The target line
+| A set of points, only 2 on the target line, +
+difference = 3 | The target line
+| A set of points, 5 points on the target line, +
+difference = 3 | The target line
+|===
++
+. Introduce data types that correspond to the essence of the problem.
+
+Obviously, this problem will require the data types: point, line, and set of points. In Python, we can define these using dataclasses or named tuples:
+
+// Page 57
+[source,python]
+----
+from dataclasses import dataclass
+
+@dataclass
+class Point:
+    x: float = 0.0  # Type POINT - coordinates X and Y
+    y: float = 0.0
+
+@dataclass
+class Line:  # Type LINE
+    a: float = 0.0  # coefficients in the equation
+    b: float = 0.0  # Ax + By + C = 0
+    c: float = 0.0
+
+MAX_POINT_NUMBER = 100
+points: list[Point] = []  # Set of points
+----
+
+
+. Introduce operations on the introduced data types. These operations should also correspond to the essence of the problem and be implemented as functions. To perform this work, one or more iterations of semantic algorithm development must first be carried out.
+
+Algorithm:
+
+
+. for all pairs of points, construct lines;
+. for each such line, count the number of points on opposite sides of the line, simultaneously selecting the minimum differences;
+. draw a picture of the solution.
+
+Let us introduce the following operations (functions):
+
+
+* `init_line(p1, p2) -> Line` -- constructs a Line from 2 points p1 and p2;
+* `difference(line, points) -> tuple[int, int]` -- a function that computes the difference between the numbers of points lying on opposite sides of the line, simultaneously returning the number of points located directly on the line;
+* `output_result(min_dif, point1, point2, points)` -- text output of the result;
+* `draw_result()` -- graphical illustration.
+
+
+. Develop the program "top-down", deferring the clarification of details that are insignificant at the current level of program development.
+
+Now we can write the main part of the program directly in Python, using the introduced operations (Listing 1.10).
+
+.Listing 1.10. Main part of the line search program
+[source,python]
+----
+found = False
+for i in range(count_points - 1):  # For points from the first
+    if min_dif == 0:  # If found, then exit
+        break
+    for j in range(i + 1, count_points):  # For points from the next
+        if min_dif == 0:  # If found, then exit
+            break
+        line = init_line(s[i], s[j])  # Build the line
+        dif, on_line_current = difference(line, s)  # Compute the difference
+        if min_dif > dif:  # if it is less than
+                                            # the minimum
+----
+
+// Page 58
+
+=== Listing 1.10 (continued)
+
+[source,python]
+----
+            min_dif = dif  # Minimum difference
+            point1 = i  # Index of 1st point
+            point2 = j  # Index of 2nd point
+            on_line = on_line_current  # Points on this line
+
+output_result(min_dif, point1, point2, s)  # Text output
+if draw_flag:
+    draw_result()  # Graphical illustration
+----
+
+Then we can move on to the next level of detail -- implementing the functions introduced in the main body of the program.
+
+The function for constructing a line:
+
+[source,python]
+----
+def init_line(pa: Point, pb: Point) -> Line:
+    line = Line()
+    line.a = pb.y - pa.y
+    line.b = pa.x - pb.x
+    line.c = pa.y * (pb.x - pa.x) - pa.x * (pb.y - pa.y)
+    return line
+----
+
+The theoretical basis of this function is the well-known equation of a line through two points:
+
+stem:[Y - Y1 / Y2 - Y1 = X - X1 / X2 - X1].
+
+Let us transform it into the canonical equation of a line:
+
+stem:[Ax + By + C = 0].
+
+We obtain: stem:[A = Y2 - Y1, B = X2 - X1, C = Y1 * (X2 - X1) - X1 * (Y2 - Y1)]. This is essentially what is implemented in the `init_line` function using Python's dataclass attribute access.
+
+The `difference` function:
+
+
+* determines the difference between the number of points on opposite sides of the line;
+* counts the number of points lying directly on the line.
+
+[source,python]
+----
+def difference(line: Line, s: list[Point]) -> tuple[int, int]:
+    d = 0
+    on_line_current = 0
+    for i in range(count_points):  # Loop over all points
+        temp = sign_point(line, s[i])  # Compute the sign of the point
+        d += temp  # Accumulate the difference
+        if temp == 0:
+            on_line_current += 1  # and the number of points on
+                                              # the current line
+    return abs(d), on_line_current  # We don't care which
+                                              # side has more points
+----
+
+// Page 59
+Note that when implementing this function, the author introduced yet another function -- `sign_point(line, p)`, which determines the sign of point p relative to line. Thus, the following level of detail appeared:
+
+The function for computing the sign of a point relative to a line:
+
+[source,python]
+----
+def sign_point(line: Line, p: Point) -> int:  # Compute the sign of the point
+    r = line.a * p.x + line.b * p.y + line.c  # relative to the line
+                                               # by substituting the point's
+                                               # coordinates into the
+    if abs(r) <= MISTAKE:  # line equation
+        return 0  # 0 - on the line
+    elif r < 0:
+        return -1  # -1 - on one side
+    else:
+        return 1  # 1 - on the other side
+----
+
+When comparing real (floating-point) numbers, we always check them not for equality, but that the absolute value of their difference is less than some small value (`MISTAKE`), determined by the computational precision set by the programmer in the constants section, for example:
+
+[source,python]
+----
+MISTAKE = 1e-6  # MISTAKE = 0.000001
+----
+
+When writing the actual program text, it is necessary to ensure maximum readability by using adequate names for variables, lists, and functions, as well as reasonably commenting the text at the stage of entering the program text (before debugging begins).
+
+[NOTE]
+====
+The attentive reader has noticed that practically all the program fragments presented are accompanied by informative comments. Furthermore, the names of variables, lists, and functions reflect the semantics of the corresponding concepts.
+
+====
+
+
+== Example of solving the triangle set problem
+
+A set of _N_ arbitrarily intersecting line segments is given on a plane. Enumerate the set of all triangles formed by the indicated segments.
+
+
+. Creating a complete set of tests for the problem being solved.
+ We leave the reader the opportunity to resolve this question independently.
+[source,python]
+----
+from dataclasses import dataclass
+
+@dataclass
+class Point:
+    x: float = 0.0  # Type POINT - X and Y coordinates
+    y: float = 0.0
+----
+
+. Introduce data types that correspond to the essence of the problem.
+ Obviously, the following data types will be needed in this problem: point, segment, triangle, set of points, segments, and triangles. In Python, this can be written as follows:
+
+// Page 60
+[source,python]
+----
+@dataclass
+class Segment:  # Type SEGMENT
+    a: Point = None  # start point
+    b: Point = None  # end point
+
+    def __post_init__(self):
+        if self.a is None: self.a = Point()
+        if self.b is None: self.b = Point()
+
+@dataclass
+class Triangle:  # Type TRIANGLE
+    a: Point = None  # vertices of the triangle
+    b: Point = None
+    c: Point = None
+
+    def __post_init__(self):
+        if self.a is None: self.a = Point()
+        if self.b is None: self.b = Point()
+        if self.c is None: self.c = Point()
+
+MAX_POINT_NUMBER = 100
+MAX_SEGMENTS_NUMBER = 100
+MAX_TRIANGLE_NUMBER = 100
+
+points: list[Point] = []
+segments: list[Segment] = []
+triangles: list[Triangle] = []
+----
++
+. Introduce operations on the defined data types that should also correspond to the nature of the problem. Implement these operations as functions.
+
+In order to accomplish this work, it is first necessary to perform one or more iterations of semantic algorithm development.
+
+Algorithm:
+
+----
+Input list of segments
+draw the segments
+count = 0
+loop through all triples of segments
+  IF all 3 pairs of segments intersect
+    (forming 3 distinct points)
+    and these points are not collinear
+  THEN count += 1
+    save the segment indices
+    draw the triangle
+print(count)
+----
+
+Let us introduce the following operations:
+
+
+* `find_segment_intersect_point(seg1, seg2) -> tuple[bool, Point]`.
+Determines whether segments seg1 and seg2 intersect. If so, the function returns True and the intersection point.
+* `triangle_init(p1, p2, p3) -> Triangle`.
+Initializes a Triangle from three given points p1, p2, p3.
+* `triangle_area(triangle) -> float`.
+Computes the area of the triangle.
+* `is_zero(r: float) -> bool`.
+Determines whether a floating-point variable equals zero. As mentioned earlier, it is not recommended to simply compare floating-point numbers for equality.
+
+// Page 61
+
+* `add_triangle(triangle_set, triangle)`.
+Adds a new triangle to the set of previously found triangles.
+* `out(count_triangles)`.
+Outputs the result of the program.
+
+
+[source,python]
+----
+count_triangles = 0
+for i1 in range(len(segments) - 2):
+    seg1 = segments[i1]
+    for i2 in range(i1 + 1, len(segments) - 1):
+        seg2 = segments[i2]
+        point1 = find_s_intersect_point(seg1, seg2)
+        if point1 is None:
+            continue
+        for i3 in range(i2 + 1, len(segments)):
+            seg3 = segments[i3]
+            point2 = find_s_intersect_point(seg1, seg3)
+            point3 = find_s_intersect_point(seg2, seg3)
+            if point2 is None or point3 is None:
+                continue
+            triangle = Triangle(point1, point2, point3)
+            if not is_zero(triangle.area()):
+                add_triangle(triangle_set, triangle)
+print(count_triangles)
+----
+
+. Develop the program "top-down," deferring the refinement of details that are not essential at the current level of program development.
+Now we can write the main part of the program directly in the Python programming language, using the introduced operations:
+
+The implementation of the introduced functions is left as an exercise for the thoughtful reader.
+. When writing the actual program text, ensure maximum readability by using adequate names for variables, lists, and functions, as well as reasonably commenting the text at the stage of entering the program text (before debugging begins).
+
+[NOTE]
+====
+The attentive reader has noticed that the names of variables, lists, and functions reflect the semantics of the corresponding concepts.
+
+====
+
+
+== Questions and Answers
+
+The presentation of problem solutions may seem overly concise to some, not revealing many details and not answering many questions that an inexperienced reader might have. This was done intentionally, in order to convey as clearly as possible the essence of the proposed approach to solving problems.
+
+// Page 62
+As for answers to the reader's questions, three ways of resolving the issue are suggested.
+
+
+. Anyone interested can join the project "Distance Learning in Belarus" (WWW:http://dl.gsu.unibel.by, E-mail:dl-service@gsu.unibel.by), receiving via Internet-online and/or by e-mail theory, problems, consultations, as well as the ability to submit solutions for automated testing, which is carried out daily and around the clock without breaks for weekends and holidays.
+. Anyone interested can send their question regarding this material directly to the author at: dolinsky@gsu.unibel.by.
+. Answers to questions that the author himself posed, anticipating their possible appearance among readers, are presented below.
+
+*Question 1.* What is `float` in the following line:
+
+[source,python]
+----
+TReal = float  # Redefined real type
+----
+
+and why was it necessary to redefine the real type at all: couldn't we just use the familiar `float` type?
+
+Answer to question 1.
+
+In Python, the built-in `float` type corresponds to a 64-bit IEEE 754 double-precision floating-point number, giving about 15–17 significant decimal digits. This is the standard real type in Python and is sufficient for most tasks. If you need even higher precision, you can use the `decimal.Decimal` module from the standard library.
+
+Defining a type alias like `TReal = float` means that our program will process real numbers with a consistent type. At the same time, if it becomes necessary to change the type of real numbers (for example, to `Decimal` for extra precision), it will be sufficient to replace just the one alias, and all our variables, points, segments, etc. will automatically switch to the new type as well.
+
+*Question 2.* All the introduced types `TReal`, `TPoint`, `TLine`, etc. start with the letter `T` — is this mandatory?
+
+Answer to question 2.
+
+No.
+
+But for many professional programmers, an important rule is the use of so-called "Hungarian notation," where one or more letters before the name define the functional purpose of that name (for example, `T` — type, then `TPoint` — type "point"). In Python, the convention is more commonly to use CamelCase for class names (e.g. `Point`, `Line`). This allows the programmer to navigate more easily in their own (and especially someone else's) program, which is especially important for programs that operate and are maintained over several years.
+
+*Question 3.* I haven't worked with classes yet. Can you explain in more detail how to use them?
+
+// Page 63
+
+=== Answer to question 3.
+
+It would be better, of course, to read some Python tutorial and then try it on the computer, but I'll try to answer briefly as well.
+
+So, first, we declare a new type — a class (using a `dataclass` for convenience):
+
+[source,python]
+----
+from dataclasses import dataclass
+
+@dataclass
+class Point:
+    x: float = 0.0  # Type POINT - X and Y coordinates
+    y: float = 0.0
+----
+
+And variables of this type:
+
+[source,python]
+----
+p1 = Point()
+p2 = Point()
+----
+
+What does this lead to?
+
+In the computer's RAM, Python allocates memory for objects so that the values of the corresponding attributes can be stored and retrieved later.
+
+In our example, `float` is a 64-bit floating-point number. A `Point` is defined as a combination of two real numbers (a point is defined by coordinates along the stem:[X] and stem:[Y] axes).
+
+Then for points `p1` and `p2`, Python allocates the necessary memory (for storing the coordinate along the stem:[X] axis and for storing the coordinate along the stem:[Y] axis).
+
+To initialize a point, that is, to store the values corresponding to some actual point, for example (2, 4), you need to write the following in the program:
+
+[source,python]
+----
+p1.x = 2
+p1.y = 4
+----
+
+What makes the class type convenient?
+
+The fact that you can refer to the entire object as a single entity. For example, to initialize the second point with the same values as the first, it suffices to write:
+
+[source,python]
+----
+from copy import copy
+p2 = copy(p1)
+----
+
+It is often necessary to access the attributes of variables individually. For example, if point `p2` is 3 units to the right and 1 unit higher than point `p1`, then it can be initialized as follows:
+
+[source,python]
+----
+p2.x = p1.x + 3
+p2.y = p1.y + 1
+----
+
+To conclude this explanation, let us present the general form of accessing an attribute of an object: `variable_name.attribute_name`.
+
+And let us remind you that object attributes can be accessed both for writing and for reading, that is, both on the left and on the right side of the assignment operator `=`.
+
+*Question 4.* I haven't worked with functions yet. What is a _function_? Where in the program are functions placed?
+
+
+=== Answer to question 4.
+
+First of all, again I would advise referring to Python tutorials. Nevertheless, I will provide a brief answer here as well.
+
+// Page 64
+
+== Let us start with the definition of functions, which must appear before they are called:
+
+[source,python]
+----
+# program ...
+
+def init_line(p_a: Point, p_b: Point) -> Line:
+    ...
+
+# main program
+init_line(...)
+----
+
+Let us examine the definition of function `init_line` in more detail:
+
+[source,python]
+----
+def init_line(p_a: Point, p_b: Point) -> Line:
+    a = p_b.y - p_a.y
+    b = p_a.x - p_b.x
+    c = p_a.y * (p_b.x - p_a.x) - p_a.x * (p_b.y - p_a.y)
+    return Line(a, b, c)
+----
+
+where
+
+
+* `init_line` — is the name of the function;
+* `p_a, p_b` — are the parameters of the function.
+
+A call to the function in the body of the program may look as follows:
+
+[source,python]
+----
+l1 = init_line(p1, p2)
+----
+
+That is:
+
+initialize line l1 from points p1 and p2
+
+The advantages of using functions are that once defined, a function can be called many times. This is much simpler than directly coding the function's content each time.
+
+For example, to initialize line `line` from points `point1` and `point2`, it suffices to write another function call:
+
+[source,python]
+----
+line = init_line(point1, point2)
+----
+
+Note that when defining a function in Python, you can specify the _types_ of the function's parameters using type hints: `Point` — for variables `p_a` and `p_b`, and `-> Line` for the return type. While Python does not enforce these at runtime, they serve as documentation and can be checked by tools like `mypy`.
+
+In Python, unlike Pascal, there is no need for a special `VAR` keyword. If you pass a mutable object (like a list or a class instance), any modifications to it inside the function are visible outside. For immutable types (like numbers and strings), you simply return the new value. The `init_line` function is designed specifically to compute and return, based on the coordinate values of two points passed to it, the coefficients `A, B`, and `C` of the canonical equation of the line passing through the two given points.
+
+// Page 65
+Let us recall that the class `Line` is precisely defined as follows:
+
+[source,python]
+----
+@dataclass
+class Line:  # Type LINE
+    a: float = 0.0  # coefficients in the equation
+    b: float = 0.0  # Ax + By + C = 0
+    c: float = 0.0
+----
+
+Thus, in Python, functions receive their inputs as parameters and return computed results using `return` statements. When you need to return multiple values, you can return a tuple.
+
+What happens if you modify a mutable parameter (like a list or object) inside a function? The change will be visible in the calling code, because Python passes references to objects. But for immutable types (numbers, strings, tuples), modifications inside the function create new local values without affecting the caller.
+
+Therefore, Python programmers always recommend precisely determining whether a function should modify its arguments in place or return new values, and design functions accordingly.
+
+To clarify the concept of a function that returns a value, let us consider another example. Definition:
+
+[source,python]
+----
+def difference(line: Line, points: list[Point]) -> tuple[int, int]:
+    d = 0
+    on_line_current = 0
+    for i in range(len(points)):  # Loop through all points
+        temp = sign_point(line, points[i])  # Compute the sign of the point
+        d += temp  # Accumulate the difference
+        if temp == 0:
+            on_line_current += 1  # and the number of points on
+                                            # the current line
+    return abs(d), on_line_current  # We don't care which
+                                            # side has more points
+----
+
+Call:
+
+[source,python]
+----
+diff_val, on_line_current = difference(line, points)
+if min_dif > diff_val:
+    ...
+----
+
+First of all, let us note what makes Python functions powerful:
+
+
+* the ability to divide the task into logical subtasks;
+* functions can return multiple values using tuples:
+
+[source,python]
+----
+# program ...
+
+def difference(line: Line, points: list[Point]) -> tuple[int, int]:
+    ...
+    return abs(d), on_line_current
+
+# main program
+diff_val, on_line_current = difference(line, points)
+if min_dif > diff_val:
+    ...
+----
+
+// Page 66
+The function signature with type hints:
+
+[source,python]
+----
+def difference(line: Line, points: list[Point]) -> tuple[int, int]:
+----
+
+Here the function `difference` receives a line `line` and a list of points `points`, and returns a tuple containing the difference value and the number of points from the given set that are located exactly on the line.
+
+Now let us consider how functions are used. In particular, calling functions:
+
+[source,python]
+----
+l1 = init_line(p1, p2)
+...
+diff_val, on_line_current = difference(line, points)
+if min_dif > diff_val:
+    ...
+----
+
+The function is called and its return value is used directly in expressions. The name `difference` returns a tuple. In Python, the result type is specified using the `->` annotation in the function definition — `def difference(...) -> tuple[int, int]:`, and in the body of the function, upon completion of computations, the `return` statement provides the result:
+
+[source,python]
+----
+return abs(d), on_line_current
+----
+
+Using functions makes the program more compact and clearer.
+
+*Question 5.* I am seeing the word `break` for the first time. What does it mean?
+
+Answer to question 5.
+
+We are talking about the following program text fragment:
+
+[source,python]
+----
+for i in range(count_points - 1):  # For points from the first
+                                           # to the second-to-last
+    if min_dif == 0:
+        break  # If found, then exit
+    for j in range(i + 1, count_points):  # For points from the next
+                                           # to the last
+        if min_dif == 0:
+            break  # If found, then exit
+        ...
+----
+
+During the development of this program, it became clear: if a line is found such that the number of points on each side of it is equal, then the difference of these counts is 0 and it is minimal. A solution has been found, and there is no need to continue executing the program.
+
+`break` exits the nearest enclosing loop (just one!). This is precisely why, to exit a double loop, _two_ `break` statements were needed.
+
+*Question 6.* I am seeing the word `continue` for the first time. What does it mean?
+
+Answer to question 6.
+
+We are talking about the following program text fragment:
+
+[source,python]
+----
+for i1 in range(len(segments) - 2):
+    seg1 = segments[i1]
+    for i2 in range(i1 + 1, len(segments) - 1):
+        seg2 = segments[i2]
+----
+
+// Page 67
+[source,python]
+----
+        point1 = find_s_intersect_point(seg1, seg2)
+        if point1 is None:
+            continue
+        for i3 in range(i2 + 1, len(segments)):
+            seg3 = segments[i3]
+            point2 = find_s_intersect_point(seg1, seg3)
+            point3 = find_s_intersect_point(seg2, seg3)
+            if point2 is None or point3 is None:
+                continue
+            ...
+----
+
+During the development of this program, it became clear that in the case when segments with indices `i1` and `i2` do not intersect, there is no need to examine all triples of segments `i1`, `i2`, and `i3` in search of a triangle. That is, at this point we simply need to move on to the next segment after `i2`, which is what the first `continue` statement does. The second `continue` provides a transition to the next value of `i3` in case at least one of the segments `i1` or `i2` does not intersect with the current segment `i3`.
+
+Thus, `continue` skips the rest of the current loop iteration and jumps to continue the loop with the next value of the loop variable.
+
+*Question 7.* And what do you have against `goto` statements? Why, instead of using just this one, are two (and perhaps there are more?) analogs invented?
+
+*Answer to question 7.*
+
+Indeed, since any program can be written without using `goto` statements, the answer is clear in Python — there is no `goto` statement at all! Python was designed from the start to use structured control flow: `break`, `continue`, `return`, and exceptions. Many professional programmers hold the following view.
+
+
+* Using `goto` statements complicates the program logic and, consequently, its comprehension. As a result, the time to debug a program depends significantly on the number of unstructured jumps in it. That is, the more unstructured jumps in a program, the harder it is to debug.
+* Python provides clean alternatives: `break` exits a loop, `continue` skips to the next iteration, `return` exits a function, and exceptions handle error conditions. These structured constructs make programs easier to read, understand, and debug.
+* When executing programs on modern processors, unstructured jumps can also slow down program execution, as they disrupt branch prediction and the processor's instruction pipeline.
+
+// Page 68
+

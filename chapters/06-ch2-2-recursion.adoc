@@ -1,0 +1,1136 @@
+== 2.2. Recursive Functions
+
+There is a significant class of programming problems whose simplest solutions are based on understanding the fundamentals of how _recursive_ functions work and on the ability to construct recursive algorithms and debug recursive programs.
+
+
+=== Examples of Problem Solutions
+
+The author has chosen a teaching methodology based on examples, as it is the most effective for learning complex or unfamiliar concepts. Below, in order of increasing complexity, are examples illustrating how to solve problems using recursion.
+
+
+=== Computing the Greatest Common Divisor
+
+A program for recursively computing the greatest common divisor (GCD) of two numbers stem:[a] and stem:[b] is shown in Listing 2.5.
+
+.Listing 2.5. Recursive computation of the GCD
+[source,python]
+----
+# euclid
+import sys
+sys.setrecursionlimit(10000)
+
+def gcd(a: int, b: int) -> int:
+    if a > b:
+        return gcd(a - b, b)
+    elif a < b:
+        return gcd(a, b - a)
+    else:
+        return a
+
+a, b = map(int, input().split())
+print(gcd(a, b))
+----
+
+This program is based on the recursive _Euclidean algorithm_ for computing the GCD:
+
+
+* find GCD(stem:[a - b, b]), if stem:[a > b];
+* GCD(stem:[a, b]) = stem:[a], if stem:[a = b];
+* find GCD(stem:[a, b - a]), if stem:[a < b].
+
+In words, this recursive algorithm can be expressed as follows: to find the GCD of two numbers stem:[a] and stem:[b], we need to compare these numbers. If they are equal, their GCD is stem:[a]. If one of the numbers is greater than the other, we subtract the smaller from the larger and reapply the above algorithm to the difference and the smaller number. The process terminates when the numbers become equal.
+
+// Page 92
+For example, computing the GCD of 12 and 18 using the Euclidean algorithm looks like this:
+
+GCD(12, 18) = GCD(12, 18 - 12) = GCD(12, 6) = GCD(12 - 6, 6) = GCD(6, 6) = 6.
+
+Now let us examine in more detail how the program `euclid` (see Listing 2.5) performs this work.
+
+The body of the main program contains just two lines:
+
+[source,python]
+----
+a, b = map(int, input().split())  # enter numbers for which we seek the GCD
+print(gcd(a, b))  # output the result of computing the GCD function
+----
+
+In the example `a = 18` and `b = 12`. Therefore, in the body of the main program, the function `gcd(18, 12)` is called. The main work is performed by this recursive function `gcd`:
+
+[source,python]
+----
+def gcd(a: int, b: int) -> int:
+    if a > b:
+        return gcd(a - b, b)
+    elif a < b:
+        return gcd(a, b - a)
+    else:
+        return a
+----
+
+Since `18 > 12`, the function `gcd` is called again, but now with the parameters `(18 - 12, 12)`, that is, with the parameters `(6, 12)`.
+
+Note that the function `gcd`, without completing its work, _calls itself_, but with modified parameters. Such functions are called _recursive_. A necessary condition for the correct operation of recursive functions is a condition for _non-recursive_ (i.e., without the function calling itself) _computation of the result_ at certain argument values. For example, in the function `gcd(a, b)`, such a condition is the equality of the parameters `a` and `b`.
+
+In our example, the function `gcd` will first call itself with the parameters `(6, 12)`, and then with the parameters `(6, 6)`. This will be the last call, yielding the answer `6`. After that, this answer will be sequentially passed back to the calling functions all the way up to the main program.
+
+Note that Python has a default recursion limit of 1000 calls. For competitive programming, you should increase it using `sys.setrecursionlimit()` at the beginning of your program. For the subtraction-based Euclidean algorithm, large inputs (e.g., `gcd(1, 1000000)`) could exceed even an increased limit, so the modulo-based version is preferred in practice.
+
+The program for computing the greatest common divisor of numbers `a` and `b` can also be written non-recursively, for example as proposed in Listing 2.6.
+
+.Listing 2.6.
+Non-recursive GCD search
+
+[source,python]
+----
+# euclid_n
+
+a, b = map(int, input().split())
+while a != b:
+    if a > b:
+        a = a - b
+    else:
+        b = b - a
+print(a)
+----
+
+Some readers will impatiently object: this is shorter and even more understandable, so why do we need to know about recursive functions? I can offer the following answer.
+
+// Page 93
+
+. There is a huge number of problems where non-recursive solutions are much more complex than recursive ones.
+. If the algorithm for solving a problem is inherently recursive, then writing a recursive program is easier, because writing a non-recursive one requires developing and debugging an alternative algorithm.
+
+These claims can be verified by examining the following examples of problem solutions.
+
+
+=== Number of combinations of stem:[N] choose stem:[M]
+
+Let us start with Pascal's triangle (row numbering starts from zero):
+
+----
+
+                    1
+                  1   1
+                1   2   1
+              1   3   3   1
+            1   4   6   4   1
+          1   5  10  10   5   1
+        1   6  15  20  15   6   1
+----
+
+Can you guess how the next row is computed from the previous one? Yes, that's right: each number equals the sum of the two numbers located in the previous row directly above it. For example, in the 4th row (note that numbering of both rows and columns in our array starts from 0) 6 = 3 + 3, in the 5th row 10 = 6 + 4, in the 6th row 15 = 5 + 10, and so on.
+
+Can you write out the next, 7th, row of Pascal's triangle? Obviously, it will look like this:
+
+----
+
+                1  7  21  35  35  21  7  1
+----
+
+Now some interesting facts about Pascal's triangle, intended to answer questions like: why do we need to know about it at all and how can it be useful to us? For example:
+
+(a + b)0 = 1; +
+
+(a + b)1 = a + b; +
+
+(a + b)2 = a2 + 2ab + b2; +
+
+(a + b)3 = a3 + 3a2b + 3ab2 + b3; +
+
+(a + b)4 = a4 + 4a3b + 6a2b2 + 4ab3 + b4.
+
+I hope attentive readers have already guessed that the stem:[N]-th row of Pascal's triangle gives us the coefficients in the expression obtained when computing stem:[(a + b)N = (a + b) * (a + b) * ... * (a + b)] (stem:[N] factors).
+
+Another example: let us consider Pascal's triangle in the form of a more familiar two-dimensional array of dimensions stem:[N] rows x stem:[M] columns:
+
+// Page 94
+----
+
+                1
+              1   1
+            1   2   1
+          1   3   3   1
+        1   4   6   4   1
+      1   5  10  10   5   1
+    1   6  15  20  15   6   1
+  1   7  21  35  35  21   7   1
+1   8  28  56  70  56  28   8   1
+----
+
+It turns out that these remarkable numbers also answer questions like: how many different combinations of stem:[N] items taken stem:[M] at a time exist? For example, suppose we have 8 different balls, numbered from 1 to 8 respectively. In how many different ways can we form groups of three balls? That is, we need to determine the number of combinations of 8 choose 3. In our array, we look for the number at the intersection of the 8th row and the 3rd column. We get the answer -- 56. And from 4 balls choose 2? That's right -- 6 (4th row, 2nd column). Let us list all possible variants: ball 1 and ball 2, 1 and 3, 1 and 4, 2 and 3, 2 and 4, 3 and 4.
+
+And what if we want to find out in how many ways we can form groups of three from 26 different balls? Continuing to build Pascal's triangle by manual computation seems somewhat tedious. And therefore: isn't that what we're learning to program for?
+
+Let us denote stem:[C(N, M)] the number of combinations of stem:[N] items taken stem:[M] at a time. Briefly, this reads as: "C of stem:[N] choose stem:[M]." Let us recall the already computed values: stem:[C(8, 3) = 56] (C of 8 choose 3 equals 56), stem:[C(4, 2) = 6]. We had difficulty computing stem:[C(26, 3)].
+
+Let us try to derive a relation that computes the next row from the previous one (more precisely, the element in the stem:[M]-th column of the stem:[N]-th row, from the needed elements of the row numbered stem:[N - 1]):
+
+stem:[C(N, M) = C(N - 1, M - 1) + C(N - 1, M).]
+
+To compute the number stem:[C(N, M)], we must add the number located above it to the upper left stem:[C(N - 1, M - 1)] and the number directly above it stem:[C(N - 1, M)]. This expression is valid for cases stem:[M ≤ N] (i.e., all numbers are below the main diagonal of the table).
+
+Furthermore, we know that stem:[C(N, 0) = 1], i.e., all numbers in column 0 equal 1, and stem:[C(N, N) = 1], i.e., all numbers on the main diagonal equal 1.
+
+And finally, all remaining elements (empty positions in the table) above the main diagonal equal 0. Then the relation for stem:[C(N, M)] will be correctly applicable to _all_ elements of the table.
+
+Thus, the final rules for computing elements in the table can look as follows:
+
+// Page 95
+
+* C(N, M) = 1, if M = 0 and N > 0 or N = M ≥ 0;
+* C(N, M) = 0, if M > N ≥ 0;
+* C(N, M) = C(N - 1, M - 1) + C(N - 1, M) in all other cases.
+
+And their notation in the Python programming language as a recursive function:
+
+[source,python]
+----
+def c(n: int, m: int) -> int:
+    if (m == 0 and n > 0) or (m == n and m > 0):
+        return 1
+    elif m > n and n >= 0:
+        return 0
+    else:
+        return c(n - 1, m - 1) + c(n - 1, m)
+----
+
+The body of the main program looks like this:
+
+[source,python]
+----
+n, m = map(int, input().split())
+print(c(n, m))
+----
+
+The complete program is presented in Listing 2.7.
+
+.Listing 2.7. Program for computing elements of Pascal's triangle
+[source,python]
+----
+# CNM
+import sys
+sys.setrecursionlimit(10000)
+
+def c(n: int, m: int) -> int:
+    if (m == 0 and n > 0) or (m == n and m > 0):
+        return 1
+    elif m > n and n >= 0:
+        return 0
+    else:
+        return c(n - 1, m - 1) + c(n - 1, m)
+
+n, m = map(int, input().split())
+print(f"C({n}.{m})={c(n, m)}")
+----
+
+To compute the values in the stem:[N]-th row, one needs to know some values in the stem:[N - 1]-th, stem:[N - 2]-th rows and so on down to the 0th row. Let us build a list of values for the example stem:[C(4,2)]:
+
+stem:[C(4,2) = C(3,1) + C(3,2), C(3,1) = C(2,0) + C(2,1), C(3,2) = C(2,1) + C(2,2),]
+
+stem:[C(2,0) = 1, C(2,1) = C(1,0) + C(1,1), C(2,1) = C(1,0) + C(1,1),]
+
+stem:[C(2,2) = 1, C(1,0) = 1, C(1,1) = 1, C(1,0) = 1, C(1,1) = 1.]
+
+It is much more convenient to represent recursive computations as a _tree_:
+
+[source,pseudocode]
+----
+                    C(4,2)
+          C(3,1)    +    C(3,2)
+   C(2,0)  +  C(2,1)      C(2,1)  +  C(2,2)
+1     C(1,0) + C(1,1)  C(1,0) + C(1,1)   1
+         1       1        1        1
+----
+
+// Page 96
+In this example, one could also write a non-recursive solution (I leave this as an optional exercise). Let us note: besides the fact that a non-recursive solution still needs to be devised (by filling a two-dimensional array from the 0th row to the stem:[N-th]), most likely the non-recursive program will also have to perform many computations whose results (as the tree of recursive calls shows) we do not need at all.
+
+The tree of recursive calls is a very important illustration of what recursive algorithms are and how they should be designed. If a problem requires investigating a set of variants that can be conveniently represented as a tree, then traversing this tree (and accordingly investigating all possible variants) is conveniently accomplished by a recursive algorithm.
+
+Some readers may be indignant: four paragraphs have already been written about some tree, yet it is not visible. What tree?
+
+First, I suggest the reader recall what trees look like in late autumn, when there are no more leaves on the trees and only the trunk and branches remain. And then look at this schematic drawing:
+
+----
+
+             O
+            / \
+           O   O
+          /|\  /\
+               ...
+----
+
+With a certain degree of imagination, one can agree that there is something in common with a tree. A strict mathematical definition of the concept of a "tree" is given in such an important branch of mathematics as _graph theory_, and we will still have a chance to become acquainted with it. For now, I suggest we stay with the above-mentioned intuitive notion of a tree.
+
+
+== Number of ways to compose a sum stem:[M] from stem:[N] numbers
+
+Suppose we need to write a program that reads numbers stem:[M] and stem:[N], a sequence of stem:[N] numbers -- stem:[a(i)] -- and counts the number of ways in which the given sum stem:[M] can be composed from the numbers stem:[a(i)].
+
+[NOTE]
+====
+Variants in which the sum is composed of the same numbers but occupying different positions in the sequence will be considered different ways of composing the sum.
+
+====
+
+Example input data: stem:[M = 10, N = 6], and the sequence of numbers is 1 10 7 4 2 3. That is, we need to compose the sum 10 from elements of this sequence of 6 numbers. We have the following variants:
+
+
+. 10 = 10;
+. 10 = 7 + 3;
+
+// Page 97
+3) stem:[10 = 7 + 2 + 1];
+
+4) stem:[10 = 4 + 3 + 2 + 1].
+
+Thus, the answer is 4.
+
+How do we obtain it? Clearly, in the general case we need to enumerate all possible combinations of numbers, that is -- all singletons, all pairs, all triples, all quadruples, all quintuples, and finally check the sum of all elements of the sequence. We will create a recursive algorithm that builds (traverses) such a tree, only it will perform the analysis from the last element to the first. But first, one more tricky test: stem:[M = 3], stem:[N = 3], and the sequence of numbers is 0 0 0. The question is: in how many ways can a sum be composed from three numbers, each of which equals 0? I believe that, according to the problem's conditions, the answer is 8:
+
+
+* 3 times we take different zeros one at a time;
+* 3 times we take different pairs of zeros;
+* 1 time we take all zeros;
+* 1 time we take none of the numbers at all.
+
+The recursive approach, as explained above, involves building a _tree_ of enumeration. To illustrate it, let us take a simpler example: we need to compose the sum 3 from three numbers: 1, 2, and 3.
+
+Obviously, the answer is: 2 (stem:[3 and 1 + 2]). The enumeration tree can be depicted as follows:
+
+----
+
+                                    3
+               !                                        -
+               2                                        2
+       !               -               !                -
+       1               1               1                1
+   !       -       !       -       !       -       !        -
+3 + 2 + 1       3 + 2       3 + 1       3   2 + 1       2       1       took nothing
+   6            5           4           3   3           2       1            0
+----
+
+[NOTE]
+====
+"!" means that we take the number in the previous row; "-" means that we do not take the number in the previous row.
+
+====
+
+So, the function `find` (Listing 2.8) will have 2 parameters: `n` -- the index of the element with which we are currently extending the tree, and `m` -- the sum we want to obtain. The value of the function `find` is the number of ways in which the sum `m` can be composed from `n` elements of the list `a`.
+
+.Listing 2.8. Program for counting the ways to compose a sum M from N numbers
+[source,python]
+----
+# Find3
+import sys
+sys.setrecursionlimit(100000)
+
+a: list[int] = []  # continued below
+----
+
+// Page 98
+
+=== Listing 2.8 _(continued)_
+
+[source,python]
+----
+def find(n: int, m: int) -> int:
+    if n == 0 and m == 0:
+        return 1
+    if n == 0 and m != 0:
+        return 0
+    if m - a[n - 1] >= 0:
+        return find(n - 1, m) + find(n - 1, m - a[n - 1])
+    else:
+        return find(n - 1, m)
+
+data = list(map(int, input().split()))
+m_val = data[0]
+n_val = data[1]
+a = data[2:2 + n_val]
+print(find(n_val, m_val))
+----
+
+As before, the main program reads the necessary data in the required order and calls the recursive function (directly in the output statement `print`). The main work of the recursive algorithm is contained in the lines:
+
+[source,python]
+----
+if m - a[n - 1] >= 0:
+    return find(n - 1, m) + find(n - 1, m - a[n - 1])
+else:
+    return find(n - 1, m)
+----
+
+`m - a[n - 1] >= 0` means that the sum `m` can be composed both with the number `a[n - 1]` and without it. The number of ways to compose the sum `m` from `n` numbers (`a[0]`, `a[1]`, ..., `a[n - 1]`) will equal the number of ways to compose the sum `m` from `n - 1` numbers (`a[0]`, `a[1]`, ..., `a[n - 2]`) (if we don't take `a[n - 1]`) plus the number of ways to compose the sum `m - a[n - 1]` from `n - 1` numbers (`a[0]`, `a[1]`, ..., `a[n - 2]`) (if we take `a[n - 1]`). If `m - a[n - 1] < 0`, then the number `a[n - 1]` cannot participate in composing the sum `m`. In this case, the number of ways to compose the sum `m` from `n` numbers will equal the number of ways to compose the sum `m` from `n - 1` numbers. This is the main mechanism of recursion, which decreases the values of its parameters (arguments `n` and `m`) when calling the recursive function. For correct termination of the recursion, non-recursive answers at certain argument values of `n` and `m` are required:
+
+[source,python]
+----
+if n == 0 and m == 0:
+    return 1
+if n == 0 and m != 0:
+    return 0
+----
+
+If there are no more numbers (`n == 0`) and the sum has been composed correctly (`m == 0`), then we found 1 combination, so `find` returns `1` and we exit from this call of the recursive function `find` (via the `return` statement). The second `if` statement analyzes the situation when there are no more numbers (`n == 0`), but the sum was not composed correctly (`m != 0`), then `find` returns `0`.
+
+Perhaps this material may seem difficult to understand, but you must agree: solving such a non-trivial problem with a recursive function whose body consists of only 5 lines justifies our effort in mastering this effective method.
+
+Now some advice on debugging recursive functions. First of all, it is useful to draw the tree of recursive function calls corresponding to a test example. For example, in the example just analyzed, it will look like this:
+
+// Page 99
+----
+
+                        find(3,3)                                      taken/not
+         find(2,0)                  find(2,3)                                3
+find(1,0)         find(1,1)      +         find(1,3)                         2
+find(0,0)   find(0,0) + find(0,1)   find(0,2) + find(0,3)                   1
+    1           1         0              0             0
+----
+
+Let us explain in words the meaning of this tree.
+
+
+* `find(3,3)` -- the number of ways in which the sum 3 can be composed from three numbers.
+* `find(2,0)` -- the number of ways in which the sum 0 can be composed from two numbers. That is, the last number in the entered list -- 3 -- we took into the sum, subtracted it from the sum, and the remainder 0 must be composed from the remaining numbers.
+* `find(2,3)` -- the number of ways in which the sum 3 can be composed from two numbers. That is, the last number in the entered list -- 3 -- we did _not_ take into the sum, therefore did _not_ subtract it from the sum, and the entire sum 3 must be composed from the remaining numbers. And so on.
+
+Each of the next numbers we can either take, reducing the sum by its value, or not take, leaving the sum unchanged. It is clear that in this way we investigate all possible combinations of numbers from the original sequence.
+
+During debugging, the following tips may be useful.
+
+
+.. print the call parameters `n` and `m` at the start of each function call;
+.. use indentation proportional to recursion depth to visualize the tree structure;
+.. you can use Python's `traceback` module or simply a depth counter to see the current call stack;
+.. this way you will be able to actually monitor the recursive traversal of the tree you designed in accordance with the order you defined.
+
+.. store intermediate results in local variables;
+.. use them for intermediate computations, for example like this:
+
+[source,python]
+----
+def find(n: int, m: int) -> int:
+    if n == 0 and m == 0:
+        return 1
+    if n == 0 and m != 0:
+        return 0
+    if m - a[n - 1] >= 0:
+----
+
+// Page 100
+[source,python]
+----
+        k1 = find(n - 1, m)
+        k2 = find(n - 1, m - a[n - 1])
+        k3 = k1 + k2
+        return k3
+    else:
+        k4 = find(n - 1, m)
+        return k4
+----
+
+Of course, the recursive function now looks less elegant and compact, but in return you can add `print()` statements to see the computed intermediate result values and, accordingly, compare them with the results obtained from manual trace-through for the test example.
+
+
+== Number of representations of a number as a sum of components
+
+Consider a problem in which it is required to count the number of different representations of a given natural number stem:[N] as a sum of at least two pairwise distinct positive addends.
+
+[EXAMPLE]
+====
+For N = 7, the answer is 4, since 7 = 6 + 1, 5 + 2, 4 + 3, 4 + 2 + 1.
+
+====
+
+In fact, as in the problem considered earlier, we need to find numbers that add up to the given number.
+
+The differences are as follows.
+
+
+[source,python]
+----
+n = int(input())
+a = list(range(1, n))
+print(find(n - 1, n))
+----
+
+. We do not read the numbers but assign them: 1, 2, ..., stem:[N - 1], and therefore the body of the main program looks like this:
+
+
+where `find(n - 1, n)` finds the number of ways to represent the sum n from n - 1 numbers `a[0], a[1], ..., a[n - 2]`.
+. The sum must consist of _at least two_ numbers (in the previous problem it was assumed that there could be one or even none).
+[source,python]
+----
+if m - a[n - 1] > 0:
+    return find(n - 1, m) + find(n - 1, m - a[n - 1])
+else:
+    return find(n - 1, m)
+----
+
+. We will reason similarly to how it was done in the previous problem: the main component of the recursive function `find(n, m)` (where again m is the sum to be composed, n is the number of elements that can be used) looks as follows:
+
+If stem:[m > A[n]], then we add `find(n - 1, m)` -- the number of ways in which the sum m can be composed from stem:[n - 1] elements (without element `a[n - 1]`) -- and `find(n - 1, m - a[n - 1])` -- the num-
+
+// Page 101
+ber of ways in which the sum `m - a[n - 1]` can be composed (i.e., `a[n - 1]` participates in the total sum). And if `m > a[n - 1]`, then obviously the sum `m` must be composed without element `a[n - 1]`, and therefore `return find(n - 1, m)`.
+
+The case `a[n - 1] == m` is handled separately:
+
+[source,python]
+----
+if m == a[n - 1]:
+    if n >= 2:
+        return 1 + find(n - 1, m)
+    else:
+        return 1
+----
+
+If `m == a[n - 1]`, then in the case `n >= 2` we have already found one variant and must continue searching for others, and in the case `n == 1`, this is the last variant.
+
+And finally, the conditions for processing branches of the tree where the required sum is not achieved:
+
+[source,python]
+----
+if n <= 1:
+    return 0
+----
+
+Thus, the final program Find4 looks as shown in Listing 2.9.
+
+.Listing 2.9. Counting the number of representations of a number as a sum of components
+[source,python]
+----
+# Find4
+import sys
+sys.setrecursionlimit(100000)
+
+a: list[int] = []
+
+def find(n: int, m: int) -> int:
+    if m == a[n - 1]:
+        if n >= 2:
+            return 1 + find(n - 1, m)
+        else:
+            return 1
+    if n <= 1:
+        return 0
+    if m - a[n - 1] > 0:
+        return find(n - 1, m) + find(n - 1, m - a[n - 1])
+    else:
+        return find(n - 1, m)
+
+n = int(input())
+a = list(range(1, n))
+print(find(n - 1, n))
+----
+
+
+== Number of valid bracket expressions
+
+Consider the following problem: we need to count the number of valid bracket expressions consisting of stem:[2 * N] parentheses. An expression is called valid if it consists of stem:[2 * N] characters and:
+
+
+. contains exactly stem:[N] opening parentheses and stem:[N] closing parentheses;
+. in any fragment (from the beginning of the bracket expression to any arbitrary position) there are always more opening parentheses than closing ones, or the same number.
+
+// Page 102
+[EXAMPLE]
+====
+*EXAMPLE*
+For stem:[N = 1] there is one valid bracket expression: (), for stem:[N = 2] there are two valid bracket expressions: ()() and (()), and for stem:[N = 3] there are five: ((())), ()()(), ()(()), (())(), (()()).
+
+====
+
+For convenience, let us replace opening parentheses with 1 and closing parentheses with 0. Consequently, we need to traverse a tree of the following kind (example for stem:[N = 2]):
+
+----
+
+                                1
+                        1               0
+                1               0               1               0
+        1       0       1       0   1       0       1       0
+      1111    1110   1101      1100 1011    1010   1001      1000
+      ((((     (((    ()(       (()) ()(()   ()()   ())(      ()))
+----
+
+We need to count how many paths have the following properties:
+
+
+* the number of ones equals the number of zeros;
+* in any fragment of the path from the beginning, the number of ones is greater than the number of zeros, or equal.
+
+We will write a recursive function:
+
+[source,python]
+----
+def find(dn: int, d: int, zero: int, one: int) -> tuple[int, int, int]:
+----
+
+where `dn` is the number of characters in the chain of 1s and 0s representing the current state of the branch of the tree we are traversing, `d` (1 or 0) indicates which branch we will go down; `zero` is the number of zeros in the current chain; `one` is the number of ones in the current chain.
+
+The main recursive call expression will look like this:
+
+[source,python]
+----
+result = find(dn - 1, 0, zero, one)
+zero, one = result[1], result[2]
+result2 = find(dn - 1, 1, zero, one)
+return (result[0] + result2[0], result2[1], result2[2])
+----
+
+That is, the number of valid expressions equals the sum of the counts of valid expressions in the branches selected for 0 and 1.
+
+Upon entering the function and exiting from it, taking into account the parameter `d`, we need to correctly maintain the count of the current number of 1s and 0s. Furthermore, if at least one of the validity conditions is violated (`zero > n` or `one > n` or `zero > one`), then this branch is "pruned."
+
+The complete program is presented in Listing 2.10. Note that in Python, since integers are immutable, we use mutable containers (lists) to simulate pass-by-reference behavior for the counters.
+
+.Listing 2.10. Counting the number of valid bracket expressions
+[source,python]
+----
+# Find5
+import sys
+sys.setrecursionlimit(100000)
+
+n = int(input())
+zero = [0]
+one = [0]
+
+def find(dn: int, d: int) -> int:
+    if d == 0:
+        zero[0] += 1
+    else:
+        one[0] += 1
+    if zero[0] > n or one[0] > n or zero[0] > one[0]:
+        result = 0
+----
+
+// Page 103
+[source,python]
+----
+        if d == 0:
+            zero[0] -= 1
+        else:
+            one[0] -= 1
+        return result
+    if dn == 1:
+        if zero[0] == one[0]:
+            result = 1
+        else:
+            result = 0
+    else:
+        result = find(dn - 1, 0) + find(dn - 1, 1)
+    if d == 0:
+        zero[0] -= 1
+    else:
+        one[0] -= 1
+    return result
+
+print(find(2 * n, 1))
+----
+
+
+== Outputting all possible ways
+
+Often in problems it is necessary not only to count how many ways something can be done, but also to output all of these ways. Let us add this requirement to the problem about different representations of a given natural number stem:[N] as a sum of at least two pairwise distinct positive addends:
+
+[EXAMPLE]
+====
+For stem:[N = 7] the answer is stem:[4: 7 = 6 + 1, 5 + 2, 4 + 3, 4 + 2 + 1].
+
+====
+
+The solution presented earlier in the section "Number of representations of a number as a sum of components" will be supplemented as follows: to the recursive function `find` we will add one more parameter -- `add` of type `bool`. It indicates whether or not we added the current element `a[n]`. To the main program we will also add a variable `path` of type `list`, which will store the indices of elements that were selected in the current branch of the tree.
+
+In the function `find` itself, if the current element is added, then upon entry we will append to the list `path`, and upon exit we will remove the last element from it. Furthermore, when finding each next solution (`m == a[n]`), we will output it using the current contents of the list `path`.
+
+The complete solution to the stated problem is given in Listing 2.11.
+
+.Listing 2.11. Number of representations of a number as a sum +
+with output of all possible ways
+[source,python]
+----
+# Find6
+import sys
+sys.setrecursionlimit(100000)
+
+a: list[int] = []
+path: list[int] = []
+
+def find(n: int, m: int, add: bool) -> int:
+    if add:
+        path.append(a[n])  # a[n] is the element just processed (n+1 in 1-indexed)
+    if m == a[n - 1]:
+        for val in path:  # continued below
+----
+
+// Page 104
+
+=== Listing 2.11 (continued)
+
+[source,python]
+----
+            print(val, end='+')
+        print(a[n - 1])
+        if n >= 2:
+            result = 1 + find(n - 1, m, False)
+        else:
+            result = 1
+        if add:
+            path.pop()
+        return result
+    if n <= 1:
+        if add:
+            path.pop()
+        return 0
+    if m - a[n - 1] > 0:
+        result = find(n - 1, m, False) + find(n - 1, m - a[n - 1], True)
+    else:
+        result = find(n - 1, m, False)
+    if add:
+        path.pop()
+    return result
+
+n = int(input())
+a = list(range(1, n))
+path = []
+print(find(n - 1, n, False))
+----
+
+
+==== NOTE
+
+[NOTE]
+====
+In this program, we use a Python list to store the path. This is convenient since Python lists support efficient `append()` and `pop()` operations for adding and removing elements from the end. The entire path is visible in a single variable, and Python provides rich built-in list operations. In this example, `len()`, `append()`, and `pop()` were used.
+
+====
+
+Instead of the variable `path` of type `list`, one could use any other data structure and write the functions for inserting and removing elements yourself, with parallel tracking of the number of elements in it.
+
+
+== Outputting one of the possible ways
+
+There are problems where it is sufficient to find just one of the possible ways. For example, suppose we need to write a program that reads numbers _M_, _N_ and a sequence of _N_ numbers stem:[a(i)] and outputs one of the ways in which the given sum _M_ can be composed from the numbers stem:[a(i)].
+
+To solve the problem, we modify the program (see Listing 2.8) as follows:
+
+
+. when the first solution is found, we output it and terminate program execution with `sys.exit()`;
+. we read the elements of the list `a`;
+. we convert the function `find` into a procedure (a function returning `None`).
+
+The text of the modified program is in Listing 2.12.
+
+// Page 105
+
+
+
+.Listing 2.12. Counting ways to compose a sum with output of one of the possible ways
+[source,python]
+----
+# Find7
+import sys
+sys.setrecursionlimit(100000)
+
+a: list[int] = []
+path: list[int] = []
+
+def find(n: int, m: int, add: bool) -> None:
+    if add:
+        path.append(a[n])  # a[n] is the element just processed
+    if m == a[n - 1]:
+        for val in path:
+            print(val, end='+')
+        print(a[n - 1])
+        sys.exit()
+    if n <= 1:
+        if add:
+            path.pop()
+        return
+    if m - a[n - 1] > 0:
+        find(n - 1, m, False)
+        find(n - 1, m - a[n - 1], True)
+    else:
+        find(n - 1, m, False)
+    if add:
+        path.pop()
+
+data = list(map(int, input().split()))
+m_val = data[0]
+n_val = data[1]
+a = data[2:2 + n_val]
+path = []
+find(n_val, m_val, False)
+----
+
+
+=== "Playing Dominoes"
+
+Suppose we need to solve the following problem: we have stem:[N] tiles from several sets of dominoes. Build a valid sequence of maximum length from them.
+
+[EXAMPLE]
+====
+Suppose we have 6 tiles: 1 1, 1 2, 4 4, 1 1, 2 3, 2 1. Then the answer will be 5. One of the valid chains: 2 1, 1 1, 1 1, 1 2, 2 3.
+
+====
+
+A recursive solution can be built from the following considerations: we need to build such trees for the available domino tiles (for simplicity of the example, take 3 tiles and number them 1, 2, 3):
+
+// Page 106
+----
+
+              1         2         3
+          2     3     1   3     1   2
+      3       2   3     1   2     1
+----
+
+Unlike the previous problems, here the order in which the elements are selected also matters. At the same time, we must remember that a domino tile can be flipped, meaning it can be attached to the end of the chain by either of its two ends.
+
+To store the state of the tree, we will use the following variables:
+
+
+* `path` -- a list storing the current chain (indices of the selected domino tiles);
+* `free` -- a list storing all currently unused domino tiles;
+* `orie` -- a list storing the orientation of the tile in the current chain (`'D'` -- in the order of input, `'I'` -- in reverse order);
+* `start` -- the value at the beginning of the current domino chain;
+* `finish` -- the value at the end of the current domino chain (both variables are initialized with the value -1);
+* `t` -- the current number of free domino tiles, initialized with the number of entered tiles;
+* `max_l` -- the current maximum path length;
+* `max_path` -- the current maximum path;
+* `a[i][0], a[i][1]` -- the numbers on the stem:[i]-th domino tile.
+
+So, we build the recursive function `find` as follows:
+
+[source,pseudocode]
+----
+Find(T,Start,Finish)
+  For i from 1 to T
+    Take a free tile
+    If this is the start,
+      then transfer it from free to the chain, orientation 0
+        initialize Start and Finish from it
+        Find(T-1, Start, Finish)
+        return it from the chain to free
+    else
+      if it fits "as is",
+        then transfer it from free to the chain, orientation 0
+          update Finish from it
+          Find(T-1, Start, Finish)
+          return it from the chain to free
+      else
+        if it fits "flipped",
+          then transfer it from free to the chain, orientation 1
+            update Finish from it
+            Find(T-1, Start, Finish)
+            return it from the chain to free
+  If Length(Path)>MaxL
+    then maxL:=Length(Path), MaxPath:=Path
+  If MaxL=N, then output Result (Path, MaxL), halt
+----
+
+The program text implementing this algorithm is given in Listing 2.13.
+
+// Page 107
+.Listing 2.13. The "Dominoes" program
+[source,python]
+----
+# Domino
+import sys
+sys.setrecursionlimit(100000)
+
+a: list[list[int]] = []
+n = 0
+max_l = 0
+max_path: list[int] = []
+max_orie: list[str] = []
+path: list[int] = []
+orie: list[str] = []
+free: list[int] = []
+
+def put_r() -> None:
+    for i in range(len(max_path)):
+        k = max_path[i]
+        if max_orie[i] == 'D':
+            print(a[k][0], a[k][1])
+        else:
+            print(a[k][1], a[k][0])
+    print(len(max_path))
+
+def find(t: int, start: int, finish: int) -> None:
+    global max_l, max_path, max_orie
+    for i in range(t):
+        k = free[i]
+        if start == -1:
+            path.append(k)
+            free.pop(i)
+            orie.append('D')
+            find(t - 1, a[k][0], a[k][1])
+            path.pop()
+            free.insert(i, k)
+            orie.pop()
+        else:
+            if a[k][0] == finish:
+                path.append(k)
+                free.pop(i)
+                orie.append('D')
+                find(t - 1, start, a[k][1])
+                path.pop()
+                free.insert(i, k)
+                orie.pop()
+            elif a[k][1] == finish:
+                path.append(k)
+                free.pop(i)
+                orie.append('I')
+                find(t - 1, start, a[k][0])
+                path.pop()
+                free.insert(i, k)
+                orie.pop()
+    if len(path) > max_l:
+        max_l = len(path)
+        max_path = path[:]
+        max_orie = orie[:]
+    if max_l == n:
+        put_r()
+        sys.exit()
+
+n = int(input())
+a = []
+for i in range(n):
+    x, y = map(int, input().split())
+    a.append([x, y])
+----
+
+_continued below_
+
+// Page 108
+
+=== Listing 2.13 _(continued)_
+
+[source,python]
+----
+max_l = 0
+max_path = []
+max_orie = []
+path = []
+orie = []
+free = list(range(n))
+find(n, -1, -1)
+put_r()
+----
+
+
+==== NOTE
+
+[NOTE]
+====
+In this program, the convenience of storing the path in a Python list also lies in the fact that saving a new best path in place of the old one is accomplished with just one slice copy: `max_path = path[:]`. Another advantage of this approach (using a list to store collections of elements) is the ability to use Python's built-in `insert()` method to return an element to the free list.
+
+====
+
+
+== "Sources and Sinks"
+
+Suppose we are given a map of one-way roads between cities. A city from which all other cities can be reached is called a _source_. A city that can be reached from all other cities is called a _sink_. We need to find all sources and sinks.
+
+
+=== EXAMPLE
+
+[EXAMPLE]
+====
+Suppose there are 6 cities (numbered from 1 to 6), and 10 roads: 2-1 (meaning this road connects city 2 to city 1), 2-4, 4-1, 4-2, 4-3, 1-3, 3-5, 5-3, 3-6, 6-3. Then the correct answer is: sources are 2 and 4, sinks are 3, 5, 6.
+
+====
+
+The solution to the problem can be as follows.
+
+
+. From the input data we determine max_a -- the maximum city number.
+----
+
+0 0 1 0 1 1
+1 1 1 1 1 1
+0 0 1 0 1 1
+1 1 1 1 1 1
+0 0 1 0 1 1
+0 0 1 0 1 1
+----
+
+. Using the recursive function `find`, we build the reachability matrix md (from which city to which city one can get via the given road network; if its element `md[i][j] == 1`, then from city i one can reach city j). For the given example it will be:
+. Rows with a count of ones greater than or equal to `max_a - 1` correspond to source cities.
+. Columns with a count of ones greater than or equal to `max_a - 1` correspond to sink cities.
+
+The recursive function `find` is very similar to the function from the domino problem considered earlier: after all, roads are chained together using the same domino principle.
+
+// Page 109
+The only difference is that in this problem the roads are one-way and therefore the function `find` is somewhat simplified:
+
+[source,pseudocode]
+----
+Find(T,Start,Finish)
+  For i from 1 to T
+    Take a free road
+    If this is the start,
+      then transfer it from free to the chain
+        initialize Start and Finish from it
+        Find(T-1, Start, Finish)
+        return it from the chain to free
+    else
+      if it fits,
+        then transfer it from free to the chain
+          update Finish from it
+          Update reachability matrix MD
+          Find(T-1, Start, Finish)
+          return it from the chain to free
+----
+
+The program also uses the following functions:
+
+
+* `init` -- for initializing the reachability matrix md from the given road map;
+* `put_r` -- for analyzing the reachability matrix md and outputting the answers.
+
+Listing 2.14 contains the full text of the program that solves this problem.
+
+.Listing 2.14. Text of the "Sources and Sinks" program
+[source,python]
+----
+# Istoki_Stoki (Sources and Sinks)
+import sys
+sys.setrecursionlimit(100000)
+
+a: list[list[int]] = []
+md: list[list[int]] = []
+n = 0
+max_a = 0
+path: list[int] = []
+free: list[int] = []
+s: list[int] = []
+p: list[int] = []
+
+def init() -> None:
+    global max_a, md
+    max_a = 0
+    for i in range(n):
+        if a[i][0] > max_a:
+            max_a = a[i][0]
+        if a[i][1] > max_a:
+            max_a = a[i][1]
+    md = [[0] * (max_a + 1) for _ in range(max_a + 1)]
+    for i in range(n):
+        md[a[i][0]][a[i][1]] = 1
+
+def put_r() -> None:
+    s = [0] * (max_a + 1)
+    p = [0] * (max_a + 1)
+    for i in range(1, max_a + 1):
+        for j in range(1, max_a + 1):
+            s[i] += md[i][j]
+            p[i] += md[j][i]
+    print('sources :', end='')
+    for i in range(1, max_a + 1):
+        if s[i] >= max_a - 1:
+            print(f' {i}', end='')
+    print()
+    print('sinks  :', end='')
+    for i in range(1, max_a + 1):
+        if p[i] >= max_a - 1:
+            print(f' {i}', end='')
+    print()
+----
+
+_continued below_
+
+// Page 110
+
+=== Listing 2.14 _(continued)_
+
+[source,python]
+----
+def find(t: int, start: int, finish: int) -> None:
+    for i in range(t):
+        k = free[i]
+        if start == -1:
+            path.append(k)
+            free.pop(i)
+            find(t - 1, a[k][0], a[k][1])
+            path.pop()
+            free.insert(i, k)
+        else:
+            if a[k][0] == finish:
+                path.append(k)
+                free.pop(i)
+                md[start][a[k][1]] = 1
+                find(t - 1, start, a[k][1])
+                path.pop()
+                free.insert(i, k)
+
+n = int(input())
+a = []
+for i in range(n):
+    x, y = map(int, input().split())
+    a.append([x, y])
+init()
+path = []
+free = list(range(n))
+find(n, -1, -1)
+put_r()
+----
+
+
+==== NOTE
+
+[NOTE]
+====
+It is important to understand that the larger the total size of local variables in a recursive function, the smaller the tree of the solution space that can be investigated.
+
+====
+
+Python has a default recursion limit of 1000 calls. You can change this limit using `sys.setrecursionlimit()`. For competitive programming, it is common to set it to a large value such as `sys.setrecursionlimit(10**6)`. However, be aware that very deep recursion in Python can cause a stack overflow (segmentation fault), so for extremely deep recursion you may need to convert to an iterative approach.
+
+If a problem requires traversing the tree of possible solutions not "depth-first" but "breadth-first" (i.e., it is necessary to investigate tree vertices "level by level" -- first the entire top row, then the entire next lower row, etc.), then one can use
+
+// Page 111
+
+
+
+the "queue" mechanism (for example, using Python's `collections.deque`). However, in this case the programmer must take on the full responsibility of saving the necessary data in the queue and timely removing them from the queue.
+
+The main attractive property of programs using recursive functions lies precisely in the fact that all the work of managing the stack with local data of all instances of recursive function calls is taken on by the Python runtime system. As a result, the user's program is freed from the corresponding code, becoming more compact and clear. When solving a sufficient number of problems to build stable skills in correct recursive programming, this method becomes extremely effective, especially under the limited time allocated for solving a problem.
+
+For example, consider the initial fragment of the program Find7 (see Listing 2.12):
+
+[source,python]
+----
+# Find7
+import sys
+sys.setrecursionlimit(100000)
+
+a: list[int] = []
+path: list[int] = []
+
+def find(n: int, m: int, add: bool) -> None:
+    ...
+----
+
+Here, in the recursive function `find`:
+
+
+* `n`, `m`, `add` are local variables (function parameters); their values are relevant only in the current instance of the function `find`;
+* `a` is a global list, accessible to all instances of the recursive function.
+
+Another case: when a function modifies mutable objects like lists that are passed as arguments, those changes are visible to all callers. In Python, integers and other immutable types are always passed by value, while lists and other mutable types are passed by reference.
+
+The main disadvantages of the recursive approach are the limited depth of the call stack and, possibly, unsatisfactory execution time of the algorithm. The first problem, as already mentioned, can be partially addressed by increasing the recursion limit with `sys.setrecursionlimit()`, as well as by carefully minimizing the number of local variables in the recursive function. Execution time can be reduced by introducing so-called _pruning_ into the recursive bodies -- special conditions that reduce the investigation tree by cutting off subtrees that are guaranteed not to contain the sought solutions. For example, in the program `Find5` (see Listing 2.10), such a _pruning_ condition is:
+
+[source,python]
+----
+if zero[0] > n or one[0] > n or zero[0] > one[0]:
+    result = 0
+    ...
+    return result
+----
+
+If the bracket expression is already invalid, there is no point in considering variants of appending new brackets to it.
+
+
